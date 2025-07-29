@@ -1,0 +1,15 @@
+[{
+  "_id": {
+    "$oid": "6440e39c3113be21e11de11d"
+  },
+  "user": {
+    "$oid": "64181decefd37e9800b2cddb"
+  },
+  "blogTitle": "this is titol",
+  "blogSummary": "some siummary eme",
+  "blogContent": "<p><strong><em>this is the main content</em></strong></p>",
+  "images": [
+    "myUploads-1681974172016514229064.png"
+  ],
+  "__v": 0
+}]

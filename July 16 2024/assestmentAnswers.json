@@ -1,0 +1,1342 @@
+[{
+  "_id": {
+    "$oid": "64af40f552c0643fa9bb7aaf"
+  },
+  "user": {
+    "$oid": "64181decefd37e9800b2cddb"
+  },
+  "type": "Point",
+  "coordinates": [
+    "120.5446139",
+    "18.0579183"
+  ],
+  "images": [],
+  "assessment": {
+    "solarStreetLights": [
+      {
+        "capacity": "66",
+        "pcs": "66"
+      }
+    ],
+    "status": "Operational",
+    "solarUsage": "Solar Street Lights"
+  },
+  "properties": {
+    "ownerName": "jaheu3",
+    "reCat": "Solar Energy",
+    "reClass": "Non-Commercial",
+    "yearEst": "66",
+    "acquisition": "Self-Established",
+    "address": {
+      "country": "Philippines",
+      "region": "Ilocos Region",
+      "province": "Ilocos Norte",
+      "city": "Paoay",
+      "brgy": "hhggg"
+    }
+  }
+},{
+  "_id": {
+    "$oid": "64af41c75d3cb5cc1ab0ed94"
+  },
+  "user": {
+    "$oid": "64181decefd37e9800b2cddb"
+  },
+  "type": "Point",
+  "coordinates": [
+    "120.5446315",
+    "18.057935"
+  ],
+  "images": [],
+  "assessment": {
+    "solarStreetLights": [
+      {
+        "capacity": "66",
+        "pcs": "6"
+      }
+    ],
+    "status": "Operational",
+    "solarUsage": "Solar Street Lights"
+  },
+  "properties": {
+    "ownerName": "hshsywyw",
+    "reCat": "Solar Energy",
+    "reClass": "Non-Commercial",
+    "yearEst": "jwuw",
+    "acquisition": "Self-Established",
+    "address": {
+      "country": "Philippines",
+      "region": "Ilocos Region",
+      "province": "Ilocos Norte",
+      "city": "Paoay",
+      "brgy": "jjh"
+    }
+  }
+},{
+  "_id": {
+    "$oid": "64af4253bcfed06e223e67b0"
+  },
+  "user": {
+    "$oid": "64181decefd37e9800b2cddb"
+  },
+  "type": "Point",
+  "coordinates": [
+    "120.5446212",
+    "18.0579331"
+  ],
+  "images": [],
+  "assessment": {
+    "solarStreetLights": [
+      {
+        "capacity": "33",
+        "pcs": "6"
+      }
+    ],
+    "status": "Operational",
+    "solarUsage": "Solar Street Lights"
+  },
+  "properties": {
+    "ownerName": "222iekwjwj",
+    "reCat": "Solar Energy",
+    "reClass": "Non-Commercial",
+    "yearEst": "bbh",
+    "acquisition": "Self-Established",
+    "address": {
+      "country": "Philippines",
+      "region": "Ilocos Region",
+      "province": "Ilocos Norte",
+      "city": "Paoay",
+      "brgy": "jshssh"
+    }
+  }
+},{
+  "_id": {
+    "$oid": "64af42f88e24c73591e4f53f"
+  },
+  "user": {
+    "$oid": "64181decefd37e9800b2cddb"
+  },
+  "type": "Point",
+  "coordinates": [
+    "120.5446366",
+    "18.057943"
+  ],
+  "images": [],
+  "assessment": {
+    "solarStreetLights": [
+      {
+        "capacity": "6",
+        "pcs": "6"
+      }
+    ],
+    "status": "Operational",
+    "solarUsage": "Solar Street Lights"
+  },
+  "properties": {
+    "ownerName": "hshshskk",
+    "reCat": "Solar Energy",
+    "reClass": "Non-Commercial",
+    "yearEst": "22",
+    "acquisition": "Self-Established",
+    "address": {
+      "country": "Philippines",
+      "region": "Ilocos Region",
+      "province": "Ilocos Norte",
+      "city": "Paoay",
+      "brgy": "hshs"
+    }
+  }
+},{
+  "_id": {
+    "$oid": "64af439e6b763c86d40bc595"
+  },
+  "user": {
+    "$oid": "64181decefd37e9800b2cddb"
+  },
+  "type": "Point",
+  "coordinates": [
+    "120.5445342",
+    "18.0580135"
+  ],
+  "images": [],
+  "assessment": {
+    "solarStreetLights": [
+      {
+        "capacity": "6",
+        "pcs": "6"
+      }
+    ],
+    "status": "Operational",
+    "solarUsage": "Solar Street Lights"
+  },
+  "properties": {
+    "ownerName": "kahdh4h",
+    "reCat": "Solar Energy",
+    "reClass": "Non-Commercial",
+    "yearEst": "222",
+    "acquisition": "Self-Established",
+    "address": {
+      "country": "Philippines",
+      "region": "Ilocos Region",
+      "province": "Ilocos Norte",
+      "city": "Paoay",
+      "brgy": "jjh"
+    }
+  }
+},{
+  "_id": {
+    "$oid": "64af43e02cd8ead7c828da55"
+  },
+  "user": {
+    "$oid": "64181decefd37e9800b2cddb"
+  },
+  "type": "Point",
+  "coordinates": [
+    "120.5446137",
+    "18.0579066"
+  ],
+  "images": [],
+  "assessment": {
+    "solarStreetLights": [
+      {
+        "capacity": "66",
+        "pcs": "66"
+      }
+    ],
+    "status": "Operational",
+    "solarUsage": "Solar Street Lights"
+  },
+  "properties": {
+    "ownerName": "jejheheh3",
+    "reCat": "Solar Energy",
+    "reClass": "Non-Commercial",
+    "yearEst": "uwus",
+    "acquisition": "Self-Established",
+    "address": {
+      "country": "Philippines",
+      "region": "Ilocos Region",
+      "province": "Ilocos Norte",
+      "city": "Paoay",
+      "brgy": "hshshs"
+    }
+  }
+},{
+  "_id": {
+    "$oid": "64af44775317a34e570ec1ae"
+  },
+  "user": {
+    "$oid": "64181decefd37e9800b2cddb"
+  },
+  "type": "Point",
+  "coordinates": [
+    "120.5446129",
+    "18.0579145"
+  ],
+  "images": [],
+  "assessment": {
+    "solarStreetLights": [
+      {
+        "capacity": "66",
+        "pcs": "6"
+      }
+    ],
+    "status": "Operational",
+    "solarUsage": "Solar Street Lights"
+  },
+  "properties": {
+    "ownerName": "jehdhs",
+    "reCat": "Solar Energy",
+    "reClass": "Non-Commercial",
+    "yearEst": "222",
+    "acquisition": "Self-Established",
+    "address": {
+      "country": "Philippines",
+      "region": "Ilocos Region",
+      "province": "Ilocos Norte",
+      "city": "Paoay",
+      "brgy": "hh"
+    }
+  }
+},{
+  "_id": {
+    "$oid": "64af44a30d635f6e45044920"
+  },
+  "user": {
+    "$oid": "64181decefd37e9800b2cddb"
+  },
+  "type": "Point",
+  "coordinates": [
+    "120.5446321",
+    "18.0579428"
+  ],
+  "images": [],
+  "assessment": {
+    "solarStreetLights": [
+      {
+        "capacity": "96",
+        "pcs": "99"
+      }
+    ],
+    "status": "Operational",
+    "solarUsage": "Solar Street Lights"
+  },
+  "properties": {
+    "ownerName": "heheh",
+    "reCat": "Solar Energy",
+    "reClass": "Non-Commercial",
+    "yearEst": "222",
+    "acquisition": "Self-Established",
+    "address": {
+      "country": "Philippines",
+      "region": "Ilocos Region",
+      "province": "Ilocos Norte",
+      "city": "Paoay",
+      "brgy": "hhh"
+    }
+  }
+},{
+  "_id": {
+    "$oid": "64af44fd81386a7965574d1a"
+  },
+  "user": {
+    "$oid": "64181decefd37e9800b2cddb"
+  },
+  "type": "Point",
+  "coordinates": [
+    "120.5446155",
+    "18.0579223"
+  ],
+  "images": [],
+  "assessment": {
+    "solarStreetLights": [
+      {
+        "capacity": "6",
+        "pcs": "6"
+      }
+    ],
+    "status": "Operational",
+    "solarUsage": "Solar Street Lights"
+  },
+  "properties": {
+    "ownerName": "hshsh",
+    "reCat": "Solar Energy",
+    "reClass": "Non-Commercial",
+    "yearEst": "667",
+    "acquisition": "Self-Established",
+    "address": {
+      "country": "Philippines",
+      "region": "Ilocos Region",
+      "province": "Ilocos Norte",
+      "city": "Paoay",
+      "brgy": "hhh"
+    }
+  }
+},{
+  "_id": {
+    "$oid": "64af453920450f37da85d8ca"
+  },
+  "user": {
+    "$oid": "64181decefd37e9800b2cddb"
+  },
+  "type": "Point",
+  "coordinates": [
+    "120.5446051",
+    "18.0579357"
+  ],
+  "images": [],
+  "assessment": {
+    "solarStreetLights": [
+      {
+        "capacity": "5",
+        "pcs": "5"
+      }
+    ],
+    "status": "Operational",
+    "solarUsage": "Solar Street Lights"
+  },
+  "properties": {
+    "ownerName": "ywyshs",
+    "reCat": "Solar Energy",
+    "reClass": "Non-Commercial",
+    "yearEst": "haha",
+    "acquisition": "Self-Established",
+    "address": {
+      "country": "Philippines",
+      "region": "Ilocos Region",
+      "province": "Ilocos Norte",
+      "city": "Paoay",
+      "brgy": "gf"
+    }
+  }
+},{
+  "_id": {
+    "$oid": "64b42f0ccef3a544363a25d4"
+  },
+  "user": {
+    "$oid": "64181decefd37e9800b2cddb"
+  },
+  "type": "Point",
+  "coordinates": [
+    "120.5915044",
+    "18.2004343"
+  ],
+  "images": [],
+  "assessment": {
+    "solarStreetLights": [
+      {
+        "capacity": [
+          "6",
+          "8"
+        ],
+        "pcs": [
+          "2",
+          "5"
+        ]
+      }
+    ],
+    "status": "Operational",
+    "solarUsage": "Solar Street Lights"
+  },
+  "properties": {
+    "ownerName": "14",
+    "reCat": "Solar Energy",
+    "reClass": "Non-Commercial",
+    "yearEst": "at",
+    "acquisition": "Self-Established",
+    "address": {
+      "country": "Philippines",
+      "region": "Ilocos Region",
+      "province": "Ilocos Norte",
+      "city": "Laoag City",
+      "brgy": "ek"
+    }
+  }
+},{
+  "_id": {
+    "$oid": "64b4303fcef3a544363a25d5"
+  },
+  "user": {
+    "$oid": "64181decefd37e9800b2cddb"
+  },
+  "type": "Point",
+  "coordinates": [
+    "120.5915087",
+    "18.2004312"
+  ],
+  "images": [],
+  "assessment": {
+    "solarStreetLights": [
+      {
+        "capacity": [
+          "6",
+          "8"
+        ],
+        "pcs": [
+          "2",
+          "5"
+        ]
+      }
+    ],
+    "status": "Operational",
+    "solarUsage": "Solar Street Lights"
+  },
+  "properties": {
+    "ownerName": "haha",
+    "reCat": "Solar Energy",
+    "reClass": "Non-Commercial",
+    "yearEst": "at",
+    "acquisition": "Self-Established",
+    "address": {
+      "country": "Philippines",
+      "region": "Ilocos Region",
+      "province": "Ilocos Norte",
+      "city": "Laoag City",
+      "brgy": "ek"
+    }
+  }
+},{
+  "_id": {
+    "$oid": "64b43076cef3a544363a25d6"
+  },
+  "user": {
+    "$oid": "64181decefd37e9800b2cddb"
+  },
+  "type": "Point",
+  "coordinates": [
+    "120.5915088",
+    "18.2004338"
+  ],
+  "images": [],
+  "assessment": {
+    "solarStreetLights": [
+      {
+        "capacity": [
+          "6",
+          "8"
+        ],
+        "pcs": [
+          "2",
+          "5"
+        ]
+      }
+    ],
+    "status": "Operational",
+    "solarUsage": "Solar Street Lights"
+  },
+  "properties": {
+    "ownerName": "gg",
+    "reCat": "Solar Energy",
+    "reClass": "Non-Commercial",
+    "yearEst": "at",
+    "acquisition": "Self-Established",
+    "address": {
+      "country": "Philippines",
+      "region": "Ilocos Region",
+      "province": "Ilocos Norte",
+      "city": "Laoag City",
+      "brgy": "ek"
+    }
+  }
+},{
+  "_id": {
+    "$oid": "64b43101cef3a544363a25d7"
+  },
+  "user": {
+    "$oid": "64181decefd37e9800b2cddb"
+  },
+  "type": "Point",
+  "coordinates": [
+    "120.5915135",
+    "18.2004361"
+  ],
+  "images": [],
+  "assessment": {
+    "solarStreetLights": [
+      {
+        "capacity": [
+          "6",
+          "8"
+        ],
+        "pcs": [
+          "2",
+          "5"
+        ]
+      }
+    ],
+    "status": "Operational",
+    "solarUsage": "Solar Street Lights"
+  },
+  "properties": {
+    "ownerName": "us",
+    "reCat": "Solar Energy",
+    "reClass": "Non-Commercial",
+    "yearEst": "at",
+    "acquisition": "Self-Established",
+    "address": {
+      "country": "Philippines",
+      "region": "Ilocos Region",
+      "province": "Ilocos Norte",
+      "city": "Laoag City",
+      "brgy": "ek"
+    }
+  }
+},{
+  "_id": {
+    "$oid": "64b43160cef3a544363a25d8"
+  },
+  "user": {
+    "$oid": "64181decefd37e9800b2cddb"
+  },
+  "type": "Point",
+  "coordinates": [
+    "120.5915047",
+    "18.2004327"
+  ],
+  "images": [],
+  "assessment": {
+    "solarStreetLights": [
+      {
+        "capacity": [],
+        "pcs": []
+      }
+    ],
+    "status": "Operational",
+    "solarUsage": "Solar Street Lights"
+  },
+  "properties": {
+    "ownerName": "jaja",
+    "reCat": "Solar Energy",
+    "reClass": "Non-Commercial",
+    "yearEst": "66",
+    "acquisition": "Self-Established",
+    "address": {
+      "country": "Philippines",
+      "region": "Ilocos Region",
+      "province": "Ilocos Norte",
+      "city": "Laoag City",
+      "brgy": "yhg"
+    }
+  }
+},{
+  "_id": {
+    "$oid": "64b43191cef3a544363a25d9"
+  },
+  "user": {
+    "$oid": "64181decefd37e9800b2cddb"
+  },
+  "type": "Point",
+  "coordinates": [
+    "120.5915062",
+    "18.2004326"
+  ],
+  "images": [],
+  "assessment": {
+    "solarStreetLights": [
+      {
+        "capacity": [],
+        "pcs": []
+      }
+    ],
+    "status": "Operational",
+    "solarUsage": "Solar Street Lights"
+  },
+  "properties": {
+    "ownerName": "gdryi",
+    "reCat": "Solar Energy",
+    "reClass": "Non-Commercial",
+    "yearEst": "66",
+    "acquisition": "Self-Established",
+    "address": {
+      "country": "Philippines",
+      "region": "Ilocos Region",
+      "province": "Ilocos Norte",
+      "city": "Laoag City",
+      "brgy": "yhg"
+    }
+  }
+},{
+  "_id": {
+    "$oid": "64b431b5cef3a544363a25da"
+  },
+  "user": {
+    "$oid": "64181decefd37e9800b2cddb"
+  },
+  "type": "Point",
+  "coordinates": [
+    "120.5915055",
+    "18.2004314"
+  ],
+  "images": [],
+  "assessment": {
+    "solarStreetLights": [
+      {
+        "capacity": [
+          "3",
+          "9"
+        ],
+        "pcs": [
+          "9",
+          "9"
+        ]
+      }
+    ],
+    "status": "Operational",
+    "solarUsage": "Solar Street Lights"
+  },
+  "properties": {
+    "ownerName": "fdrukkt4567",
+    "reCat": "Solar Energy",
+    "reClass": "Non-Commercial",
+    "yearEst": "66",
+    "acquisition": "Self-Established",
+    "address": {
+      "country": "Philippines",
+      "region": "Ilocos Region",
+      "province": "Ilocos Norte",
+      "city": "Laoag City",
+      "brgy": "yhg"
+    }
+  }
+},{
+  "_id": {
+    "$oid": "64b431c3cef3a544363a25db"
+  },
+  "user": {
+    "$oid": "64181decefd37e9800b2cddb"
+  },
+  "type": "Point",
+  "coordinates": [
+    "120.5915065",
+    "18.2004341"
+  ],
+  "images": [],
+  "assessment": {
+    "solarStreetLights": [
+      {
+        "capacity": [
+          "3",
+          "9"
+        ],
+        "pcs": [
+          "9",
+          "9"
+        ]
+      }
+    ],
+    "status": "Operational",
+    "solarUsage": "Solar Street Lights"
+  },
+  "properties": {
+    "ownerName": "gxogot",
+    "reCat": "Solar Energy",
+    "reClass": "Non-Commercial",
+    "yearEst": "66",
+    "acquisition": "Self-Established",
+    "address": {
+      "country": "Philippines",
+      "region": "Ilocos Region",
+      "province": "Ilocos Norte",
+      "city": "Laoag City",
+      "brgy": "yhg"
+    }
+  }
+},{
+  "_id": {
+    "$oid": "64b431ddcef3a544363a25dc"
+  },
+  "user": {
+    "$oid": "64181decefd37e9800b2cddb"
+  },
+  "type": "Point",
+  "coordinates": [
+    "120.5915073",
+    "18.2004353"
+  ],
+  "images": [],
+  "assessment": {
+    "solarStreetLights": [
+      {
+        "capacity": [
+          "9",
+          "3"
+        ],
+        "pcs": [
+          "8",
+          "8"
+        ]
+      }
+    ],
+    "status": "Operational",
+    "solarUsage": "Solar Street Lights"
+  },
+  "properties": {
+    "ownerName": "85s88t",
+    "reCat": "Solar Energy",
+    "reClass": "Non-Commercial",
+    "yearEst": "ggu",
+    "acquisition": "Self-Established",
+    "address": {
+      "country": "Philippines",
+      "region": "Ilocos Region",
+      "province": "Ilocos Norte",
+      "city": "Laoag City",
+      "brgy": "gg"
+    }
+  }
+},{
+  "_id": {
+    "$oid": "64b4af9d8e0e29041473968b"
+  },
+  "user": {
+    "$oid": "64181decefd37e9800b2cddb"
+  },
+  "type": "Point",
+  "coordinates": [
+    "120.5446204",
+    "18.0579216"
+  ],
+  "images": [],
+  "assessment": {
+    "solarStreetLights": [
+      {
+        "capacity": "6698",
+        "pcs": "66"
+      },
+      {
+        "capacity": "99",
+        "pcs": "9"
+      }
+    ],
+    "status": "Operational",
+    "solarUsage": "Solar Street Lights"
+  },
+  "properties": {
+    "ownerName": "jjehd",
+    "reCat": "Solar Energy",
+    "reClass": "Non-Commercial",
+    "yearEst": "jshs",
+    "acquisition": "Self-Established",
+    "address": {
+      "country": "Philippines",
+      "region": "Ilocos Region",
+      "province": "Ilocos Norte",
+      "city": "Paoay",
+      "brgy": "hshah"
+    }
+  }
+},{
+  "_id": {
+    "$oid": "64b4b240f3db226f8633c64c"
+  },
+  "user": {
+    "$oid": "6417af4bcd29bcb75f23f4a5"
+  },
+  "type": "Point",
+  "coordinates": [
+    "120.5446149",
+    "18.0579156"
+  ],
+  "images": [],
+  "assessment": {
+    "solarStreetLights": [
+      {
+        "capacity": "59999",
+        "pcs": "3464"
+      },
+      {
+        "capacity": "99494",
+        "pcs": "504"
+      }
+    ],
+    "status": "Operational",
+    "solarUsage": "Solar Street Lights"
+  },
+  "properties": {
+    "ownerName": "dhegne",
+    "reCat": "Solar Energy",
+    "reClass": "Non-Commercial",
+    "yearEst": "gsgsys",
+    "acquisition": "Self-Established",
+    "address": {
+      "country": "Philippines",
+      "region": "Ilocos Region",
+      "province": "Ilocos Norte",
+      "city": "Paoay",
+      "brgy": "tsvsvs"
+    }
+  }
+},{
+  "_id": {
+    "$oid": "64b750f5eb58f33b0576cd3d"
+  },
+  "user": {
+    "$oid": "64181decefd37e9800b2cddb"
+  },
+  "type": "Point",
+  "coordinates": [
+    "120.5446013",
+    "18.0579242"
+  ],
+  "images": [],
+  "assessment": {
+    "solarStreetLights": [
+      {
+        "capacity": "65",
+        "pcs": "5"
+      },
+      {
+        "capacity": "5",
+        "pcs": "5"
+      }
+    ],
+    "status": "Operational",
+    "solarUsage": "Solar Street Lights"
+  },
+  "properties": {
+    "ownerName": "ueue",
+    "reCat": "Solar Energy",
+    "reClass": "Non-Commercial",
+    "yearEst": "isj",
+    "acquisition": "Self-Established",
+    "address": {
+      "country": "Philippines",
+      "region": "Ilocos Region",
+      "province": "Ilocos Norte",
+      "city": "Paoay",
+      "brgy": "yeye"
+    }
+  }
+},{
+  "_id": {
+    "$oid": "64b7522deb58f33b0576cd42"
+  },
+  "user": {
+    "$oid": "64181decefd37e9800b2cddb"
+  },
+  "type": "Point",
+  "coordinates": [
+    "120.5445991",
+    "18.0579224"
+  ],
+  "images": [
+    "64b750f6eb58f33b0576cd3e.jpg",
+    "64b750f8eb58f33b0576cd40.jpg"
+  ],
+  "assessment": {
+    "solarStreetLights": [
+      {
+        "capacity": "65",
+        "pcs": "5"
+      },
+      {
+        "capacity": "5",
+        "pcs": "5"
+      }
+    ],
+    "status": "Operational",
+    "solarUsage": "Solar Street Lights"
+  },
+  "properties": {
+    "ownerName": "eyejeyey",
+    "reCat": "Solar Energy",
+    "reClass": "Non-Commercial",
+    "yearEst": "isj",
+    "acquisition": "Self-Established",
+    "address": {
+      "country": "Philippines",
+      "region": "Ilocos Region",
+      "province": "Ilocos Norte",
+      "city": "Paoay",
+      "brgy": "yeye"
+    }
+  }
+},{
+  "_id": {
+    "$oid": "64b7525ceb58f33b0576cd47"
+  },
+  "user": {
+    "$oid": "64181decefd37e9800b2cddb"
+  },
+  "type": "Point",
+  "coordinates": [
+    "120.5445978",
+    "18.0579236"
+  ],
+  "images": [
+    "64b750f6eb58f33b0576cd3e.jpg",
+    "64b750f8eb58f33b0576cd40.jpg",
+    "64b7522eeb58f33b0576cd43.jpg",
+    "64b7522feb58f33b0576cd45.jpg"
+  ],
+  "assessment": {
+    "solarStreetLights": [
+      {
+        "capacity": "65",
+        "pcs": "5"
+      },
+      {
+        "capacity": "5",
+        "pcs": "5"
+      }
+    ],
+    "status": "Operational",
+    "solarUsage": "Solar Street Lights"
+  },
+  "properties": {
+    "ownerName": " edbdbdehneym",
+    "reCat": "Solar Energy",
+    "reClass": "Non-Commercial",
+    "yearEst": "isj",
+    "acquisition": "Self-Established",
+    "address": {
+      "country": "Philippines",
+      "region": "Ilocos Region",
+      "province": "Ilocos Norte",
+      "city": "Paoay",
+      "brgy": "yeye"
+    }
+  }
+},{
+  "_id": {
+    "$oid": "64b753313166e8576ecebe35"
+  },
+  "user": {
+    "$oid": "64181decefd37e9800b2cddb"
+  },
+  "type": "Point",
+  "coordinates": [
+    "120.5446052",
+    "18.0579253"
+  ],
+  "images": [],
+  "assessment": {
+    "solarStreetLights": [
+      {
+        "capacity": "35",
+        "pcs": "5"
+      },
+      {
+        "capacity": "5",
+        "pcs": "5"
+      }
+    ],
+    "status": "Operational",
+    "solarUsage": "Solar Street Lights"
+  },
+  "properties": {
+    "ownerName": "ueue",
+    "reCat": "Solar Energy",
+    "reClass": "Non-Commercial",
+    "yearEst": "yehe",
+    "acquisition": "Self-Established",
+    "address": {
+      "country": "Philippines",
+      "region": "Ilocos Region",
+      "province": "Ilocos Norte",
+      "city": "Paoay",
+      "brgy": "7e6e"
+    }
+  }
+},{
+  "_id": {
+    "$oid": "64b753883166e8576ecebe3a"
+  },
+  "user": {
+    "$oid": "64181decefd37e9800b2cddb"
+  },
+  "type": "Point",
+  "coordinates": [
+    "120.5446024",
+    "18.0579235"
+  ],
+  "images": [
+    "64b753323166e8576ecebe36.jpg",
+    "64b753333166e8576ecebe38.jpg"
+  ],
+  "assessment": {
+    "solarStreetLights": [
+      {
+        "capacity": "35",
+        "pcs": "5"
+      },
+      {
+        "capacity": "5",
+        "pcs": "5"
+      }
+    ],
+    "status": "Operational",
+    "solarUsage": "Solar Street Lights"
+  },
+  "properties": {
+    "ownerName": "vv",
+    "reCat": "Solar Energy",
+    "reClass": "Non-Commercial",
+    "yearEst": "yehe",
+    "acquisition": "Self-Established",
+    "address": {
+      "country": "Philippines",
+      "region": "Ilocos Region",
+      "province": "Ilocos Norte",
+      "city": "Paoay",
+      "brgy": "7e6e"
+    }
+  }
+},{
+  "_id": {
+    "$oid": "64b753af3166e8576ecebe3f"
+  },
+  "user": {
+    "$oid": "64181decefd37e9800b2cddb"
+  },
+  "type": "Point",
+  "coordinates": [
+    "120.5446069",
+    "18.0579238"
+  ],
+  "images": [
+    "64b753323166e8576ecebe36.jpg",
+    "64b753333166e8576ecebe38.jpg",
+    "64b753883166e8576ecebe3b.jpg",
+    "64b753893166e8576ecebe3d.jpg"
+  ],
+  "assessment": {
+    "solarStreetLights": [
+      {
+        "capacity": "35",
+        "pcs": "5"
+      },
+      {
+        "capacity": "5",
+        "pcs": "5"
+      }
+    ],
+    "status": "Operational",
+    "solarUsage": "Solar Street Lights"
+  },
+  "properties": {
+    "ownerName": "ggf",
+    "reCat": "Solar Energy",
+    "reClass": "Non-Commercial",
+    "yearEst": "yehe",
+    "acquisition": "Self-Established",
+    "address": {
+      "country": "Philippines",
+      "region": "Ilocos Region",
+      "province": "Ilocos Norte",
+      "city": "Paoay",
+      "brgy": "7e6e"
+    }
+  }
+},{
+  "_id": {
+    "$oid": "64be80401e473d8fd215e467"
+  },
+  "user": {
+    "$oid": "64181decefd37e9800b2cddb"
+  },
+  "type": "Point",
+  "coordinates": [
+    "121.7253007",
+    "17.6131247"
+  ],
+  "images": [],
+  "assessment": {},
+  "properties": {
+    "ownerName": "o9ow",
+    "reCat": "Biomass",
+    "reClass": "Non-Commercial",
+    "yearEst": "444",
+    "acquisition": "Self-Established",
+    "address": {
+      "country": "Philippines",
+      "region": "Cagayan Valley",
+      "province": "Cagayan",
+      "city": "Tuguegarao City",
+      "brgy": "jsjs"
+    }
+  }
+},{
+  "_id": {
+    "$oid": "64be81a01e473d8fd215e468"
+  },
+  "user": {
+    "$oid": "64181decefd37e9800b2cddb"
+  },
+  "type": "Point",
+  "coordinates": [
+    "121.7252976",
+    "17.6131273"
+  ],
+  "images": [],
+  "assessment": {},
+  "properties": {
+    "ownerName": "36w5m",
+    "reCat": "Biomass",
+    "reClass": "Non-Commercial",
+    "yearEst": "444",
+    "acquisition": "Self-Established",
+    "address": {
+      "country": "Philippines",
+      "region": "Cagayan Valley",
+      "province": "Cagayan",
+      "city": "Tuguegarao City",
+      "brgy": "jsjs"
+    }
+  }
+},{
+  "_id": {
+    "$oid": "64be81f1ddafd1befd6ff418"
+  },
+  "user": {
+    "$oid": "64181decefd37e9800b2cddb"
+  },
+  "type": "Point",
+  "coordinates": [
+    "121.7253006",
+    "17.6131251"
+  ],
+  "images": [],
+  "assessment": {},
+  "properties": {
+    "ownerName": "haha",
+    "reCat": "Biomass",
+    "reClass": "Non-Commercial",
+    "yearEst": "2p203",
+    "acquisition": "Self-Established",
+    "address": {
+      "country": "Philippines",
+      "region": "Cagayan Valley",
+      "province": "Cagayan",
+      "city": "Tuguegarao City",
+      "brgy": "hshshs"
+    }
+  }
+},{
+  "_id": {
+    "$oid": "64be8212ddafd1befd6ff419"
+  },
+  "user": {
+    "$oid": "64181decefd37e9800b2cddb"
+  },
+  "type": "Point",
+  "coordinates": [
+    "121.7253027",
+    "17.6131245"
+  ],
+  "images": [],
+  "assessment": {},
+  "properties": {
+    "ownerName": "tumanengnfh",
+    "reCat": "Biomass",
+    "reClass": "Non-Commercial",
+    "yearEst": "2p203",
+    "acquisition": "Self-Established",
+    "address": {
+      "country": "Philippines",
+      "region": "Cagayan Valley",
+      "province": "Cagayan",
+      "city": "Tuguegarao City",
+      "brgy": "hshshs"
+    }
+  }
+},{
+  "_id": {
+    "$oid": "64be841f8c731ae91d240892"
+  },
+  "user": {
+    "$oid": "64181decefd37e9800b2cddb"
+  },
+  "type": "Point",
+  "coordinates": [
+    "121.7253025",
+    "17.6131258"
+  ],
+  "images": [],
+  "assessment": {},
+  "properties": {
+    "ownerName": "haktod",
+    "reCat": "Biomass",
+    "reClass": "Non-Commercial",
+    "yearEst": "hhh",
+    "acquisition": "Self-Established",
+    "address": {
+      "country": "Philippines",
+      "region": "Cagayan Valley",
+      "province": "Cagayan",
+      "city": "Tuguegarao City",
+      "brgy": "uggy"
+    }
+  }
+},{
+  "_id": {
+    "$oid": "64be850f8c731ae91d240893"
+  },
+  "user": {
+    "$oid": "64181decefd37e9800b2cddb"
+  },
+  "type": "Point",
+  "coordinates": [
+    "121.7252997",
+    "17.6131282"
+  ],
+  "images": [],
+  "assessment": {},
+  "properties": {
+    "ownerName": "tuma",
+    "reCat": "Biomass",
+    "reClass": "Non-Commercial",
+    "yearEst": "hhh",
+    "acquisition": "Self-Established",
+    "address": {
+      "country": "Philippines",
+      "region": "Cagayan Valley",
+      "province": "Cagayan",
+      "city": "Tuguegarao City",
+      "brgy": "uggy"
+    }
+  }
+},{
+  "_id": {
+    "$oid": "64be856a8c731ae91d240894"
+  },
+  "user": {
+    "$oid": "64181decefd37e9800b2cddb"
+  },
+  "type": "Point",
+  "coordinates": [
+    "121.7252987",
+    "17.6131261"
+  ],
+  "images": [],
+  "assessment": {},
+  "properties": {
+    "ownerName": "skiripopop",
+    "reCat": "Biomass",
+    "reClass": "Non-Commercial",
+    "yearEst": "hhh",
+    "acquisition": "Self-Established",
+    "address": {
+      "country": "Philippines",
+      "region": "Cagayan Valley",
+      "province": "Cagayan",
+      "city": "Tuguegarao City",
+      "brgy": "uggy"
+    }
+  }
+},{
+  "_id": {
+    "$oid": "64be87f48c731ae91d240895"
+  },
+  "user": {
+    "$oid": "64181decefd37e9800b2cddb"
+  },
+  "type": "Point",
+  "coordinates": [
+    "121.7252993",
+    "17.6131282"
+  ],
+  "images": [],
+  "assessment": {},
+  "properties": {
+    "ownerName": "ggt",
+    "reCat": "Biomass",
+    "reClass": "Non-Commercial",
+    "yearEst": "hhh",
+    "acquisition": "Self-Established",
+    "address": {
+      "country": "Philippines",
+      "region": "Cagayan Valley",
+      "province": "Cagayan",
+      "city": "Tuguegarao City",
+      "brgy": "uggy"
+    }
+  }
+},{
+  "_id": {
+    "$oid": "64be89c4cc6868be951fcacd"
+  },
+  "user": {
+    "$oid": "64181decefd37e9800b2cddb"
+  },
+  "type": "Point",
+  "coordinates": [
+    "121.7252982",
+    "17.6131287"
+  ],
+  "images": [],
+  "assessment": {},
+  "properties": {
+    "ownerName": "kkkjjgyu",
+    "reCat": "Biomass",
+    "reClass": "Non-Commercial",
+    "yearEst": "555",
+    "acquisition": "Self-Established",
+    "address": {
+      "country": "Philippines",
+      "region": "Cagayan Valley",
+      "province": "Cagayan",
+      "city": "Tuguegarao City",
+      "brgy": " 8g88t"
+    }
+  }
+}]
