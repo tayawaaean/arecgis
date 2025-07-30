@@ -21,6 +21,11 @@ import {
   Tooltip,
   Backdrop,
   CircularProgress,
+  FormControlLabel,
+  Checkbox,
+  List,
+  ListItem,
+  ListItemText,
 } from '@mui/material'
 import {
   Upload as UploadFileIcon,
@@ -40,8 +45,9 @@ import { baseUrl } from '../../config/baseUrl'
 import { Classification, mannerOfAcquisition } from '../../config/techAssesment'
 import { Coordinates } from '../../components/Coordinates'
 import { EditHydropower } from '../categories/EditHydropower'
+
 const EditInventoryForm = ({ reItems, allUsers }) => {
-  const { username, isManager, isAdmin, } = useAuth()
+  const { username, isManager, isAdmin } = useAuth()
   const GEOCODE_URL = 'https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=pjson&langCode=EN&location='
 
   const [updateInventory, {
@@ -75,14 +81,35 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
   const [province, setProvince] = useState(reItems?.properties?.address?.province)
   const [city, setCity] = useState(reItems?.properties?.address?.city)
   const [brgy, setBrgy] = useState(reItems?.properties?.address?.brgy)
-  const [type, setType] = useState(reItems?.type)
-  const [coordinates, setCoordinates] = useState(reItems?.coordinates)
-  const [lat, setLat] = useState(reItems?.coordinates[1])
-  const [lng, setLng] = useState(reItems?.coordinates[0])
-  const [reClass, setReClass] = useState([reItems?.properties?.reClass])
-  const [reCat, setReCat] = useState([reItems?.properties?.reCat])
-  const [acquisition, setAcquisition] = useState([reItems?.properties?.acquisition])
+  
+  // Fixed: Use coordinates.type from database (GeoJSON type)
+  const [type, setType] = useState(reItems?.coordinates?.type || 'Point')
+  
+  const [coordinates, setCoordinates] = useState(
+    reItems?.coordinates?.coordinates
+      ? reItems.coordinates.coordinates
+      : reItems?.coordinates
+  )
+  // Ensure proper string conversion for input
+  const [lat, setLat] = useState(
+    reItems?.coordinates?.coordinates
+      ? String(reItems.coordinates.coordinates[1])
+      : (reItems?.coordinates && reItems.coordinates[1] !== undefined
+          ? String(reItems.coordinates[1])
+          : '')
+  )
+  const [lng, setLng] = useState(
+    reItems?.coordinates?.coordinates
+      ? String(reItems.coordinates.coordinates[0])
+      : (reItems?.coordinates && reItems.coordinates[0] !== undefined
+          ? String(reItems.coordinates[0])
+          : '')
+  )
+  const [reClass, setReClass] = useState(reItems?.properties?.reClass)
+  const [reCat, setReCat] = useState(reItems?.properties?.reCat)
+  const [acquisition, setAcquisition] = useState(reItems?.properties?.acquisition)
   const [yearEst, setYearEst] = useState(reItems?.properties?.yearEst)
+  
 
   const [myUploads, setmyUploads] = useState('')
   const [filesCount, setFilesCount] = useState(null)
@@ -92,23 +119,62 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
   const [biomass, setEditBiomass] = useState([])
   const [hydropower, setEditHydropower] = useState([])
 
-  const [delAlert, setDelAlert] = useState({bool: false, value: null});
+  const [delAlert, setDelAlert] = useState({ bool: false, value: null })
   const [loading, setLoading] = useState(false)
 
-  const openDelAlert = (index) => {
-    setDelAlert({bool: true, value: index })
+  // --- Net Metered and Own Use as Yes/No strings for consistency ---
+  const [isNetMetered, setIsNetMetered] = useState(
+    reItems?.properties?.isNetMetered === "Yes" ? "Yes" : "No"
+  )
+  const [isOwnUse, setIsOwnUse] = useState(
+    reItems?.properties?.ownUse === "Yes" ? "Yes" : "No"
+  )
 
+  // --- Duplicate detection states ---
+  const [potentialDuplicates, setPotentialDuplicates] = useState([])
+  const [showDuplicateModal, setShowDuplicateModal] = useState(false)
+  const [forceUpdate, setForceUpdate] = useState(false)
+  const [lastFormData, setLastFormData] = useState(null)
+
+  // Sync lat/lng/coordinates when reItems changes
+  useEffect(() => {
+    let coords = [];
+    if (reItems?.coordinates?.coordinates) {
+      coords = reItems.coordinates.coordinates;
+    } else if (reItems?.coordinates) {
+      coords = reItems.coordinates;
+    }
+    if (
+      coords &&
+      coords[0] !== undefined &&
+      coords[1] !== undefined
+    ) {
+      setLng(String(coords[0]));
+      setLat(String(coords[1]));
+      setCoordinates([coords[0], coords[1]]);
+    }
+  }, [reItems]);
+
+  useEffect(() => {
+    if (reItems?.properties) {
+      setIsNetMetered(reItems.properties.isNetMetered === "Yes" ? "Yes" : "No")
+      setIsOwnUse(reItems.properties.ownUse === "Yes" ? "Yes" : "No")
+    }
+  }, [reItems])
+
+  const openDelAlert = (index) => {
+    setDelAlert({ bool: true, value: index })
   }
 
   const closeDelAlert = () => {
-    setDelAlert({bool: false, value: null})
+    setDelAlert({ bool: false, value: null })
   }
-  
+
   const Alert = React.forwardRef(function Alert(props, ref) {
     return <MuiAlert elevation={6} ref={ref} variant='filled' {...props} />;
   })
-  useEffect(() => {
 
+  useEffect(() => {
     if (isSuccess) {
       setOwnerName("")
       setCountry("")
@@ -119,24 +185,20 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
       setLng("")
       setLat("")
       setCoordinates([])
-      setType([])
-      setReCat([])
+      setType("Point") // Reset to default GeoJSON type
+      setReCat("")
       setUserId("")
       navigate(0)
     }
-
   }, [isSuccess, navigate])
 
   useEffect(() => {
-
-    if (isLoading ||isImageLoading) {
+    if (isLoading || isImageLoading) {
       setLoading(true)
     }
-
   }, [isLoading, isImageLoading])
 
   useEffect(() => {
-
     if (isDelSuccess) {
       setOwnerName("")
       setCountry("")
@@ -147,16 +209,14 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
       setLng("")
       setLat("")
       setCoordinates([])
-      setType([])
-      setReCat([])
+      setType("Point")
+      setReCat("")
       setUserId("")
       navigate(-1)
     }
-
   }, [isDelSuccess, navigate])
 
   useEffect(() => {
-
     if (isImageDelSuccess) {
       navigate(0)
     }
@@ -178,7 +238,6 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
   const onmyUploadsChanged = (e) => {
     setmyUploads(e.target.files)
     setFilesCount(e.target.files.length)
-    
   }
   const onLatChanged = (e) => {
     setLat(e.target.value)
@@ -195,12 +254,9 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
   const onYearEstChanged = (e) => setYearEst(e.target.value)
 
   const reverseGeoCoding = async (coordinates) => {
-    // Here the coordinates are in LatLng Format
-    // if you wish to use other formats you will have to change the lat and lng in the fetch URL
     const data = await (
       await fetch(GEOCODE_URL + `${coordinates.lng},${coordinates.lat}`)
     ).json()
-
     if (data.address !== undefined) {
       setBrgy(data.address.Neighborhood)
       setCity(data.address.City)
@@ -213,106 +269,123 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
     }
   }
 
-  
- 
-  const canSave = [type, ownerName, userId].every(Boolean) && !isLoading
-  
-  const onSaveInventoryClicked = async (e) => {
-    e.preventDefault()
-    const data = new FormData()
+  // Fixed: Removed type from canSave since it's not needed for validation
+  const canSave = [ownerName, userId].every(Boolean) && !isLoading
+
+  // Debug: Add console.log to check values
+  // console.log('Debug canSave:', {
+  //   ownerName,
+  //   userId,
+  //   isLoading,
+  //   canSave
+  // })
+
+  // -- EDIT INVENTORY SUBMIT HANDLER --
+  const onSaveInventoryClicked = async (e, isForce = false) => {
+    e.preventDefault();
+
+    // Build properties object for correct backend parsing!
+    const propertiesObj = {
+      ownerName,
+      reCat,
+      reClass,
+      yearEst,
+      acquisition,
+      isNetMetered,
+      ownUse: isOwnUse,
+      address: {
+        country,
+        region,
+        province,
+        city,
+        brgy,
+      }
+    };
+
+    // Build assessment object (customize per your logic)
+    const assessmentObj = {};
+    if (reCat === "Solar Energy" && solar) {
+      Object.assign(assessmentObj, solar);
+    }
+    if (reCat === "Wind Energy" && wind) {
+      Object.assign(assessmentObj, wind);
+    }
+    if (reCat === "Biomass" && biomass) {
+      Object.assign(assessmentObj, biomass);
+    }
+    if (reCat === "Hydropower" && hydropower) {
+      Object.assign(assessmentObj, hydropower);
+    }
+
+    // Build coordinates object in GeoJSON format
+    const coordinatesObj = {
+      type: "Point",
+      coordinates: [parseFloat(lng), parseFloat(lat)]
+    };
+
+    const data = new FormData();
     data.append('id', reItems.id)
     data.append('user', userId)
-    data.append('type', type)
-    data.append('coordinates[]', lng)
-    data.append('coordinates[]', lat)
-    data.append('properties[ownerName]', ownerName)
-    data.append('properties[reCat]', reCat)
-    data.append('properties[reClass]', reClass)
-    data.append('properties[yearEst]', yearEst)
-    data.append('properties[acquisition]', acquisition)
-    data.append('properties[address][country]', country)
-    data.append('properties[address][region]', region)
-    data.append('properties[address][province]', province)
-    data.append('properties[address][city]', city)
-    data.append('properties[address][brgy]', brgy)
-    if (reCat == "Solar Energy") {
-      if (solar?.solarUsage === "Solar Street Lights") {
-        const items = solar?.solarStreetLights
-        for (let i = 0; i < items.length; i++) {
-          const obj = items[i]
-          data.append(`assessment[solarStreetLights][${i}][capacity]`, obj.capacity)
-          data.append(`assessment[solarStreetLights][${i}][pcs]`, obj.pcs)
-        }
-      }
-      if (solar?.solarUsage === "Solar Pump") {
-        data.append("assessment[capacity]", solar.capacity)
-        data.append("assessment[flowRate]", solar.flowRate)
-        data.append("assessment[serviceArea]", solar.serviceArea)
-      }
-      if (solar?.solarUsage === "Power Generation") {
-        data.append("assessment[solarSystemTypes]", solar.solarSystemTypes)
-        data.append("assessment[capacity]", solar.capacity)
-      }
+    data.append('type', 'Point');
+    // Send coordinates as GeoJSON object
+    data.append('coordinates', JSON.stringify(coordinatesObj));
+    data.append('properties', JSON.stringify(propertiesObj));
+    data.append('assessment', JSON.stringify(assessmentObj));
 
-      data.append("assessment[status]", solar.status)
-      data.append("assessment[remarks]", solar.remarks)
-      data.append("assessment[solarUsage]", solar.solarUsage)
-    }
-    if (reCat == "Wind Energy") {
-      if (wind?.windUsage === 'Water pump') {
-        data.append("assessment[serviceArea]", wind.serviceArea)
-      }
-      data.append("assessment[capacity]", wind.capacity)
-      data.append("assessment[windUsage]", wind.windUsage)
-      data.append("assessment[status]", wind.status)
-      data.append("assessment[remarks]", wind.remarks)
-    }
-    if (reCat == "Biomass") {
-      if (biomass?.biomassPriUsage === 'Biogas' || biomass?.biomassPriUsage === 'Gasification') {
-        data.append("assessment[bioUsage]", biomass.bioUsage)
-      }
-      data.append("assessment[capacity]", biomass.capacity)
-      data.append("assessment[biomassPriUsage]", biomass.biomassPriUsage)
-      data.append("assessment[status]", biomass.status)
-      data.append("assessment[remarks]", biomass.remarks)
-    }
-    if (reCat == "Hydropower") {
-      data.append("assessment[capacity]", hydropower.capacity)
-      data.append("assessment[status]", hydropower.status)
-      data.append("assessment[remarks]", hydropower.remarks)
-    }
-
-    if (myUploads.length != 0) {
+    // Add images if any
+    if (myUploads && myUploads.length > 0) {
       for (const file of myUploads) {
         data.append('myUploads', file)
       }
     }
+    if (isForce) data.append('forceUpdate', true)
+
+    setLastFormData(data) // Save for retry
 
     if (canSave) {
-      await updateInventory(data)
-      // await addNewInventory({ type, coordinates, myUploads, properties: { user: userId, ownerName, reCat, address:{country, region, province, city, brgy} } })
+      try {
+        await updateInventory(data).unwrap();
+        setForceUpdate(false)
+        setShowDuplicateModal(false)
+      } catch (err) {
+        if (err?.status === 409 && err?.data?.duplicates) {
+          setPotentialDuplicates(err.data.duplicates)
+          setShowDuplicateModal(true)
+        } else {
+          setErrContent(err?.data?.message || "Unknown error");
+        }
+      }
     }
   }
 
-  // const onSaveInventoryClicked = async (e) => {
-  //     if (canSave) {
-  //         await updateInventory({ id: reItems.id, user: userId, type, ownerName })
-  //     }
-  // }
+  // When user chooses to "Proceed Anyway"
+  const handleProceedAnyway = async () => {
+    setShowDuplicateModal(false)
+    setForceUpdate(true)
+    if (lastFormData) {
+      lastFormData.append("forceUpdate", true)
+      try {
+        await updateInventory(lastFormData).unwrap()
+        setForceUpdate(false)
+      } catch (err) {
+        setErrContent(err?.data?.message || "Unknown error")
+      }
+    }
+  }
 
-  const onDeleteInventoryClicked = async () => {  
+  const handleCancelDuplicate = () => {
+    setShowDuplicateModal(false)
+    setForceUpdate(false)
+    setPotentialDuplicates([])
+  }
+
+  const onDeleteInventoryClicked = async () => {
     await deleteInventory({ id: [reItems.id] })
   }
 
   const deleteImage = async (index) => {
     await deleteImageInventory({ id: reItems.id, images: index })
-    // await deleteInventory({ image: reItems.id })
   }
-
-
-
-  // const validTypeClass = !type ? 'form__input--incomplete' : ''
-  // const validOwnerNameClass = !ownerName ? 'form__input--incomplete' : ''
 
   const content = (
     <>
@@ -322,7 +395,7 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
       >
         <CircularProgress color="inherit" />
       </Backdrop>
-      <Container  sx={{maxWidth:{lg:'md'}}} >
+      <Container sx={{ maxWidth: { lg: 'md' } }}>
         <form onSubmit={e => e.preventDefault()}>
           <Box
             sx={{
@@ -331,9 +404,7 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
               '& .MuiTextField-root': { my: 1 },
             }}
           >
-            <Box
-              sx={boxstyle}
-            >
+            <Box sx={boxstyle}>
               {errContent !== null ?
                 <Snackbar open={true} autoHideDuration={6000} onClose={() => setErrContent(null)} >
                   <Alert onClose={() => setErrContent(null)} severity='warning' sx={{ width: '100%' }}>
@@ -414,9 +485,9 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
               <TextField
                 fullWidth
                 size="small"
+                label="Year Established"
                 id="yearEst"
                 name="properties.yearEst"
-                label="Year Established"
                 type="number"
                 value={yearEst}
                 onChange={onYearEstChanged}
@@ -437,25 +508,72 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
                   ))}
                 </TextField> : ''
               }
+
+              {/* --- Net Metered and Own Use as radio-like checkboxes --- */}
+              <Box sx={{ mt: 2 }}>
+                <Typography sx={{ fontWeight: 700, mb: 1 }} component="label">
+                  Is net-metered?
+                </Typography>
+                <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', mb: 2 }}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={isNetMetered === "Yes"}
+                        onChange={() => setIsNetMetered("Yes")}
+                        color="primary"
+                      />
+                    }
+                    label="Yes"
+                    sx={{ mr: 2, ml: 1 }}
+                  />
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={isNetMetered === "No"}
+                        onChange={() => setIsNetMetered("No")}
+                        color="primary"
+                      />
+                    }
+                    label="No"
+                    sx={{ ml: 2 }}
+                  />
+                </Box>
+                <Typography sx={{ fontWeight: 700, mb: 1 }} component="label">
+                  Own use?
+                </Typography>
+                <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', mb: 2 }}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={isOwnUse === "Yes"}
+                        onChange={() => setIsOwnUse("Yes")}
+                        color="primary"
+                      />
+                    }
+                    label="Yes"
+                    sx={{ mr: 2, ml: 1 }}
+                  />
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={isOwnUse === "No"}
+                        onChange={() => setIsOwnUse("No")}
+                        color="primary"
+                      />
+                    }
+                    label="No"
+                    sx={{ ml: 2 }}
+                  />
+                </Box>
+              </Box>
             </Box>
-            
 
-
-            {/* <img
-              src={`data:${reItems.img.contentType};base64, ${reItems.img.data.toString('base64')}`}
-              // alt={item.title}
-              alt={reItems.properties.reCat[0]}
-              loading='lazy'
-            /> */}
             {reItems.images.length == 0 ? '' : <ImageList sx={{ height: 250 }} cols={3} rowHeight={164}>
               {reItems.images.map((image, index) => (
                 <ImageListItem key={index}>
-                  <img 
-                    // src={`data:${image.contentType};base64, ${image.data.toString('base64')}`}
+                  <img
                     src={`${baseUrl + image}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
                     loading='lazy'
-                    // srcSet={`${baseUrl + image}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
-                    // alt={item.title}
                     alt={reItems.properties.reCat}
                   />
                   <ImageListItemBar
@@ -466,8 +584,7 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
                     }}
                     position='top'
                     actionIcon={
-                      // <IconButton onClick={() => deleteImage(index)}>
-                      <IconButton onClick={()=>openDelAlert(index)}>
+                      <IconButton onClick={() => openDelAlert(index)}>
                         <DeleteOutlineIcon sx={{ color: 'white.main' }} />
                       </IconButton>
                     }
@@ -477,27 +594,25 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
               ))}
             </ImageList>}
             <Dialog
-        open={delAlert.bool}
-        onClose={closeDelAlert}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-      >
+              open={delAlert.bool}
+              onClose={closeDelAlert}
+              aria-labelledby="alert-dialog-title"
+              aria-describedby="alert-dialog-description"
+            >
               <DialogTitle id="alert-dialog-title">
                 {"Delete warning"}
               </DialogTitle>
               <DialogContent>
                 <DialogContentText id="alert-dialog-description">
-                  Are you sure you want to delete this {delAlert.value===undefined ? "inventory" : "image"}?
+                  Are you sure you want to delete this {delAlert.value === undefined ? "inventory" : "image"}?
                 </DialogContentText>
               </DialogContent>
               <DialogActions>
                 <Button onClick={closeDelAlert}>Cancel</Button>
-                <Button variant="contained" color="error" onClick={delAlert.value===undefined ? onDeleteInventoryClicked : ()=>deleteImage(delAlert.value)}>Yes</Button>
+                <Button variant="contained" color="error" onClick={delAlert.value === undefined ? onDeleteInventoryClicked : () => deleteImage(delAlert.value)}>Yes</Button>
               </DialogActions>
             </Dialog>
-            <Box
-              sx={boxstyle}
-            >
+            <Box sx={boxstyle}>
               <Typography sx={{ fontStyle: 'italic' }} component='h1' variant='subtitle2'>
                 Coordinates
               </Typography>
@@ -530,9 +645,7 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
                   component='label'
                   variant='outlined'
                   startIcon={<MyLocationIcon />}
-                  sx={{
-                    my: 1,
-                  }}
+                  sx={{ my: 1 }}
                   size='small'
                   onClick={handleOpenModal}
                 >
@@ -540,12 +653,8 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
                 </Button>
               </Box>
               <Coordinates openModal={openModal} setOpenModal={setOpenModal} reverseGeoCoding={reverseGeoCoding} setLat={setLat} setLng={setLng} coordinates={coordinates} />
-
             </Box>
-
-            <Box
-              sx={boxstyle}
-            >
+            <Box sx={boxstyle}>
               <Typography sx={{ fontStyle: 'italic' }} component='h1' variant='subtitle2'>
                 Address
               </Typography>
@@ -595,71 +704,114 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
                 onChange={onBrgyChanged}
               />
             </Box>
-
             {reCat === null ? null :
-              reCat == 'Solar Energy' ? <EditSolar setEditSolar={setEditSolar} reItems={reItems} allUsers={allUsers} /> :
-                reCat == 'Wind Energy' ? <EditWind setEditWind={setEditWind} reItems={reItems} allUsers={allUsers} /> :
-                  reCat == 'Biomass' ? <EditBiomass setEditBiomass={setEditBiomass} reItems={reItems} allUsers={allUsers} /> :
-                    reCat == 'Hydropower' ? <EditHydropower setEditHydropower={setEditHydropower} reItems={reItems} allUsers={allUsers} /> : ''}
-
+              reCat === 'Solar Energy' ? <EditSolar setEditSolar={setEditSolar} reItems={reItems} allUsers={allUsers} /> :
+                reCat === 'Wind Energy' ? <EditWind setEditWind={setEditWind} reItems={reItems} allUsers={allUsers} /> :
+                  reCat === 'Biomass' ? <EditBiomass setEditBiomass={setEditBiomass} reItems={reItems} allUsers={allUsers} /> :
+                    reCat === 'Hydropower' ? <EditHydropower setEditHydropower={setEditHydropower} reItems={reItems} allUsers={allUsers} /> : ''}
             <Box
               sx={{
                 display: 'flex',
                 flexDirection: 'row-reverse',
               }}
             >
-
               <Button
                 variant='contained'
                 color="success"
                 sx={{ my: 1 }}
                 disabled={!canSave}
-                onClick={onSaveInventoryClicked}
+                onClick={(e) => onSaveInventoryClicked(e, false)}
               >
                 Update
               </Button>
               <Button
                 variant='contained'
                 sx={{ m: 1, backgroundColor: 'custom.error' }}
-                // onClick={onDeleteInventoryClicked}
-                onClick={()=>openDelAlert()}
+                onClick={() => openDelAlert()}
               >
                 Delete
               </Button>
-              {reItems.images.length===3 ? null : <Tooltip title="3 maximum images">
-              <Button
-                component='label'
-                variant='contained'
-                startIcon={<UploadFileIcon />}
-                sx={{ my: 1, backgroundColor: 'primary.main' }}
-              >
-                  Add Images {filesCount>=4 ? "| no. of file exceeded" : filesCount ?"| "+filesCount+" selected": null}
-                <input
-                  type='file'
-                  id='myUploads'
-                  name='myUploads'
-                  accept='image/*'
-                  multiple
-                  hidden
-                  onChange={onmyUploadsChanged}
-                />
-              </Button>
+              {reItems.images.length === 3 ? null : <Tooltip title="3 maximum images">
+                <Button
+                  component='label'
+                  variant='contained'
+                  startIcon={<UploadFileIcon />}
+                  sx={{ my: 1, backgroundColor: 'primary.main' }}
+                >
+                  Add Images {filesCount >= 4 ? "| no. of file exceeded" : filesCount ? "| " + filesCount + " selected" : null}
+                  <input
+                    type='file'
+                    id='myUploads'
+                    name='myUploads'
+                    accept='image/*'
+                    multiple
+                    hidden
+                    onChange={onmyUploadsChanged}
+                  />
+                </Button>
               </Tooltip>}
-
             </Box>
           </Box>
-
           <input
             className={`form__input}`}
             id='coordinates'
             name='coordinates'
             value={coordinates}
-            // onChange={onCoordinatesChanged}
             type='hidden'
           />
+
+          {/* Duplicate detection modal */}
+          <Dialog open={showDuplicateModal} onClose={handleCancelDuplicate}>
+            <DialogTitle>Potential Duplicate Detected</DialogTitle>
+            <DialogContent>
+              <MuiAlert severity="warning" sx={{ mb: 2 }}>
+                There is/are technical assessment(s) within 100 meters of this location.
+                <br />
+                Is this the same RE System as any of the following?
+              </MuiAlert>
+              <List>
+                {potentialDuplicates.map((dup, idx) => (
+                  <ListItem key={dup._id || idx}>
+                    <ListItemText
+                      primary={dup.properties?.ownerName || "Unknown"}
+                      secondary={
+                        <>
+                          <Typography variant="body2">
+                            <b>RE Cat:</b> {dup.properties?.reCat}
+                          </Typography>
+                          <Typography variant="body2">
+                            <b>RE Class:</b> {dup.properties?.reClass}
+                          </Typography>
+                          <Typography variant="body2">
+                            <b>Year Est.:</b> {dup.properties?.yearEst}
+                          </Typography>
+                          <Typography variant="body2">
+                            <b>Address:</b> {dup.properties?.address?.city}, {dup.properties?.address?.province}, {dup.properties?.address?.region}
+                          </Typography>
+                          <Typography variant="body2">
+                            <b>Coordinates:</b> {dup.coordinates?.coordinates?.[1]}, {dup.coordinates?.coordinates?.[0]}
+                          </Typography>
+                        </>
+                      }
+                    />
+                  </ListItem>
+                ))}
+              </List>
+              <MuiAlert severity="info" sx={{ mt: 2 }}>
+                If you wish to proceed with updating this inventory at this location, click "Proceed Anyway".
+              </MuiAlert>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleProceedAnyway} color="success" variant="contained">
+                Proceed Anyway
+              </Button>
+              <Button onClick={handleCancelDuplicate} color="secondary" variant="outlined">
+                Cancel
+              </Button>
+            </DialogActions>
+          </Dialog>
         </form>
       </Container>
-
     </>
   )
   return content

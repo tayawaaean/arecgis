@@ -29,6 +29,27 @@ const contNames = reCats.map((type) => type.contName)
 
 const { BaseLayer } = LayersControl
 
+function toGeoJSONFeature(inventory) {
+  if (inventory.type === "Feature" && inventory.geometry) return inventory;
+  if (inventory.coordinates?.type === "Point") {
+    return {
+      type: "Feature",
+      geometry: inventory.coordinates,
+      properties: inventory.properties,
+      id: inventory.id || inventory._id
+    };
+  }
+  if (Array.isArray(inventory.coordinates)) {
+    return {
+      type: "Feature",
+      geometry: { type: "Point", coordinates: inventory.coordinates },
+      properties: inventory.properties,
+      id: inventory.id || inventory._id
+    };
+  }
+  return null;
+}
+
 
 const RElist = (props) => {
   const { isManager, isAdmin } = useAuth()
@@ -155,6 +176,39 @@ const RElist = (props) => {
       },
       disableClickEventBubbling: true,
     },
+  {
+  field: 'solarSystemTypes',
+  headerName: 'Solar System Types',
+  width: 160,
+  filterable: true,
+  type: 'singleSelect',
+  valueOptions: ['Off-grid', 'Grid-tied', 'Hybrid'],
+  valueGetter: (row) =>
+    row.row.properties.reCat === 'Solar Energy'
+      ? row.row.assessment.solarSystemTypes || ''
+      : '',
+  disableClickEventBubbling: true,
+},
+    {
+    field: 'isNetMetered',
+    headerName: 'Net Metered',
+    width: 120,
+    filterable: true,
+    type: 'singleSelect',
+    valueOptions: ['Yes', 'No'],
+    valueGetter: (inventories) => inventories.row?.properties?.isNetMetered || '',
+    disableClickEventBubbling: true,
+  },
+  {
+    field: 'ownUse',
+    headerName: 'Own Use',
+    width: 120,
+    filterable: true,
+    type: 'singleSelect',
+    valueOptions: ['Yes', 'No'],
+    valueGetter: (inventories) => inventories.row?.properties?.ownUse || '',
+    disableClickEventBubbling: true,
+  },
     {
       field: 'capacity',
       headerName: 'Capacity',
@@ -258,6 +312,7 @@ const RElist = (props) => {
     },
 
   ]
+  
   const map = useMap(); // available when component nested inside MapContainer
   const fly = (params) => {
     setProject(params?.row)
@@ -267,6 +322,7 @@ const RElist = (props) => {
     map.flyTo([...locate].reverse(), 14, { duration: 3 })
   }
 
+  
   return (
     <>
       <Modal
@@ -641,17 +697,14 @@ const RElist = (props) => {
 }
 
 const Inventory = () => {
-
   const [category, setCategory] = useState([])
   const [clearVal, setClearVal] = useState(false)
   const [project, setProject] = useState('')
   const [active, setActive] = useState(false)
   const inventories = useSelector(selectAllInventories)
-
-  //filter search
-  const [query, setQuery] = useState("");
-  const [searchParam] = useState(["city", "province"]);
-  const data = Object.values(inventories);
+  const [query, setQuery] = useState("")
+  const [searchParam] = useState(["city", "province"])
+  const data = Object.values(inventories)
   const search = (inventories) => {
     return inventories.filter((item) => {
       return searchParam.some((newItem) => {
@@ -665,7 +718,6 @@ const Inventory = () => {
       })
     })
   }
-
   const navigate = useNavigate()
   const location = useLocation()
   const [position, setPosition] = useState(null)
@@ -677,7 +729,9 @@ const Inventory = () => {
   const [statusFilter, setStatusFilter] = useState(Status.map(item => item.name))
   const [biomassUsageFilter, setBiomassUsageFilter] = useState(rawBiomassPriUsage.map(item => item.name))
   const [windUsageFilter, setWindUsageFilter] = useState(rawWindUsage.map(item => item.name))
-
+  const [netMeteredFilter, setNetMeteredFilter] = useState([]);
+  const [ownUseFilter, setOwnUseFilter] = useState([]);
+  const [solarSystemTypeFilter, setSolarSystemTypeFilter] = useState(["Hybrid", "Off-grid", "Grid-tied"])
   const [loading, setLoading] = useState(false)
   const [loadingOv, setLoadingOv] = useState(false)
 
@@ -685,7 +739,7 @@ const Inventory = () => {
   let biomassEnergy = []
   let windEnergy = []
 
-  const provinceRaw = inventories.map((inventory) => {
+  inventories.forEach((inventory) => {
     if (inventory.properties.reCat === 'Solar Energy') {
       solarEnergy = [...solarEnergy, inventory.properties.address.city]
     }
@@ -702,41 +756,24 @@ const Inventory = () => {
   const windProvince = ([... new Set(windEnergy)])
 
   const onStatusFilterChanged = (event) => {
-    const {
-      target: { value },
-    } = event;
-    setStatusFilter(
-      // On autofill we get a stringified value.
-      typeof value === 'string' ? value.split(',') : value,
-    );
+    const { target: { value } } = event;
+    setStatusFilter(typeof value === 'string' ? value.split(',') : value);
   }
   const onSolarChecked = (event) => {
-    const {
-      target: { value },
-    } = event;
-    setSolarUsageFilter(
-      // On autofill we get a stringified value.
-      typeof value === 'string' ? value.split(',') : value,
-    );
+    const { target: { value } } = event;
+    setSolarUsageFilter(typeof value === 'string' ? value.split(',') : value);
   }
-
+  const onSolarSystemTypeChecked = (event) => {
+    const { target: { value } } = event;
+    setSolarSystemTypeFilter(typeof value === 'string' ? value.split(',') : value);
+  }
   const onBiomassChecked = (event) => {
-    const {
-      target: { value },
-    } = event;
-    setBiomassUsageFilter(
-      // On autofill we get a stringified value.
-      typeof value === 'string' ? value.split(',') : value,
-    );
+    const { target: { value } } = event;
+    setBiomassUsageFilter(typeof value === 'string' ? value.split(',') : value);
   }
   const onWindChecked = (event) => {
-    const {
-      target: { value },
-    } = event;
-    setWindUsageFilter(
-      // On autofill we get a stringified value.
-      typeof value === 'string' ? value.split(',') : value,
-    );
+    const { target: { value } } = event;
+    setWindUsageFilter(typeof value === 'string' ? value.split(',') : value);
   }
 
   const ITEM_HEIGHT = 48;
@@ -751,7 +788,7 @@ const Inventory = () => {
   };
 
   useEffect(() => {
-    reCats.map((type) => type.checked = false)
+    reCats.forEach((type) => type.checked = false)
   }, [location, category])
 
   useEffect(() => {
@@ -759,12 +796,19 @@ const Inventory = () => {
   }, [])
 
   const clearAll = () => {
-    reCats.map((type) => type.checked = false)
+    reCats.forEach((type) => type.checked = false)
     setClearVal(true)
     setFilters({ contNames: contNames })
     setCategory([...reCats])
     setPosition(null)
     setQuery("")
+    setSolarUsageFilter(rawSolarUsage.map(item => item.name))
+    setStatusFilter(Status.map(item => item.name))
+    setBiomassUsageFilter(rawBiomassPriUsage.map(item => item.name))
+    setWindUsageFilter(rawWindUsage.map(item => item.name))
+    setNetMeteredFilter(['Yes', 'No'])
+    setOwnUseFilter(['Yes', 'No'])
+    setSolarSystemTypeFilter(["Hybrid", "Off-grid", "Grid-tied"])
   }
   const onAddClicked = () => navigate("/dashboard/inventories/new")
 
@@ -773,19 +817,11 @@ const Inventory = () => {
 
   const handleDrawerOpen = () => {
     setDrawer(true)
-    if (solarProvFilter.length === 0) {
-      setSolarProvFilter(solarProvince)
-    }
-    if (bioProvFilter.length === 0) {
-      setBioProvFilter(biomassProvince)
-    }
-    if (windProvFilter.length === 0) {
-      setWindProvFilter(windProvince)
-    }
+    if (solarProvFilter.length === 0) setSolarProvFilter(solarProvince)
+    if (bioProvFilter.length === 0) setBioProvFilter(biomassProvince)
+    if (windProvFilter.length === 0) setWindProvFilter(windProvince)
   }
-  const handleDrawerClose = () => {
-    setDrawer(false)
-  }
+  const handleDrawerClose = () => setDrawer(false)
 
   const handleChange = (type, index) => (e) => {
     category[index].checked = !category[index].checked
@@ -806,6 +842,7 @@ const Inventory = () => {
     if (filters.contNames.includes('Solar Energy')) {
       setSolarUsageFilter(rawSolarUsage.map(item => item.name))
       setSolarProvFilter(solarProvince)
+      setSolarSystemTypeFilter(["Hybrid", "Off-grid", "Grid-tied"])
     }
     if (filters.contNames.includes('Biomass')) {
       setBiomassUsageFilter(rawBiomassPriUsage.map(item => item.name))
@@ -816,9 +853,7 @@ const Inventory = () => {
       setWindProvFilter(windProvince)
     }
   }, [filters])
-  // drawer end
 
-  //geojson start
   const onEachRE = (feature, layer) => {
     if (feature.properties?.reCat === 'Solar Energy') {
       layer.setStyle({ radius: 8, className: 'solarEnergy' })
@@ -833,63 +868,75 @@ const Inventory = () => {
       layer.setStyle({ radius: 8, className: 'hydroPower' })
     }
     if (feature.properties) {
-      layer.bindPopup(
-        feature.properties.reCat
-        // popupContent
-      )
+      layer.bindPopup(feature.properties.reCat)
     }
   }
   const pointToLayer = (feature, latlng) => {
-    return L.circleMarker(latlng, {
-      // className: 'button', // Assign a unique CSS class for each feature
-    });
+    return L.circleMarker(latlng, {});
   };
-  //geojson end
-  const FilterRE = () => {
-    return (
-      <>
-        <Tooltip title="Filter settings" placement="left-start">
-          <button className="leaflet-control-layers controlStyle" aria-label="place-icon" onClick={handleDrawerOpen}>
-            <FilterListIcon fontSize="small" />
-          </button>
-        </Tooltip>
-      </>
-    )
-  }
 
-  const AddRE = () => {
-    return (
-      <>
-        <Tooltip title="Add Inventory" placement="left-start">
-          <button className="leaflet-control-layers controlStyle" aria-label="place-icon" onClick={onAddClicked}>
-            <AddIcon fontSize="small" />
-          </button>
-        </Tooltip>
-      </>
-    )
-  }
+  const FilterRE = () => (
+    <Tooltip title="Filter settings" placement="left-start">
+      <button className="leaflet-control-layers controlStyle" aria-label="place-icon" onClick={handleDrawerOpen}>
+        <FilterListIcon fontSize="small" />
+      </button>
+    </Tooltip>
+  )
 
-
+  const AddRE = () => (
+    <Tooltip title="Add Inventory" placement="left-start">
+      <button className="leaflet-control-layers controlStyle" aria-label="place-icon" onClick={onAddClicked}>
+        <AddIcon fontSize="small" />
+      </button>
+    </Tooltip>
+  )
 
   const BaseLayerChange = () => {
-    const map = useMapEvents({
+    useMapEvents({
       overlayremove() {
         setLoadingOv(false)
       }
     })
+    return null
   }
 
+  const filteredInventories = search(data).filter((inventory) => {
+    if (filters.contNames.includes(inventory.properties.reCat)) return false
 
-
-
+    if (inventory.properties.reCat === 'Solar Energy') {
+      const isPowerGen = solarUsageFilter.includes("Power Generation")
+      return (
+        solarUsageFilter.includes(inventory.assessment.solarUsage) &&
+        statusFilter.includes(inventory.assessment.status) &&
+        (netMeteredFilter.length === 0 || netMeteredFilter.includes(inventory.properties.isNetMetered)) &&
+        (ownUseFilter.length === 0 || ownUseFilter.includes(inventory.properties.ownUse)) &&
+        (!isPowerGen ||
+          (isPowerGen && (
+            solarSystemTypeFilter.length === 0 || 
+            solarSystemTypeFilter.includes(inventory.assessment.solarSystemTypes)
+          ))
+        )
+      )
+    }
+    if (inventory.properties.reCat === 'Biomass') {
+      return (
+        biomassUsageFilter.includes(inventory.assessment.biomassPriUsage) &&
+        statusFilter.includes(inventory.assessment.status)
+      )
+    }
+    if (inventory.properties.reCat === 'Wind Energy') {
+      return (
+        windUsageFilter.includes(inventory.assessment.windUsage) &&
+        statusFilter.includes(inventory.assessment.status)
+      )
+    }
+    return false
+  })
 
   if (inventories) {
-
-    // const handleEdit = () => navigate(`/dashboard/inventory/${inventoryId}`)
     return (
       <>
         <Box style={{ height: "91vh" }}>
-
           <MapContainer
             style={{ height: "100%" }}
             center={[12.512797, 122.395164]}
@@ -899,111 +946,76 @@ const Inventory = () => {
             doubleClickZoom={false}
             minZoom={1}
           >
-
             {position == null ? null :
               <Marker position={[...position].reverse()}
                 eventHandlers={{
                   click: () => {
                     setActive(true)
-                    // setSnackBar({ openSnackbar: true })
                   },
                 }}
-              >
-              </Marker>}
+              />
+            }
             <BaseLayerChange />
             <LayersControl position="topleft" >
-
-
-              <BaseLayer name="OpenStreetMap" >
-
+              <LayersControl.BaseLayer name="OpenStreetMap">
                 <TileLayer
                   eventHandlers={{ loading: () => setLoading(true), load: () => setLoading(false) }}
                   attribution='&copy <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-
                 />
-              </BaseLayer>
-              <BaseLayer checked name="Esri ArcGIS World Imagery">
+              </LayersControl.BaseLayer>
+              <LayersControl.BaseLayer checked name="Esri ArcGIS World Imagery">
                 <TileLayer
                   eventHandlers={{ loading: () => setLoading(true), load: () => setLoading(false) }}
                   attribution='&copy <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                   className="basemap"
                   url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
                 />
-
-              </BaseLayer>
+              </LayersControl.BaseLayer>
               <LayersControl.Overlay name="Open Weather Map" >
-                <LayerGroup >
+                <LayerGroup>
                   <TileLayer
                     eventHandlers={{ loading: () => setLoadingOv(true), load: () => setLoadingOv(false) }}
                     url="https://tile.openweathermap.org/map/clouds_new/{z}/{x}/{y}.png?appid=a30ee7b050677eb2e7e16b14dc7080a5"
-
                   />
                   <TileLayer
-
                     url="https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=a30ee7b050677eb2e7e16b14dc7080a5"
                   />
                   <TileLayer
-
                     url="https://tile.openweathermap.org/map/wind_new/{z}/{x}/{y}.png?appid=a30ee7b050677eb2e7e16b14dc7080a5"
                   />
                 </LayerGroup>
-
               </LayersControl.Overlay>
-
               <LayersControl.Overlay name="OWM Temperature" >
                 <TileLayer
-
                   eventHandlers={{ loading: () => setLoadingOv(true), load: () => setLoadingOv(false) }}
-
                   url="https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=a30ee7b050677eb2e7e16b14dc7080a5"
                 />
               </LayersControl.Overlay>
-              {/* <BaseLayer name="NASA Gibs Blue Marble">
-                                          <WMSTileLayer
-                                          url="https://basemaps-api.arcgis.com/arcgis/rest/services/World_Basemap_v2/VectorTileServer/tile/{z}/{y}/{x}.pbf?token=AAPK6aeb8e0924874b0bbb18681ae81485cb_nU6z8eGvJ-_zxR4SrZiTyKxWThoqT1L2qD-mvg4ny5uwvoITDjKDwoA4zn-JrEf"
-                                          /> */}
-              {/* <BaseLayer name="Open Weather Map"> */}
-
-
-
-              {/* </BaseLayer> */}
             </LayersControl>
-
-            {search(data).map((inventory, index) => {
-              if (!filters.contNames.includes(inventory.properties.reCat)) {
-                if (solarUsageFilter.includes(inventory.assessment.solarUsage) || biomassUsageFilter.includes(inventory.assessment.biomassPriUsage) || windUsageFilter.includes(inventory.assessment.windUsage)) {
-                  if (statusFilter.includes(inventory.assessment.status)) {
-                    // if (solarProvFilter.includes(inventory.properties.address.city) || bioProvFilter.includes(inventory.properties.address.city) || windProvFilter.includes(inventory.properties.address.city)) {
-                    return (
-                      <GeoJSON
-                        key={Math.random()}
-                        data={inventory}
-                        onEachFeature={onEachRE}
-                        pointToLayer={pointToLayer}
-                        eventHandlers={{
-                          click: () => {
-                            setActive(true)
-                            setProject(inventory)
-                            setPosition(inventory.coordinates)
-                          },
-                        }}
-                      />
-                    )
-                  }
-
-                }
-
-              }
-              return null
+            {/* GeoJSON: always wrap as Feature */}
+            {filteredInventories.map((inventory, index) => {
+              const feature = toGeoJSONFeature(inventory)
+              if (!feature) return null
+              return (
+                <GeoJSON
+                  key={feature.id || index}
+                  data={feature}
+                  onEachFeature={onEachRE}
+                  pointToLayer={pointToLayer}
+                  eventHandlers={{
+                    click: () => {
+                      setActive(true)
+                      setProject(inventory)
+                      setPosition(Array.isArray(inventory.coordinates)
+                        ? inventory.coordinates
+                        : inventory.coordinates?.coordinates
+                      )
+                    },
+                  }}
+                />
+              )
             })}
-            {/* <Control position="bottomleft"> */}
-            {/* {!filters.contNames.includes('Solar Energy') ? <SolarInformation inventories={inventories} solarUsageFilter={solarUsageFilter} solarProvFilter={solarProvFilter} />
-              : null}
-            {!filters.contNames.includes('Biomass') ? <BiomassInformation inventories={inventories} biomassUsageFilter={biomassUsageFilter} bioProvFilter={bioProvFilter} />
-              : null} */}
-
-            {/* </Control> */}
             <Control position="topright">
               <FilterRE />
               <Drawer
@@ -1020,7 +1032,6 @@ const Inventory = () => {
                     <CloseIcon />
                   </IconButton>
                 </Stack>
-
                 <Divider />
                 <Stack spacing={3} sx={{ p: 3 }}>
                   <div>
@@ -1039,203 +1050,234 @@ const Inventory = () => {
                       {category.map((type, index) => (
                         <div key={index}>
                           <FormControlLabel
-                            label={<div style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              flexWrap: 'wrap',
-                            }}>
-                              <CircleIcon fontSize='small' style={type.contName === "Solar Energy" ? {
-                                stroke: '#000',
-                                color: '#FFBF00',
-                                marginRight: '5px'
-                              } : type.contName === "Biomass" ? {
-                                stroke: '#000',
-                                color: '#947b4f',
-                                marginRight: '5px'
-                              } : type.contName === "Wind Energy" ? {
-                                stroke: '#000',
-                                color: '#f3ebe8',
-                                marginRight: '5px'
-                              } : type.contName === "Hydropower" ? {
-                                stroke: '#000',
-                                color: '#1e2f97',
-                                marginRight: '5px'
-                              } : null} />
-                              <span>{type.contName}</span>
-                            </div>}
+                            label={
+                              <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                flexWrap: 'wrap',
+                              }}>
+                                <CircleIcon fontSize='small' style={
+                                  type.contName === "Solar Energy" ? { stroke: '#000', color: '#FFBF00', marginRight: '5px' } :
+                                  type.contName === "Biomass" ? { stroke: '#000', color: '#947b4f', marginRight: '5px' } :
+                                  type.contName === "Wind Energy" ? { stroke: '#000', color: '#f3ebe8', marginRight: '5px' } :
+                                  type.contName === "Hydropower" ? { stroke: '#000', color: '#1e2f97', marginRight: '5px' } :
+                                  null
+                                } />
+                                <span>{type.contName}</span>
+                              </div>
+                            }
                             key={index}
                             control={
                               <Checkbox
                                 checked={type.checked}
-                                indeterminate={type.contName === 'Solar Energy' ? (rawSolarUsage.map(item => solarUsageFilter.indexOf(item.name)).includes(-1)) || (solarProvince.map(item => solarProvFilter.indexOf(item)).includes(-1)) :
-                                  type.contName === 'Biomass' ? (rawBiomassPriUsage.map(item => biomassUsageFilter.indexOf(item.name)).includes(-1)) || (biomassProvince.map(item => bioProvFilter.indexOf(item)).includes(-1)) :
-                                    type.contName === 'Wind Energy' ? (rawWindUsage.map(item => windUsageFilter.indexOf(item.name)).includes(-1)) || (windProvince.map(item => windProvFilter.indexOf(item)).includes(-1)) : false}
+                                indeterminate={
+                                  type.contName === 'Solar Energy'
+                                    ? (rawSolarUsage.map(item => solarUsageFilter.indexOf(item.name)).includes(-1)) ||
+                                      (solarProvince.map(item => solarProvFilter.indexOf(item)).includes(-1))
+                                    : type.contName === 'Biomass'
+                                    ? (rawBiomassPriUsage.map(item => biomassUsageFilter.indexOf(item.name)).includes(-1)) ||
+                                      (biomassProvince.map(item => bioProvFilter.indexOf(item)).includes(-1))
+                                    : type.contName === 'Wind Energy'
+                                    ? (rawWindUsage.map(item => windUsageFilter.indexOf(item.name)).includes(-1)) ||
+                                      (windProvince.map(item => windProvFilter.indexOf(item)).includes(-1))
+                                    : false
+                                }
                                 onChange={handleChange(type.contName, index)}
                               />
                             }
                           />
-
-                          {!filters.contNames.includes(type.contName) ?
+                          {!filters.contNames.includes(type.contName) && (
                             <div>
-
                               <FormControl sx={{ m: 1, width: 300 }}>
                                 <InputLabel id="multiple-checkbox-label">Select Usage</InputLabel>
-                                {type.contName === 'Solar Energy' ? <Select
-                                  size="small"
-                                  id="multiple-checkbox"
-                                  multiple
-                                  value={solarUsageFilter}
-                                  onChange={onSolarChecked}
-                                  input={<OutlinedInput label="Select Usage" />}
-                                  renderValue={(selected) => selected.join(', ')}
-                                  MenuProps={MenuProps}
-                                >
-                                  {rawSolarUsage.map((value, index) => (
-                                    <MenuItem key={index} value={value.name}>
-                                      <Checkbox checked={solarUsageFilter.indexOf(value.name) > -1} />
-                                      <ListItemText primary={value.name} />
-                                    </MenuItem>
-                                  ))}
-                                </Select> : type.contName === 'Biomass' ? <Select
-                                  size="small"
-                                  id="multiple-checkbox"
-                                  multiple
-                                  value={biomassUsageFilter}
-                                  onChange={onBiomassChecked}
-                                  input={<OutlinedInput label="Select Usage" />}
-                                  renderValue={(selected) => selected.join(', ')}
-                                  MenuProps={MenuProps}
-                                >
-                                  {rawBiomassPriUsage.map((value, index) => (
-                                    <MenuItem key={index} value={value.name}>
-                                      <Checkbox checked={biomassUsageFilter.indexOf(value.name) > -1} />
-                                      <ListItemText primary={value.name} />
-                                    </MenuItem>
-                                  ))}
-                                </Select> : type.contName === 'Wind Energy' ? <Select
-                                  size="small"
-                                  id="multiple-checkbox"
-                                  multiple
-                                  value={windUsageFilter}
-                                  onChange={onWindChecked}
-                                  input={<OutlinedInput label="Select Usage" />}
-                                  renderValue={(selected) => selected.join(', ')}
-                                  MenuProps={MenuProps}
-                                >
-                                  {rawWindUsage.map((value, index) => (
-                                    <MenuItem key={index} value={value.name}>
-                                      <Checkbox checked={windUsageFilter.indexOf(value.name) > -1} />
-                                      <ListItemText primary={value.name} />
-                                    </MenuItem>
-                                  ))}
-                                </Select> : type.contName === 'Hydropower' ? <Select
-                                  size="small"
-                                  id="multiple-checkbox"
-                                  multiple
-                                  value={['not availble']}
-                                  onChange={onWindChecked}
-                                  input={<OutlinedInput label="Not yet available" />}
-                                  renderValue={(selected) => selected.join(', ')}
-                                  MenuProps={MenuProps}
-                                >
-                                  <MenuItem key={Math.random()} value={['not available']}>
-                                    <Checkbox checked={true} />
-                                    <ListItemText primary={['not available']} />
-                                  </MenuItem>
-                                </Select> : ''}
+                                {type.contName === 'Solar Energy' ? (
+                                  <>
+                                    <Select
+                                      size="small"
+                                      id="solar-usage-checkbox"
+                                      multiple
+                                      value={solarUsageFilter}
+                                      onChange={onSolarChecked}
+                                      input={<OutlinedInput label="Select Usage" />}
+                                      renderValue={(selected) => selected.join(', ')}
+                                      MenuProps={MenuProps}
+                                    >
+                                      {rawSolarUsage.map((value, idx) => (
+                                        <MenuItem key={idx} value={value.name}>
+                                          <Checkbox checked={solarUsageFilter.indexOf(value.name) > -1} />
+                                          <ListItemText primary={value.name} />
+                                        </MenuItem>
+                                      ))}
+                                    </Select>
+                                    {/* Show Solar System Type filter only if "Power Generation" is selected */}
+                                    {solarUsageFilter.includes("Power Generation") && (
+                                    <FormControl sx={{ marginTop: 2, width: 300 }}>
+                                      <InputLabel id="solar-system-type-label">Solar System Type</InputLabel>
+                                      <Select
+                                        size="small"
+                                        labelId="solar-system-type-label"
+                                        id="solar-system-type-checkbox"
+                                        multiple
+                                        value={solarSystemTypeFilter}
+                                        onChange={onSolarSystemTypeChecked}
+                                        input={<OutlinedInput label="Solar System Type" />}
+                                        renderValue={selected => selected.join(', ')}
+                                        MenuProps={MenuProps}
+                                      >
+                                        {["Hybrid", "Off-grid", "Grid-tied"].map(type => (
+                                          <MenuItem key={type} value={type}>
+                                            <Checkbox checked={solarSystemTypeFilter.indexOf(type) > -1} />
+                                            <ListItemText primary={type} />
+                                          </MenuItem>
+                                        ))}
+                                      </Select>
+                                    </FormControl>
+                                  )}
 
-
-                                <FormControl sx={{ marginTop: 2, width: 300 }}>
-                                  <InputLabel id="multiple-checkbox-label">Status</InputLabel>
+                                    {/* Status */}
+                                    <FormControl sx={{ marginTop: 2, width: 300 }}>
+                                      <InputLabel id="status-label">Status</InputLabel>
+                                      <Select
+                                        size="small"
+                                        labelId="status-label"
+                                        id="status-select"
+                                        multiple
+                                        value={statusFilter}
+                                        onChange={onStatusFilterChanged}
+                                        input={<OutlinedInput label="Status" />}
+                                        renderValue={(selected) => selected.join(', ')}
+                                        MenuProps={MenuProps}
+                                      >
+                                        {Status.map((value, idx) => (
+                                          <MenuItem key={idx} value={value.name}>
+                                            <Checkbox checked={statusFilter.indexOf(value.name) > -1} />
+                                            <ListItemText primary={value.name} />
+                                          </MenuItem>
+                                        ))}
+                                      </Select>
+                                    </FormControl>
+                                    {/* Net Metered */}
+                                    <FormControl sx={{ marginTop: 2, width: 300 }}>
+                                      <InputLabel id="net-metered-label">Net Metered</InputLabel>
+                                      <Select
+                                        size="small"
+                                        labelId="net-metered-label"
+                                        id="net-metered-select"
+                                        multiple
+                                        value={netMeteredFilter}
+                                        onChange={e =>
+                                          setNetMeteredFilter(
+                                            typeof e.target.value === 'string'
+                                              ? e.target.value.split(',')
+                                              : e.target.value
+                                          )
+                                        }
+                                        input={<OutlinedInput label="Net Metered" />}
+                                        renderValue={selected => selected.join(', ')}
+                                        MenuProps={MenuProps}
+                                      >
+                                        <MenuItem value="Yes">
+                                          <Checkbox checked={netMeteredFilter.indexOf('Yes') > -1} />
+                                          <ListItemText primary="Yes" />
+                                        </MenuItem>
+                                        <MenuItem value="No">
+                                          <Checkbox checked={netMeteredFilter.indexOf('No') > -1} />
+                                          <ListItemText primary="No" />
+                                        </MenuItem>
+                                      </Select>
+                                    </FormControl>
+                                    {/* Own Use */}
+                                    <FormControl sx={{ marginTop: 2, width: 300 }}>
+                                      <InputLabel id="own-use-label">Own Use</InputLabel>
+                                      <Select
+                                        size="small"
+                                        labelId="own-use-label"
+                                        id="own-use-select"
+                                        multiple
+                                        value={ownUseFilter}
+                                        onChange={e =>
+                                          setOwnUseFilter(
+                                            typeof e.target.value === 'string'
+                                              ? e.target.value.split(',')
+                                              : e.target.value
+                                          )
+                                        }
+                                        input={<OutlinedInput label="Own Use" />}
+                                        renderValue={selected => selected.join(', ')}
+                                        MenuProps={MenuProps}
+                                      >
+                                        <MenuItem value="Yes">
+                                          <Checkbox checked={ownUseFilter.indexOf('Yes') > -1} />
+                                          <ListItemText primary="Yes" />
+                                        </MenuItem>
+                                        <MenuItem value="No">
+                                          <Checkbox checked={ownUseFilter.indexOf('No') > -1} />
+                                          <ListItemText primary="No" />
+                                        </MenuItem>
+                                      </Select>
+                                    </FormControl>
+                                  </>
+                                ) : type.contName === 'Biomass' ? (
                                   <Select
                                     size="small"
-                                    id="multiple-checkbox"
+                                    id="biomass-usage-checkbox"
                                     multiple
-                                    value={statusFilter}
-                                    onChange={onStatusFilterChanged}
-                                    input={<OutlinedInput label="Status" />}
-                                    renderValue={(selected) => selected.join(', ')}
+                                    value={biomassUsageFilter}
+                                    onChange={onBiomassChecked}
+                                    input={<OutlinedInput label="Select Usage" />}
+                                    renderValue={selected => selected.join(', ')}
                                     MenuProps={MenuProps}
                                   >
-                                    {Status.map((value, index) => (
-                                      <MenuItem key={index} value={value.name}>
-                                        <Checkbox checked={statusFilter.indexOf(value.name) > -1} />
+                                    {rawBiomassPriUsage.map((value, idx) => (
+                                      <MenuItem key={idx} value={value.name}>
+                                        <Checkbox checked={biomassUsageFilter.indexOf(value.name) > -1} />
                                         <ListItemText primary={value.name} />
                                       </MenuItem>
                                     ))}
                                   </Select>
-                                </FormControl>
-
-                              </FormControl>
-                            </div>
-                            : null}
-
-
-                          {/* {!filters.contNames.includes(type.contName) ? <div>
-                                <FormControl sx={{ m: 1, width: 300 }}>
-                                  <InputLabel id="multiple-checkbox-label">Select City/Municipality</InputLabel>
-                                  {type.contName === 'Solar Energy' && solarProvFilter ? <Select
+                                ) : type.contName === 'Wind Energy' ? (
+                                  <Select
                                     size="small"
-                                    id="demo-multiple-checkbox"
+                                    id="wind-usage-checkbox"
                                     multiple
-                                    value={solarProvFilter}
-                                    onChange={onChangeSolarProv}
-                                    input={<OutlinedInput label="Select City/Municipality" />}
-                                    renderValue={(selected) => selected.join(', ')}
+                                    value={windUsageFilter}
+                                    onChange={onWindChecked}
+                                    input={<OutlinedInput label="Select Usage" />}
+                                    renderValue={selected => selected.join(', ')}
                                     MenuProps={MenuProps}
                                   >
-                                    {solarProvince.map((name) => (
-                                      <MenuItem key={name} value={name}>
-                                        <Checkbox checked={solarProvFilter.indexOf(name) > -1} />
-                                        <ListItemText primary={name} />
+                                    {rawWindUsage.map((value, idx) => (
+                                      <MenuItem key={idx} value={value.name}>
+                                        <Checkbox checked={windUsageFilter.indexOf(value.name) > -1} />
+                                        <ListItemText primary={value.name} />
                                       </MenuItem>
                                     ))}
                                   </Select>
-                                    : type.contName === 'Biomass' ? <Select
-                                      size="small"
-                                      id="demo-multiple-checkbox"
-                                      multiple
-                                      value={bioProvFilter}
-                                      onChange={onChangeBioProv}
-                                      input={<OutlinedInput label="Select City/Municipality" />}
-                                      renderValue={(selected) => selected.join(', ')}
-                                      MenuProps={MenuProps}
-                                    >
-                                      {biomassProvince.map((name) => (
-                                        <MenuItem key={name} value={name}>
-                                          <Checkbox checked={bioProvFilter.indexOf(name) > -1} />
-                                          <ListItemText primary={name} />
-                                        </MenuItem>
-                                      ))}
-                                    </Select> : type.contName === 'Wind Energy' ? <Select
-                                      size="small"
-                                      id="demo-multiple-checkbox"
-                                      multiple
-                                      value={windProvFilter}
-                                      onChange={onChangeWindProv}
-                                      input={<OutlinedInput label="Select City/Municipality" />}
-                                      renderValue={(selected) => selected.join(', ')}
-                                      MenuProps={MenuProps}
-                                    >
-                                      {windProvince.map((name) => (
-                                        <MenuItem key={name} value={name}>
-                                          <Checkbox checked={windProvFilter.indexOf(name) > -1} />
-                                          <ListItemText primary={name} />
-                                        </MenuItem>
-                                      ))}
-                                    </Select> : <FadeLoader height={10} color={"#fffdd0"} />
-                                  }
-
-                                </FormControl>
-                              </div> : null} */}
-
+                                ) : type.contName === 'Hydropower' ? (
+                                  <Select
+                                    size="small"
+                                    id="hydro-usage-checkbox"
+                                    multiple
+                                    value={['not available']}
+                                    onChange={onWindChecked}
+                                    input={<OutlinedInput label="Not yet available" />}
+                                    renderValue={selected => selected.join(', ')}
+                                    MenuProps={MenuProps}
+                                  >
+                                    <MenuItem key="hydro" value={['not available']}>
+                                      <Checkbox checked={true} />
+                                      <ListItemText primary={['not available']} />
+                                    </MenuItem>
+                                  </Select>
+                                ) : null}
+                              </FormControl>
+                            </div>
+                          )}
                         </div>
                       ))}
                     </FormGroup>
                   </div>
-
                 </Stack>
-
                 <Box sx={{ p: 3 }}>
                   <Button
                     fullWidth
@@ -1252,37 +1294,24 @@ const Inventory = () => {
               </Drawer>
             </Control>
             <Control position="topright">
-              <RElist clearVal={clearVal} setClearVal={setClearVal} />
+            <RElist setClearVal={setClearVal} clearVal={clearVal} />
             </Control>
-
             <ZoomControl position="bottomright" />
-            {/* This control will be below the default zoom control. Note the wrapping Stack component */}
             <Control position="topright">
               <AddRE />
             </Control>
             <Control position="topright">
-              {loading || loadingOv ?
-                <FadeLoader
-                  color={"#ffd15d"}
-
-                /> : null
+              {(loading || loadingOv) &&
+                <FadeLoader color={"#ffd15d"} />
               }
             </Control>
-            {/* <SnackBar setActive={setActive} active={active} project={project} /> */}
-
           </MapContainer>
-
-
           <SnackBar setActive={setActive} active={active} project={project} />
-          {/* <Stack direction={{ md: 'row', sm: 'column' }} spacing={{ xs: 2, sm: 2, md: 4 }} sx={{ marginTop: 4 }}>
-            <SolarInformation inventories={inventories} solarUsageFilter={solarUsageFilter} solarProvFilter={solarProvFilter} />
-            <BiomassInformation inventories={inventories} biomassUsageFilter={biomassUsageFilter} bioProvFilter={bioProvFilter} />
-            <WindInformation inventories={inventories} windUsageFilter={windUsageFilter} windProvFilter={windProvFilter} />
-          </Stack> */}
         </Box>
       </>
     )
   } else return null
 }
+
 const memoizedInventory = memo(Inventory)
 export default memoizedInventory

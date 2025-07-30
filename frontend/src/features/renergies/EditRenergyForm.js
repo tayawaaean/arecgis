@@ -18,6 +18,11 @@ import {
   IconButton,
   Grid,
   Typography,
+  FormControl,
+  FormLabel,
+  RadioGroup,
+  FormControlLabel,
+  Radio,
 } from "@mui/material"
 import {
   Upload as UploadFileIcon,
@@ -40,10 +45,8 @@ import { boxwrapstyle, style } from "../../config/style"
 const EditRenergyForm = ({ reItems, users }) => {
   const { isManager, isAdmin } = useAuth()
   const GEOCODE_URL = "https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=pjson&langCode=EN&location="
- 
 
   const HandleClickFindSelfMap = () => {
-    // const [position, setPosition] = useState(null)
     const map = useMapEvents({
       click(e) {
         setLat(e.latlng.lat)
@@ -78,6 +81,7 @@ const EditRenergyForm = ({ reItems, users }) => {
       ></Marker>
     )
   }
+
   const [open, setOpen] = useState(false)
   const handleOpen = () => setOpen(true)
   const handleClose = () => setOpen(false)
@@ -104,25 +108,64 @@ const EditRenergyForm = ({ reItems, users }) => {
   const navigate = useNavigate()
 
   const [position, setPosition] = useState([0, 0])
-  const [ownerName, setOwnerName] = useState(reItems.properties.ownerName)
-  const [country, setCountry] = useState(reItems.properties.address.country)
-  const [region, setRegion] = useState(reItems.properties.address.region)
-  const [province, setProvince] = useState(reItems.properties.address.province)
-  const [city, setCity] = useState(reItems.properties.address.city)
-  const [brgy, setBrgy] = useState(reItems.properties.address.brgy)
-  const [type, setType] = useState(reItems.type)
-  const [coordinates, setCoordinates] = useState(reItems.coordinates)
-  const [lat, setLat] = useState(reItems.coordinates[1])
-  const [lng, setLng] = useState(reItems.coordinates[0])
-  const [reCat, setReType] = useState([reItems.properties.reCat])
+  const [ownerName, setOwnerName] = useState("")
+  const [country, setCountry] = useState("")
+  const [region, setRegion] = useState("")
+  const [province, setProvince] = useState("")
+  const [city, setCity] = useState("")
+  const [brgy, setBrgy] = useState("")
+  const [type, setType] = useState("")
+  const [coordinates, setCoordinates] = useState([0,0])
+  const [lat, setLat] = useState("")
+  const [lng, setLng] = useState("")
+  const [reCat, setReType] = useState("")
   const [myUploads, setmyUploads] = useState("")
-  const [userId, setUserId] = useState(reItems.user)
+  const [userId, setUserId] = useState("")
   const [solar, setEditSolar] = useState([])
   const [wind, setEditWind] = useState([])
   const [biomass, setEditBiomass] = useState([])
 
-  useEffect(() => {
+  // --- NetMetered and OwnUse State (as "Yes"/"No" strings for radio buttons) ---
+  const [isNetMetered, setIsNetMetered] = useState("No")
+  const [isOwnUse, setIsOwnUse] = useState("No")
+  // ---
 
+  // Debug: Log on every render
+  console.log("isNetMetered:", isNetMetered)
+  console.log("isOwnUse:", isOwnUse)
+
+  // Optional: Log when reItems changes
+  useEffect(() => {
+    console.log("reItems:", reItems)
+  }, [reItems])
+
+  // Optional: Log when values change
+  useEffect(() => {
+    console.log("Changed isNetMetered:", isNetMetered)
+    console.log("Changed isOwnUse:", isOwnUse)
+  }, [isNetMetered, isOwnUse])
+
+  // Sync initial values from reItems
+  useEffect(() => {
+    if (reItems?.properties) {
+      setOwnerName(reItems.properties.ownerName || "")
+      setCountry(reItems.properties.address?.country || "")
+      setRegion(reItems.properties.address?.region || "")
+      setProvince(reItems.properties.address?.province || "")
+      setCity(reItems.properties.address?.city || "")
+      setBrgy(reItems.properties.address?.brgy || "")
+      setType(reItems.type || "")
+      setCoordinates(reItems.coordinates || [0,0])
+      setLat(reItems.coordinates?.[1] || "")
+      setLng(reItems.coordinates?.[0] || "")
+      setReType(reItems.properties.reCat || "")
+      setUserId(reItems.user || "")
+      setIsNetMetered(reItems.properties.isNetMetered === "Yes" ? "Yes" : "No")
+      setIsOwnUse(reItems.properties.ownUse === "Yes" ? "Yes" : "No")
+    }
+  }, [reItems])
+
+  useEffect(() => {
     if (isSuccess) {
       setOwnerName("")
       setCountry("")
@@ -133,16 +176,14 @@ const EditRenergyForm = ({ reItems, users }) => {
       setLng("")
       setLat("")
       setCoordinates([])
-      setType([])
-      setReType([])
+      setType("")
+      setReType("")
       setUserId("")
       navigate(0)
     }
-
   }, [isSuccess, navigate])
 
   useEffect(() => {
-
     if ( isDelSuccess) {
       setOwnerName("")
       setCountry("")
@@ -153,16 +194,14 @@ const EditRenergyForm = ({ reItems, users }) => {
       setLng("")
       setLat("")
       setCoordinates([])
-      setType([])
-      setReType([])
+      setType("")
+      setReType("")
       setUserId("")
       navigate("/dashboard/renergies/list")
     }
-
   }, [isDelSuccess, navigate])
 
   useEffect(() => {
-
     if (isImageDelSuccess) {
       navigate(0)
     }
@@ -186,12 +225,9 @@ const EditRenergyForm = ({ reItems, users }) => {
   const onUserIdChanged = (e) => setUserId(e.target.value)
   const onReTypesChanged = (e) => setReType(e.target.value)
   const reverseGeoCoding = async (coordinates) => {
-    // Here the coordinates are in LatLng Format
-    // if you wish to use other formats you will have to change the lat and lng in the fetch URL
     const data = await (
       await fetch(GEOCODE_URL + `${coordinates.lng},${coordinates.lat}`)
     ).json()
-    //   console.log(data.address)
     if (data.address !== undefined) {
       setBrgy(data.address.Neighborhood)
       setCity(data.address.City)
@@ -199,12 +235,15 @@ const EditRenergyForm = ({ reItems, users }) => {
       setRegion(data.address.Region)
       setCountry(data.address.CntryName)
     }
-    // this.setState({ address: addressLabel})
   }
   const canSave = [type, ownerName, userId].every(Boolean) && !isLoading
 
   const onSaveRenergyClicked = async (e) => {
     e.preventDefault()
+    // Log before submit
+    console.log("Submitting isNetMetered:", isNetMetered)
+    console.log("Submitting isOwnUse:", isOwnUse)
+
     const data = new FormData()
     data.append("id", reItems.id)
     data.append("user", userId)
@@ -218,6 +257,11 @@ const EditRenergyForm = ({ reItems, users }) => {
     data.append("properties[address][province]", province)
     data.append("properties[address][city]", city)
     data.append("properties[address][brgy]", brgy)
+    // --- NetMetered and OwnUse ---
+    data.append("properties[isNetMetered]", isNetMetered)
+    data.append("properties[ownUse]", isOwnUse)
+    // ---
+
     if (reCat == "Solar Energy") {
       data.append("assessment[capacity]", solar.capacity)
       data.append("assessment[numbers]", solar.numbers)
@@ -256,18 +300,10 @@ const EditRenergyForm = ({ reItems, users }) => {
       }
     }
 
-
     if (canSave) {
       await updateRenergy(data)
-      // await addNewRenergy({ type, coordinates, myUploads, properties: { user: userId, ownerName, reCat, address:{country, region, province, city, brgy} } })
     }
   }
-
-  // const onSaveRenergyClicked = async (e) => {
-  //     if (canSave) {
-  //         await updateRenergy({ id: reItems.id, user: userId, type, ownerName })
-  //     }
-  // }
 
   const onDeleteRenergyClicked = async () => {
     await deleteRenergy({ id: reItems.id })
@@ -275,16 +311,10 @@ const EditRenergyForm = ({ reItems, users }) => {
 
   const deleteImage = async (index) => {
     await deleteImageRenergy({ id: reItems.id, images: index })
-    // await deleteRenergy({ image: reItems.id })
   }
 
-
   const errClass = (isError || isDelError) ? "errmsg" : "offscreen"
-  // const validTypeClass = !type ? "form__input--incomplete" : ''
-  // const validOwnerNameClass = !ownerName ? "form__input--incomplete" : ''
-
   const errContent = (error?.data?.message || delerror?.data?.message) ?? ''
-  
 
   const content = (
     <>
@@ -298,13 +328,11 @@ const EditRenergyForm = ({ reItems, users }) => {
               "& .MuiTextField-root": { my: 1 },
             }}
           >
-            <Box
-              sx={boxwrapstyle}
-            >
+            <Box sx={boxwrapstyle}>
               <Grid container>
                 <Grid item xs>
                   <Typography component="h1" variant="h5">
-                    Edit technical assessment
+                    Edit Inventory
                   </Typography>
                 </Grid>
                 <Grid item>
@@ -315,7 +343,7 @@ const EditRenergyForm = ({ reItems, users }) => {
               </Grid>
               <TextField
                 fullWidth
-                label="Owner Name"
+                label="Owner/ Company/ Cooperative/ Association Name"
                 id="ownerName"
                 name="properties.ownerName"
                 type="text"
@@ -327,7 +355,7 @@ const EditRenergyForm = ({ reItems, users }) => {
                 id="reCat"
                 select
                 name="properties.reCat"
-                label="Select Renewable Energy category"
+                label="Select RE Category"
                 value={reCat || ""}
                 onChange={onReTypesChanged}
               >
@@ -337,6 +365,30 @@ const EditRenergyForm = ({ reItems, users }) => {
                   </MenuItem>
                 ))}
               </TextField>
+              <FormControl fullWidth margin="normal">
+                <FormLabel>Is net-metered?</FormLabel>
+                <RadioGroup
+                  row
+                  value={isNetMetered}
+                  onChange={e => setIsNetMetered(e.target.value)}
+                  name="isNetMetered"
+                >
+                  <FormControlLabel value="Yes" control={<Radio />} label="Yes" />
+                  <FormControlLabel value="No" control={<Radio />} label="No" />
+                </RadioGroup>
+              </FormControl>
+              <FormControl fullWidth margin="normal">
+                <FormLabel>Own use?</FormLabel>
+                <RadioGroup
+                  row
+                  value={isOwnUse}
+                  onChange={e => setIsOwnUse(e.target.value)}
+                  name="ownUse"
+                >
+                  <FormControlLabel value="Yes" control={<Radio />} label="Yes" />
+                  <FormControlLabel value="No" control={<Radio />} label="No" />
+                </RadioGroup>
+              </FormControl>
               <Box
                 sx={{
                   display: "grid",
@@ -346,7 +398,7 @@ const EditRenergyForm = ({ reItems, users }) => {
               >
                 <TextField
                   fullWidth
-                  label="Longtitude"
+                  label="Longitude"
                   id="lng"
                   name="lng"
                   type="tel"
@@ -372,7 +424,7 @@ const EditRenergyForm = ({ reItems, users }) => {
                   size="small"
                   onClick={handleOpen}
                 >
-                  Mark Location
+                  Select on Map
                 </Button>
               </Box>
               <TextField
@@ -414,7 +466,7 @@ const EditRenergyForm = ({ reItems, users }) => {
               <TextField
                 fullWidth
                 label="Barangay"
-                id="lng"
+                id="brgy"
                 name="properties.address.brgy"
                 type="text"
                 value={brgy}
@@ -425,7 +477,7 @@ const EditRenergyForm = ({ reItems, users }) => {
                 id="user"
                 select
                 name="user"
-                label="Uploader"
+                label="Assigned to:"
                 value={userId || ""}
                 onChange={onUserIdChanged}
               >
@@ -435,13 +487,12 @@ const EditRenergyForm = ({ reItems, users }) => {
                   </MenuItem>
                 ))}
               </TextField>
-              {reItems.images.length == 0 ? "" : <ImageList sx={{ width: 500, height: 450 }} cols={3} rowHeight={164}>
+              {reItems.images.length === 0 ? "" : <ImageList sx={{ width: 500, height: 450 }} cols={3} rowHeight={164}>
                 {reItems.images.map((image, index) => (
                   <ImageListItem key={index}>
                     <img
                       src={`${baseUrl + image}?w=164&h=164&fit=crop&auto=format`}
                       srcSet={`${baseUrl + image}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
-                      // alt={item.title}
                       alt={reItems.properties.reCat[0]}
                       loading="lazy"
                     />
@@ -463,9 +514,7 @@ const EditRenergyForm = ({ reItems, users }) => {
                   </ImageListItem>
                 ))}
               </ImageList>}
-
             </Box>
-
             <Modal
               open={open}
               onClose={handleClose}
@@ -484,23 +533,19 @@ const EditRenergyForm = ({ reItems, users }) => {
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                   />
                   <HandleClickFindSelfMap />
-                  {/* <HandleFindSelfMap /> */}
                 </MapContainer>
               </Box>
             </Modal>
-
             {reCat === null ? null : 
-            reCat == 'Solar Energy' ? <EditSolar setEditSolar={setEditSolar} reItems={reItems} users={users} /> : 
-            reCat == 'Wind Energy' ? <EditWind setEditWind={setEditWind} reItems={reItems} users={users} /> : 
-            reCat == 'Biomass' ? <EditBiomass setEditBiomass={setEditBiomass} reItems={reItems} users={users} /> : ''}
-
+            reCat === 'Solar Energy' ? <EditSolar setEditSolar={setEditSolar} reItems={reItems} users={users} /> : 
+            reCat === 'Wind Energy' ? <EditWind setEditWind={setEditWind} reItems={reItems} users={users} /> : 
+            reCat === 'Biomass' ? <EditBiomass setEditBiomass={setEditBiomass} reItems={reItems} users={users} /> : ''}
             <Box
               sx={{
                 display: "flex",
                 flexDirection: "row-reverse",
               }}
             >
-
               <Button
                 variant="contained"
                 color="success"
@@ -537,18 +582,15 @@ const EditRenergyForm = ({ reItems, users }) => {
               </Button>
             </Box>
           </Box>
-
           <input
             className={`form__input}`}
             id="coordinates"
             name="coordinates"
             value={coordinates}
-            // onChange={onCoordinatesChanged}
             type="hidden"
           />
         </form>
       </Container>
-
     </>
   )
 

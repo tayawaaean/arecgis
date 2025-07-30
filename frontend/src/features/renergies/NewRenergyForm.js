@@ -27,6 +27,11 @@ import {
   DialogContent,
   DialogActions,
   styled,
+  FormControl,
+  FormLabel,
+  RadioGroup,
+  FormControlLabel,
+  Radio,
 } from "@mui/material"
 import PropTypes from 'prop-types'
 import { boxwrapstyle } from '../../config/style'
@@ -162,6 +167,10 @@ const NewRenergyForm = ({ allUsers }) => {
   const [biomass, setBiomass] = useState([])
   const [loading, setLoading] = useState(false)
 
+  // Radio group state for Net Metered and Own Use
+  const [isNetMetered, setIsNetMetered] = useState("No")
+  const [isOwnUse, setIsOwnUse] = useState("No")
+
   const markerEventHandler = useMemo(
     () => ({
       dragend(e) {
@@ -234,8 +243,6 @@ const NewRenergyForm = ({ allUsers }) => {
   const onReTypesChanged = (e) => setReType(e.target.value)
 
   const reverseGeoCoding = async (coordinates) => {
-    // Here the coordinates are in LatLng Format
-    // if you wish to use other formats you will have to change the lat and lng in the fetch URL
     const data = await (
       await fetch(GEOCODE_URL + `${coordinates.lng},${coordinates.lat}`)
     ).json()
@@ -278,6 +285,9 @@ const NewRenergyForm = ({ allUsers }) => {
     data.append("properties[address][province]", province)
     data.append("properties[address][city]", city)
     data.append("properties[address][brgy]", brgy)
+    // Add radio group values for net metered and own use
+    data.append("properties[isNetMetered]", isNetMetered)
+    data.append("properties[ownUse]", isOwnUse)
     if (retype == "Solar Energy") {
       data.append("assessment[capacity]", solar.capacity)
       data.append("assessment[numbers]", solar.numbers)
@@ -319,33 +329,16 @@ const NewRenergyForm = ({ allUsers }) => {
 
     if (canSave) {
       await addNewRenergy(data)
-      // await addNewRenergy({ type, coordinates, myUploads, properties: { user: userId, ownerName, retype, address:{country, region, province, city, brgy} } })
     }
   }
-
-
-  // const errClass = isError ? "errmsg" : "offscreen"
-  // const validOwnerNameClass = !ownerName
-  //   ? "form__input--incomplete"
-  //   : ""
-  // const validCountryClass = !country ? "form__input--incomplete" : ""
 
   const content = (
     <>
       <p>{error?.data?.message}</p>
       <Container maxWidth="sm" sx={{ bgcolor: 'primary' }}>
-
         <form onSubmit={onSaveRenergyClicked}>
-          <Box
-            sx={{
-              minHeight: "100vh",
-              maxWidth: "100%",
-              "& .MuiTextField-root": { my: 1 },
-            }}
-          >
-            <Box
-              sx={boxwrapstyle}
-            >
+          <Box sx={{ minHeight: "100vh", maxWidth: "100%", "& .MuiTextField-root": { my: 1 } }}>
+            <Box sx={boxwrapstyle}>
               <Grid container>
                 <Grid item xs>
                   <Typography component="h1" variant="h5">
@@ -382,6 +375,32 @@ const NewRenergyForm = ({ allUsers }) => {
                   </MenuItem>
                 ))}
               </TextField>
+              {/* RADIO GROUP for Net-Metered */}
+              <FormControl fullWidth margin="normal">
+                <FormLabel>Is net-metered?</FormLabel>
+                <RadioGroup
+                  row
+                  value={isNetMetered}
+                  onChange={e => setIsNetMetered(e.target.value)}
+                  name="isNetMetered"
+                >
+                  <FormControlLabel value="Yes" control={<Radio />} label="Yes" />
+                  <FormControlLabel value="No" control={<Radio />} label="No" />
+                </RadioGroup>
+              </FormControl>
+              {/* RADIO GROUP for Own Use */}
+              <FormControl fullWidth margin="normal">
+                <FormLabel>Own use?</FormLabel>
+                <RadioGroup
+                  row
+                  value={isOwnUse}
+                  onChange={e => setIsOwnUse(e.target.value)}
+                  name="ownUse"
+                >
+                  <FormControlLabel value="Yes" control={<Radio />} label="Yes" />
+                  <FormControlLabel value="No" control={<Radio />} label="No" />
+                </RadioGroup>
+              </FormControl>
               <Box
                 sx={{
                   display: "grid",
@@ -411,9 +430,7 @@ const NewRenergyForm = ({ allUsers }) => {
                   component="label"
                   variant="outlined"
                   startIcon={<MyLocationIcon />}
-                  sx={{
-                    my: 1,
-                  }}
+                  sx={{ my: 1 }}
                   size="small"
                   onClick={handleOpen}
                 >
@@ -481,7 +498,6 @@ const NewRenergyForm = ({ allUsers }) => {
                   ))}
                 </TextField> : ""
               }
-
             </Box>
             <BootstrapDialog
               onClose={handleClose}
@@ -523,11 +539,9 @@ const NewRenergyForm = ({ allUsers }) => {
                       />
                     </BaseLayer>
                   </LayersControl>
-
                   <Control position="topright">
                     <MarkLocation setPosition={setPosition} position={position} setLoading={setLoading} />
                   </Control>
-
                   {position == null ? null : <Marker draggable={true} eventHandlers={markerEventHandler} position={position}></Marker>}
                   <Control position="topright">
                     {loading == true ? <FadeLoader
@@ -550,15 +564,8 @@ const NewRenergyForm = ({ allUsers }) => {
                 </Button>
               </DialogActions>
             </BootstrapDialog>
-
             {retype === null ? null : retype == 'Solar Energy' ? <Solar setSolar={setSolar} /> : retype == 'Wind Energy' ? <Wind setWind={setWind} /> : retype == 'Biomass' ? <Biomass setBiomass={setBiomass} /> : ''}
-
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "row-reverse",
-              }}
-            >
+            <Box sx={{ display: "flex", flexDirection: "row-reverse" }}>
               <Button
                 variant="contained"
                 color="success"
@@ -568,7 +575,6 @@ const NewRenergyForm = ({ allUsers }) => {
               >
                 Save
               </Button>
-
               <Button
                 component="label"
                 variant="outlined"
@@ -588,7 +594,6 @@ const NewRenergyForm = ({ allUsers }) => {
               </Button>
             </Box>
           </Box>
-
           <input
             className={`form__input}`}
             id="coordinates"
