@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { selectAllInventories } from "../inventories/inventoriesApiSlice";
 import { selectAllUsers } from "../users/usersApiSlice";
 import {
   Box, Paper, Typography, FormControl, InputLabel, Select, MenuItem,
   Container, useTheme, Divider, Grid, Card, CardContent, Tooltip, Fade,
-  OutlinedInput, Checkbox, ListItemText, Alert,
+  OutlinedInput, Checkbox, ListItemText, Alert, CircularProgress
 } from "@mui/material";
 import EnergySavingsLeafIcon from '@mui/icons-material/EnergySavingsLeaf';
 import ScatterPlotIcon from '@mui/icons-material/ScatterPlot';

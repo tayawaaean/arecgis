@@ -6,24 +6,23 @@ import { DataGrid, GridToolbar } from '@mui/x-data-grid'
 import useAuth from "../../hooks/useAuth"
 import useTitle from '../../hooks/useTitle'
 import { boxmain, boxpaper } from '../../config/style'
-import { useGetInventoryListQuery } from './inventoryListApiSlice'
+import { useGetInventoriesQuery } from './inventoriesApiSlice'
 
 const InventoriesList = () => {
     useTitle('ArecGIS | RE List')
 
     const { username, isManager, isAdmin } = useAuth()
-    const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 100 })
+    const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 20 })
 
-    // Protected, paginated API call
-    const { data, isLoading, isError, error } = useGetInventoryListQuery({
+    // For MUI X v6+, query with paginationModel.page and pageSize
+    const { data, isLoading, isError, error } = useGetInventoriesQuery({
         page: paginationModel.page + 1,
         limit: paginationModel.pageSize,
     })
 
-    // Always provide id for DataGrid, use MongoDB _id
     const inventories = useMemo(() => {
-        if (!data?.data) return []
-        let all = data.data.map(row => ({ ...row, id: row._id }))
+        if (!data) return []
+        let all = Object.values(data.entities || {})
         if (isManager || isAdmin) {
             return all
         } else {
