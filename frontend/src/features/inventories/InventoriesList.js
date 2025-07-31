@@ -25,7 +25,6 @@ const InventoriesList = () => {
 
     if (isManager || isAdmin) {
         inventories = [...rawinventories]
-        
     } else {
         inventories = rawinventories.filter(user => user.username === username)
     }
@@ -53,7 +52,6 @@ const InventoriesList = () => {
                     size="small"
                     style={{ margin: 'auto' }}
                     onClick={() => { handleEdit(params) }}
-
                 >
                     Edit
                 </Button>
@@ -68,7 +66,6 @@ const InventoriesList = () => {
                 sortable: false,
                 renderCell: renderEditButton,
                 disableClickEventBubbling: true,
-
             },
             {
                 field: 'ownerName',
@@ -103,12 +100,31 @@ const InventoriesList = () => {
                 disableClickEventBubbling: true,
               },
               {
+                field: 'isNetMetered',
+                headerName: 'Net Metered',
+                width: 120,
+                filterable: true,
+                type: 'singleSelect',
+                valueOptions: ['Yes', 'No'],
+                valueGetter: (inventories) => inventories.row?.properties?.isNetMetered || '',
+                disableClickEventBubbling: true,
+              },
+              {
+                field: 'ownUse',
+                headerName: 'Own Use',
+                width: 120,
+                filterable: true,
+                type: 'singleSelect',
+                valueOptions: ['Yes', 'No'],
+                valueGetter: (inventories) => inventories.row?.properties?.ownUse || '',
+                disableClickEventBubbling: true,
+              },
+              {
                 field: 'capacity',
                 headerName: 'Capacity',
                 width: 100,
                 type: 'number',
                 valueGetter: (inventories) => {
-          
                   if (inventories.row.assessment.solarStreetLights) {
                     const rawSolarItems = inventories.row.assessment.solarStreetLights
                     const product = rawSolarItems.map((solar => solar.capacity * solar.pcs))
@@ -121,14 +137,30 @@ const InventoriesList = () => {
                   if (inventories.row.properties.reCat === 'Solar Energy') {
                     return `${inventories.row.assessment.capacity / 1000} kWp`
                   }
-          
                   if (inventories.row.properties.reCat === 'Biomass') {
                     return `${inventories.row.assessment.capacity} m³`
                   }
                   if (inventories.row.properties.reCat === 'Wind Energy') {
                     return `${inventories.row.assessment.capacity / 1000} kWp`
                   }
-          
+                },
+                disableClickEventBubbling: true,
+              },
+              {
+                field: 'annualEnergyProduction',
+                headerName: 'Annual Energy Prod.',
+                width: 160,
+                type: 'number',
+                valueGetter: (inventories) => {
+                  if (
+                    inventories.row.properties.reCat === 'Solar Energy' &&
+                    inventories.row.assessment.solarUsage === 'Power Generation'
+                  ) {
+                    return inventories.row.assessment.annualEnergyProduction
+                      ? `${inventories.row.assessment.annualEnergyProduction} kWh`
+                      : '';
+                  }
+                  return '';
                 },
                 disableClickEventBubbling: true,
               },
@@ -145,14 +177,12 @@ const InventoriesList = () => {
                 headerName: 'Total Gen. (if operational)',
                 width: 230,
                 valueGetter: (inventories) => {
-          
                   const noOfYear = parseInt(inventories.row.properties.yearEst)
                   let dateEst = new Date(`1/1/${noOfYear}`);
                   let dateCreated = new Date(inventories.row.createdAt)
                   const dateCreatedConv = dateCreated.toLocaleDateString()
                   const diffInTime = dateCreated.getTime() - dateEst.getTime();
                   const noOfDays = Math.round(diffInTime / oneDay);
-          
                   if (inventories.row.assessment.solarStreetLights) {
                     const rawSolarItems = inventories.row.assessment.solarStreetLights
                     const product = rawSolarItems.map((solar => solar.capacity * solar.pcs))
@@ -183,84 +213,73 @@ const InventoriesList = () => {
                 valueGetter: (inventories) => inventories.row.assessment.status,
                 disableClickEventBubbling: true,
               },
-            {
-                field: 'latitude',
+              {
+                field: 'lat',
                 headerName: 'Latitude',
                 width: 100,
-                valueGetter: (inventories) => inventories?.row?.coordinates[1],
+                valueGetter: (inventories) => inventories.row.coordinates[1],
                 disableClickEventBubbling: true,
-            },
-            {
-                field: 'longitude',
+              },
+              {
+                field: 'long',
                 headerName: 'Longitude',
                 width: 100,
-                valueGetter: (inventories) => inventories?.row?.coordinates[0],
+                valueGetter: (inventories) => inventories.row.coordinates[0],
                 disableClickEventBubbling: true,
-            }, 
-            // {
-            //     field: 'username',
-            //     headerName: 'Uploader',
-            //     width: 100,
-            //     disableClickEventBubbling: true,
-            // },
+              },
         ]
 
-            return (
-                <>
-                    <Container maxWidth="lg">
-                        <Box sx={boxmain}>
-                            <Box
-                                sx={boxpaper}
-                            >
-                                <Paper elevation={3}  >
-                                    <Grid container>
-                                        <Grid item xs>
-                                            <Typography component="h1" variant="h5">
-                                                RE list (uploads)
-                                            </Typography>
-                                        </Grid>
-                                        <Grid item>
-                                            <IconButton onClick={() => navigate(-1)}>
-                                                <ArrowBackIcon />
-                                            </IconButton>
-                                        </Grid>
+        return (
+            <>
+                <Container maxWidth="lg">
+                    <Box sx={boxmain}>
+                        <Box sx={boxpaper}>
+                            <Paper elevation={3}  >
+                                <Grid container>
+                                    <Grid item xs>
+                                        <Typography component="h1" variant="h5">
+                                            RE list (uploads)
+                                        </Typography>
                                     </Grid>
-                                    <Box sx={{ m: 1 }}>
-                                        <Box sx={{ height: '60vh', width: '100%' }}>
-                                            <DataGrid
-                                                rows={inventories}
-                                                columns={columns}
-                                                initialSnackBar={{
-                                                    pagination: {
-                                                        paginationModel: {
-                                                            pageSize: 10,
-                                                        },
+                                    <Grid item>
+                                        <IconButton onClick={() => navigate(-1)}>
+                                            <ArrowBackIcon />
+                                        </IconButton>
+                                    </Grid>
+                                </Grid>
+                                <Box sx={{ m: 1 }}>
+                                    <Box sx={{ height: '60vh', width: '100%' }}>
+                                        <DataGrid
+                                            rows={inventories}
+                                            columns={columns}
+                                            initialSnackBar={{
+                                                pagination: {
+                                                    paginationModel: {
+                                                        pageSize: 10,
                                                     },
-                                                }}
-                                                density="compact"
-                                                pageSizeOptions={[100]}
-                                                // disableColumnSelector
-                                                slots={{ toolbar: GridToolbar }}
-                                                slotProps={{
-                                                    toolbar: {
-                                                        // csvOptions: { disableToolbarButton: false },
-                                                        printOptions: { disableToolbarButton: true },
-                                                        showQuickFilter: true,
-                                                        quickFilterProps: { debounceMs: 500 },
-                                                    },
-                                                }}
-                                                disableRowSelectionOnClick
-                                            />
-                                        </Box>
+                                                },
+                                            }}
+                                            density="compact"
+                                            pageSizeOptions={[100]}
+                                            slots={{ toolbar: GridToolbar }}
+                                            slotProps={{
+                                                toolbar: {
+                                                    printOptions: { disableToolbarButton: true },
+                                                    showQuickFilter: true,
+                                                    quickFilterProps: { debounceMs: 500 },
+                                                },
+                                            }}
+                                            disableRowSelectionOnClick
+                                        />
                                     </Box>
-                                </Paper>
-                            </Box>
+                                </Box>
+                            </Paper>
                         </Box>
-                    </Container>
-                </>
-            )
+                    </Box>
+                </Container>
+            </>
+        )
+    } else return null
+}
 
-        } else return null
-
-    }
-    export default InventoriesList
+export default InventoriesList

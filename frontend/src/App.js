@@ -27,6 +27,8 @@ import InventoriesList from './features/inventories/InventoriesList'
 import EditInventory from './features/inventories/EditInventory'
 import NewInventory from './features/inventories/NewInventory'
 
+import Charts from './features/charts/Chart';
+
 import BlogMap from './features/blogs/BlogMap'
 import BlogsList from './features/blogs/BlogsList'
 import EditBlog from './features/blogs/EditBlog'
@@ -139,6 +141,8 @@ function App() {
                     <Route path=':id' element={<EditRenergy />} />
                     <Route path='new' element={<NewRenergy />} />
                   </Route>
+
+                  <Route path='charts' element={<Charts />} />
 
                   <Route path='blogs'>
                     <Route index element={<BlogMap />} />

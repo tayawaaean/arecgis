@@ -240,6 +240,25 @@ const RElist = (props) => {
       disableClickEventBubbling: true,
     },
     {
+  field: 'annualEnergyProduction',
+  headerName: 'Annual Energy Prod.',
+  width: 160,
+  type: 'number',
+  valueGetter: (inventories) => {
+    // Only show for Solar Energy and if Power Generation is selected
+    if (
+      inventories.row.properties.reCat === 'Solar Energy' &&
+      inventories.row.assessment.solarUsage === 'Power Generation'
+    ) {
+      return inventories.row.assessment.annualEnergyProduction
+        ? `${inventories.row.assessment.annualEnergyProduction} kWh`
+        : '';
+    }
+    return '';
+  },
+  disableClickEventBubbling: true,
+},
+    {
       field: 'yearEst',
       headerName: 'Year est.',
       width: 80,
@@ -322,7 +341,7 @@ const RElist = (props) => {
     map.flyTo([...locate].reverse(), 14, { duration: 3 })
   }
 
-  
+  const [totalAnnualEnergyProduction, setTotalAnnualEnergyProduction] = useState(0);
   return (
     <>
       <Modal
@@ -392,24 +411,30 @@ const RElist = (props) => {
                   const noOfDays = Math.round(diffInTime / oneDay);
 
                   if (inventory.assessment.solarStreetLights) {
-                    const rawSolarItems = inventory.assessment.solarStreetLights
-                    const product = rawSolarItems.map((solar => solar.capacity * solar.pcs))
-                    const units = rawSolarItems.map((solar => parseInt(solar.pcs)))
-                    const initialValue = 0;
-                    const initialUnitValue = 0;
-                    const rawSolarStreet = product.reduce((accumulator, currentValue) =>
-                      accumulator + currentValue, initialValue
-                    )
-
-
-                    const rawSolarStUnt = units.reduce((accumulator, currentValue) =>
-                      accumulator + currentValue, initialUnitValue
-                    )
-                    const rawGen = Math.round((rawSolarStreet / 1000) * sunHour * noOfDays)
-                    rawSolarValue = [...rawSolarValue, rawGen]
-                    rawSolarValueCap = [...rawSolarValueCap, rawSolarStreet]
-                    rawSolarStUnits = [...rawSolarStUnits, rawSolarStUnt]
-                  }
+                  const rawSolarItems = inventory.assessment.solarStreetLights;
+                  // Safe conversion for capacity and pcs
+                  const product = rawSolarItems.map(solar => {
+                    const cap = parseFloat(solar.capacity);
+                    const pcs = parseInt(solar.pcs, 10);
+                    return (isNaN(cap) ? 0 : cap) * (isNaN(pcs) ? 0 : pcs);
+                  });
+                  const units = rawSolarItems.map(solar => {
+                    const pcs = parseInt(solar.pcs, 10);
+                    return isNaN(pcs) ? 0 : pcs;
+                  });
+                  const initialValue = 0;
+                  const initialUnitValue = 0;
+                  const rawSolarStreet = product.reduce((accumulator, currentValue) =>
+                    accumulator + currentValue, initialValue
+                  );
+                  const rawSolarStUnt = units.reduce((accumulator, currentValue) =>
+                    accumulator + currentValue, initialUnitValue
+                  );
+                  const rawGen = Math.round((rawSolarStreet / 1000) * sunHour * noOfDays);
+                  rawSolarValue = [...rawSolarValue, rawGen];
+                  rawSolarValueCap = [...rawSolarValueCap, rawSolarStreet];
+                  rawSolarStUnits = [...rawSolarStUnits, rawSolarStUnt];
+                }
 
                   if (inventory.assessment.solarUsage === 'Power Generation' && inventory.properties.reClass === 'Non-Commercial') {
                     const rawGen = Math.round((inventory.assessment.capacity / 1000) * sunHour * noOfDays)
@@ -426,6 +451,18 @@ const RElist = (props) => {
 
                 }))
                 // setTotal(solarStVal);
+                const totalAnnualEnergyProduction = result.reduce((sum, inventory) => {
+    if (
+      inventory.assessment.solarUsage === "Power Generation" &&
+      inventory.assessment.annualEnergyProduction &&
+      !isNaN(Number(inventory.assessment.annualEnergyProduction))
+    ) {
+      return sum + Number(inventory.assessment.annualEnergyProduction);
+    }
+    return sum;
+  }, 0);
+
+  setTotalAnnualEnergyProduction(totalAnnualEnergyProduction);
 
                 const solarStCaptotal = rawSolarValueCap.reduce((a, b) => a + b, 0)
                 const powerGenCapTotal = rawSolarPowerGenCap.reduce((a, b) => a + b, 0)
@@ -512,24 +549,30 @@ const RElist = (props) => {
                   const diffInTime = dateCreated.getTime() - dateEst.getTime();
                   const noOfDays = Math.round(diffInTime / oneDay);
 
-                  if (inventory.assessment.solarStreetLights) {
-                    const rawSolarItems = inventory.assessment.solarStreetLights
-                    const product = rawSolarItems.map((solar => solar.capacity * solar.pcs))
-                    const units = rawSolarItems.map((solar => parseInt(solar.pcs)))
+                 if (inventory.assessment.solarStreetLights) {
+                    const rawSolarItems = inventory.assessment.solarStreetLights;
+                    // Safe conversion for capacity and pcs
+                    const product = rawSolarItems.map(solar => {
+                      const cap = parseFloat(solar.capacity);
+                      const pcs = parseInt(solar.pcs, 10);
+                      return (isNaN(cap) ? 0 : cap) * (isNaN(pcs) ? 0 : pcs);
+                    });
+                    const units = rawSolarItems.map(solar => {
+                      const pcs = parseInt(solar.pcs, 10);
+                      return isNaN(pcs) ? 0 : pcs;
+                    });
                     const initialValue = 0;
                     const initialUnitValue = 0;
                     const rawSolarStreet = product.reduce((accumulator, currentValue) =>
                       accumulator + currentValue, initialValue
-                    )
-
-
+                    );
                     const rawSolarStUnt = units.reduce((accumulator, currentValue) =>
                       accumulator + currentValue, initialUnitValue
-                    )
-                    const rawGen = Math.round((rawSolarStreet / 1000) * sunHour * noOfDays)
-                    rawSolarValue = [...rawSolarValue, rawGen]
-                    rawSolarValueCap = [...rawSolarValueCap, rawSolarStreet]
-                    rawSolarStUnits = [...rawSolarStUnits, rawSolarStUnt]
+                    );
+                    const rawGen = Math.round((rawSolarStreet / 1000) * sunHour * noOfDays);
+                    rawSolarValue = [...rawSolarValue, rawGen];
+                    rawSolarValueCap = [...rawSolarValueCap, rawSolarStreet];
+                    rawSolarStUnits = [...rawSolarStUnits, rawSolarStUnt];
                   }
 
                   if (inventory.assessment.solarUsage === 'Power Generation') {
@@ -602,74 +645,207 @@ const RElist = (props) => {
           </Stack> */}
 {REClass === "Commercial" || REClass === "Non-Commercial" ?
           <TableContainer component={Paper}>
-            <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
-              <TableHead>
-                <TableRow>
-                  <TableCell>
-                    <FormControl variant="standard" sx={{ minWidth: 120 }} size="small">
-                      <InputLabel id="demo-select-small-label">Summary<small>(by usage)</small></InputLabel>
-                      <Select
-                        labelId="demo-select-small-label"
-                        id="demo-select-small"
-                        value={"solar"}
-                        label="types"
-                      // onChange={handleChange}
-                      >
-                        <MenuItem value={"solar"}>Solar Energy</MenuItem>
-                        <MenuItem value={"wind"} disabled>Wind Energy</MenuItem>
-                        <MenuItem value={"biomass"} disabled>Biomass</MenuItem>
-                        <MenuItem value={"hydropower"} disabled>Hydropower</MenuItem>
-                      </Select>
-                    </FormControl></TableCell>
-                  <TableCell align="right">No. of units</TableCell>
-                  <TableCell align="right">est. Generation<small>(from year installed)</small></TableCell>
-                  <TableCell align="right">tot. Capacity</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                <TableRow
-                  sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                >
-                  <TableCell component="th" scope="row">
-                    Solar streetlights/lights
-                  </TableCell>
-                  <TableCell align="right">{solarStTotalUnit}</TableCell>
-                  <TableCell align="right">{Math.ceil(Math.log10(solarStTotal + 1)) >= 4 ? <><b>{(solarStTotal / 1000).toFixed(2)}</b> MWh</> : <><b>{(solarStTotal).toFixed(2)}</b> kWh</>}</TableCell>
-                  <TableCell align="right">{Math.ceil(Math.log10(solarStTotalCap + 1)) >= 4 ? <><b>{(solarStTotalCap / 1000).toFixed(2)}</b> MW</> : <><b>{(solarStTotalCap).toFixed(2)}</b> kW</>}</TableCell>
-                </TableRow>
-                <TableRow
-                  sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                >
-                  <TableCell component="th" scope="row">
-                    For power generation
-                  </TableCell>
-                  <TableCell align="right">{solarPowerGenTotalUnit}</TableCell>
-                  <TableCell align="right">{Math.ceil(Math.log10(solarPowerGenTotal + 1)) >= 4 ? <><b>{(solarPowerGenTotal / 1000).toFixed(2)}</b> MWh</> : <><b>{(solarPowerGenTotal).toFixed(2)}</b> kWh</>}</TableCell>
-                  <TableCell align="right">{Math.ceil(Math.log10(solarPowerGenTotalCap + 1)) >= 4 ? <><b>{(solarPowerGenTotalCap / 1000).toFixed(2)}</b> MW</> : <><b>{(solarPowerGenTotalCap).toFixed(2)}</b> kW</>}</TableCell>
-                </TableRow>
-                <TableRow
-                  sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                >
-                  <TableCell component="th" scope="row">
-                    Solar Pumps
-                  </TableCell>
-                  <TableCell align="right">{solarPumpTotalUnit}</TableCell>
-                  <TableCell align="right">{Math.ceil(Math.log10(solarPumpTotal + 1)) >= 4 ? <><b>{(solarPumpTotal / 1000).toFixed(2)}</b> MWh</> : <><b>{solarPumpTotal.toFixed(2)}</b> kWh</>} </TableCell>
-                  <TableCell align="right">{Math.ceil(Math.log10(solarPumpTotalCap + 1)) >= 4 ? <><b>{(solarPumpTotalCap / 1000).toFixed(2)}</b> MW</> : <><b>{solarPumpTotalCap.toFixed(2)}</b> kW</>}</TableCell>
-                </TableRow>
-                <TableRow
-                  sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                >
-                  <TableCell component="th" scope="row">
-                  <b>TOTAL</b>
-                  </TableCell>
-                  <TableCell align="right"></TableCell>
-                  <TableCell align="right">{Math.ceil(Math.log10((solarStTotal+solarPowerGenTotal+solarPumpTotal)+ 1)) >= 4 ? <><b>{Math.round((solarStTotal+solarPowerGenTotal+solarPumpTotal) / 1000)}</b> MWh</> : <><b>{solarStTotal+solarPowerGenTotal+solarPumpTotal}</b> kWh</>} </TableCell>
-                  <TableCell align="right">{Math.ceil(Math.log10((solarStTotalCap+solarPowerGenTotalCap+solarPumpTotalCap) + 1)) >= 4 ? <><b>{((solarStTotalCap+solarPowerGenTotalCap+solarPumpTotalCap) / 1000).toFixed(2)}</b> MW</> : <><b>{solarStTotalCap+solarPowerGenTotalCap+solarPumpTotalCap}</b> kW</>}</TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </TableContainer>
+  <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
+    <TableHead>
+      <TableRow>
+        <TableCell>
+          <FormControl variant="standard" sx={{ minWidth: 120 }} size="small">
+            <InputLabel id="demo-select-small-label">
+              Summary<small>(by usage)</small>
+            </InputLabel>
+            <Select
+              labelId="demo-select-small-label"
+              id="demo-select-small"
+              value={"solar"}
+              label="types"
+            >
+              <MenuItem value={"solar"}>Solar Energy</MenuItem>
+              <MenuItem value={"wind"} disabled>
+                Wind Energy
+              </MenuItem>
+              <MenuItem value={"biomass"} disabled>
+                Biomass
+              </MenuItem>
+              <MenuItem value={"hydropower"} disabled>
+                Hydropower
+              </MenuItem>
+            </Select>
+          </FormControl>
+        </TableCell>
+        <TableCell align="right">No. of units</TableCell>
+        <TableCell align="right">
+          est. Generation
+          <small>(from year installed)</small>
+        </TableCell>
+        <TableCell align="right">tot. Capacity</TableCell>
+        <TableCell align="right">
+          <b>
+            Annual Energy Prod.
+            <br />
+            (declared)
+          </b>
+        </TableCell>
+      </TableRow>
+    </TableHead>
+    <TableBody>
+      <TableRow>
+        <TableCell component="th" scope="row">
+          Solar streetlights/lights
+        </TableCell>
+        <TableCell align="right">{solarStTotalUnit}</TableCell>
+        <TableCell align="right">
+          {Math.ceil(Math.log10(solarStTotal + 1)) >= 4 ? (
+            <>
+              <b>{(solarStTotal / 1000).toFixed(2)}</b> MWh
+            </>
+          ) : (
+            <>
+              <b>{solarStTotal.toFixed(2)}</b> kWh
+            </>
+          )}
+        </TableCell>
+        <TableCell align="right">
+          {Math.ceil(Math.log10(solarStTotalCap + 1)) >= 4 ? (
+            <>
+              <b>{(solarStTotalCap / 1000).toFixed(2)}</b> MW
+            </>
+          ) : (
+            <>
+              <b>{solarStTotalCap.toFixed(2)}</b> kW
+            </>
+          )}
+        </TableCell>
+        <TableCell align="right"></TableCell>
+      </TableRow>
+      <TableRow>
+        <TableCell component="th" scope="row">
+          For power generation
+        </TableCell>
+        <TableCell align="right">{solarPowerGenTotalUnit}</TableCell>
+        <TableCell align="right">
+          {Math.ceil(Math.log10(solarPowerGenTotal + 1)) >= 4 ? (
+            <>
+              <b>{(solarPowerGenTotal / 1000).toFixed(2)}</b> MWh
+            </>
+          ) : (
+            <>
+              <b>{solarPowerGenTotal.toFixed(2)}</b> kWh
+            </>
+          )}
+        </TableCell>
+        <TableCell align="right">
+          {Math.ceil(Math.log10(solarPowerGenTotalCap + 1)) >= 4 ? (
+            <>
+              <b>{(solarPowerGenTotalCap / 1000).toFixed(2)}</b> MW
+            </>
+          ) : (
+            <>
+              <b>{solarPowerGenTotalCap.toFixed(2)}</b> kW
+            </>
+          )}
+        </TableCell>
+        <TableCell align="right">
+          {totalAnnualEnergyProduction > 10000 ? (
+            <b>{(totalAnnualEnergyProduction / 1000).toFixed(2)} MWh</b>
+          ) : (
+            <b>{totalAnnualEnergyProduction} kWh</b>
+          )}
+        </TableCell>
+      </TableRow>
+      <TableRow>
+        <TableCell component="th" scope="row">
+          Solar Pumps
+        </TableCell>
+        <TableCell align="right">{solarPumpTotalUnit}</TableCell>
+        <TableCell align="right">
+          {Math.ceil(Math.log10(solarPumpTotal + 1)) >= 4 ? (
+            <>
+              <b>{(solarPumpTotal / 1000).toFixed(2)}</b> MWh
+            </>
+          ) : (
+            <>
+              <b>{solarPumpTotal.toFixed(2)}</b> kWh
+            </>
+          )}
+        </TableCell>
+        <TableCell align="right">
+          {Math.ceil(Math.log10(solarPumpTotalCap + 1)) >= 4 ? (
+            <>
+              <b>{(solarPumpTotalCap / 1000).toFixed(2)}</b> MW
+            </>
+          ) : (
+            <>
+              <b>{solarPumpTotalCap.toFixed(2)}</b> kW
+            </>
+          )}
+        </TableCell>
+        <TableCell align="right"></TableCell>
+      </TableRow>
+      <TableRow>
+        <TableCell component="th" scope="row">
+          <b>TOTAL</b>
+        </TableCell>
+        <TableCell align="right"></TableCell>
+        <TableCell align="right">
+          {Math.ceil(
+            Math.log10(solarStTotal + solarPowerGenTotal + solarPumpTotal + 1)
+          ) >= 4 ? (
+            <>
+              <b>
+                {Math.round(
+                  (solarStTotal + solarPowerGenTotal + solarPumpTotal) / 1000
+                )}
+              </b>{" "}
+              MWh
+            </>
+          ) : (
+            <>
+              <b>
+                {solarStTotal + solarPowerGenTotal + solarPumpTotal}
+              </b>{" "}
+              kWh
+            </>
+          )}
+        </TableCell>
+        <TableCell align="right">
+          {Math.ceil(
+            Math.log10(
+              solarStTotalCap + solarPowerGenTotalCap + solarPumpTotalCap + 1
+            )
+          ) >= 4 ? (
+            <>
+              <b>
+                {(
+                  (solarStTotalCap +
+                    solarPowerGenTotalCap +
+                    solarPumpTotalCap) /
+                  1000
+                ).toFixed(2)}
+              </b>{" "}
+              MW
+            </>
+          ) : (
+            <>
+              <b>
+                {solarStTotalCap +
+                  solarPowerGenTotalCap +
+                  solarPumpTotalCap}
+              </b>{" "}
+              kW
+            </>
+          )}
+        </TableCell>
+        <TableCell align="right">
+          {totalAnnualEnergyProduction > 10000 ? (
+            <b>{(totalAnnualEnergyProduction / 1000).toFixed(2)} MWh</b>
+          ) : (
+            <b>{totalAnnualEnergyProduction} kWh</b>
+          )}
+        </TableCell>
+      </TableRow>
+    </TableBody>
+  </Table>
+</TableContainer>
  : null}
 
         </Box>
@@ -705,6 +881,10 @@ const Inventory = () => {
   const [query, setQuery] = useState("")
   const [searchParam] = useState(["city", "province"])
   const data = Object.values(inventories)
+  // Uploader filter state
+  const uploaderOptions = [...new Set(inventories.map(inv => inv.username).filter(Boolean))];
+  const [uploaderFilter, setUploaderFilter] = useState([]);
+
   const search = (inventories) => {
     return inventories.filter((item) => {
       return searchParam.some((newItem) => {
@@ -802,6 +982,7 @@ const Inventory = () => {
     setCategory([...reCats])
     setPosition(null)
     setQuery("")
+    setUploaderFilter([]) // <--- CLEAR uploader filter too!
     setSolarUsageFilter(rawSolarUsage.map(item => item.name))
     setStatusFilter(Status.map(item => item.name))
     setBiomassUsageFilter(rawBiomassPriUsage.map(item => item.name))
@@ -900,7 +1081,11 @@ const Inventory = () => {
     return null
   }
 
+  // --- FILTER LOGIC UPDATE: now includes uploader filter ---
   const filteredInventories = search(data).filter((inventory) => {
+    // Uploader filter
+    if (uploaderFilter.length > 0 && !uploaderFilter.includes(inventory.username)) return false;
+
     if (filters.contNames.includes(inventory.properties.reCat)) return false
 
     if (inventory.properties.reCat === 'Solar Energy') {
@@ -1043,6 +1228,30 @@ const Inventory = () => {
                       value={query}
                       onChange={(e) => setQuery(e.target.value)}
                     />
+                    {/* --- Uploader filter UI --- */}
+                    <FormControl fullWidth size="small" sx={{ mt: 2 }}>
+                      <InputLabel id="uploader-filter-label">Filter by Uploader</InputLabel>
+                      <Select
+                        labelId="uploader-filter-label"
+                        id="uploader-filter"
+                        multiple
+                        value={uploaderFilter}
+                        onChange={e =>
+                          setUploaderFilter(typeof e.target.value === 'string' ? e.target.value.split(',') : e.target.value)
+                        }
+                        input={<OutlinedInput label="Filter by Uploader" />}
+                        renderValue={selected => selected.join(', ')}
+                        MenuProps={MenuProps}
+                      >
+                        {uploaderOptions.map((name, idx) => (
+                          <MenuItem key={idx} value={name}>
+                            <Checkbox checked={uploaderFilter.indexOf(name) > -1} />
+                            <ListItemText primary={name} />
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                    {/* --- End uploader filter UI --- */}
                     <Typography variant="h6" gutterBottom>
                       RE categories
                     </Typography>

@@ -206,6 +206,16 @@ const NewInventoryForm = ({ allUsers }) => {
       if (solar?.solarUsage === "Power Generation") {
         data.append("assessment[solarSystemTypes]", solar.solarSystemTypes);
         data.append("assessment[capacity]", solar.capacity);
+        // ---- Add annualEnergyProduction if provided ----
+        if (
+          solar.annualEnergyProduction !== undefined &&
+          solar.annualEnergyProduction !== ""
+        ) {
+          data.append(
+            "assessment[annualEnergyProduction]",
+            solar.annualEnergyProduction
+          );
+        }
       }
       data.append("assessment[remarks]", solar.remarks);
       data.append("assessment[status]", solar.status);

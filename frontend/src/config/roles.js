@@ -1,5 +1,6 @@
 export const ROLES = {
     Employee: 'Employee',
     Manager: 'Manager',
-    Admin: 'Admin'
+    Admin: 'Admin',
+    Installer: 'Installer',  // <-- add this line
 }

@@ -281,82 +281,106 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
   // })
 
   // -- EDIT INVENTORY SUBMIT HANDLER --
-  const onSaveInventoryClicked = async (e, isForce = false) => {
-    e.preventDefault();
+const onSaveInventoryClicked = async (e, isForce = false) => {
+  e.preventDefault();
 
-    // Build properties object for correct backend parsing!
-    const propertiesObj = {
-      ownerName,
-      reCat,
-      reClass,
-      yearEst,
-      acquisition,
-      isNetMetered,
-      ownUse: isOwnUse,
-      address: {
-        country,
-        region,
-        province,
-        city,
-        brgy,
-      }
-    };
-
-    // Build assessment object (customize per your logic)
-    const assessmentObj = {};
-    if (reCat === "Solar Energy" && solar) {
-      Object.assign(assessmentObj, solar);
+  // Build properties object for correct backend parsing!
+  const propertiesObj = {
+    ownerName,
+    reCat,
+    reClass,
+    yearEst,
+    acquisition,
+    isNetMetered,
+    ownUse: isOwnUse,
+    address: {
+      country,
+      region,
+      province,
+      city,
+      brgy,
     }
-    if (reCat === "Wind Energy" && wind) {
-      Object.assign(assessmentObj, wind);
+  };
+
+  // Build assessment object (customize per your logic)
+  let assessmentObj = {};
+  if (reCat === "Solar Energy" && solar) {
+    Object.assign(assessmentObj, solar);
+  }
+  if (reCat === "Wind Energy" && wind) {
+    Object.assign(assessmentObj, wind);
+  }
+  if (reCat === "Biomass" && biomass) {
+    Object.assign(assessmentObj, biomass);
+  }
+  if (reCat === "Hydropower" && hydropower) {
+    Object.assign(assessmentObj, hydropower);
+  }
+
+  // ---- CLEANUP: Remove empty or invalid solarStreetLights ----
+  if (assessmentObj.solarStreetLights && Array.isArray(assessmentObj.solarStreetLights)) {
+    assessmentObj.solarStreetLights = assessmentObj.solarStreetLights.filter(
+      s =>
+        (s.capacity !== "" && !isNaN(Number(s.capacity))) ||
+        (s.pcs !== "" && !isNaN(Number(s.pcs)))
+    );
+    // If after filtering, array is empty, remove the key entirely
+    if (assessmentObj.solarStreetLights.length === 0) {
+      delete assessmentObj.solarStreetLights;
     }
-    if (reCat === "Biomass" && biomass) {
-      Object.assign(assessmentObj, biomass);
+  }
+
+  // ---- CLEANUP: Convert capacity and annualEnergyProduction to numbers if possible ----
+  if (assessmentObj.capacity !== undefined && assessmentObj.capacity !== '') {
+    assessmentObj.capacity = Number(assessmentObj.capacity);
+  }
+  if (
+    assessmentObj.annualEnergyProduction !== undefined &&
+    assessmentObj.annualEnergyProduction !== ''
+  ) {
+    assessmentObj.annualEnergyProduction = Number(assessmentObj.annualEnergyProduction);
+  }
+
+  // Build coordinates object in GeoJSON format
+  const coordinatesObj = {
+    type: "Point",
+    coordinates: [parseFloat(lng), parseFloat(lat)]
+  };
+
+  const data = new FormData();
+  data.append('id', reItems.id)
+  data.append('user', userId)
+  data.append('type', 'Point');
+  // Send coordinates as GeoJSON object
+  data.append('coordinates', JSON.stringify(coordinatesObj));
+  data.append('properties', JSON.stringify(propertiesObj));
+  data.append('assessment', JSON.stringify(assessmentObj));
+
+  // Add images if any
+  if (myUploads && myUploads.length > 0) {
+    for (const file of myUploads) {
+      data.append('myUploads', file)
     }
-    if (reCat === "Hydropower" && hydropower) {
-      Object.assign(assessmentObj, hydropower);
-    }
+  }
+  if (isForce) data.append('forceUpdate', true)
 
-    // Build coordinates object in GeoJSON format
-    const coordinatesObj = {
-      type: "Point",
-      coordinates: [parseFloat(lng), parseFloat(lat)]
-    };
+  setLastFormData(data) // Save for retry
 
-    const data = new FormData();
-    data.append('id', reItems.id)
-    data.append('user', userId)
-    data.append('type', 'Point');
-    // Send coordinates as GeoJSON object
-    data.append('coordinates', JSON.stringify(coordinatesObj));
-    data.append('properties', JSON.stringify(propertiesObj));
-    data.append('assessment', JSON.stringify(assessmentObj));
-
-    // Add images if any
-    if (myUploads && myUploads.length > 0) {
-      for (const file of myUploads) {
-        data.append('myUploads', file)
-      }
-    }
-    if (isForce) data.append('forceUpdate', true)
-
-    setLastFormData(data) // Save for retry
-
-    if (canSave) {
-      try {
-        await updateInventory(data).unwrap();
-        setForceUpdate(false)
-        setShowDuplicateModal(false)
-      } catch (err) {
-        if (err?.status === 409 && err?.data?.duplicates) {
-          setPotentialDuplicates(err.data.duplicates)
-          setShowDuplicateModal(true)
-        } else {
-          setErrContent(err?.data?.message || "Unknown error");
-        }
+  if (canSave) {
+    try {
+      await updateInventory(data).unwrap();
+      setForceUpdate(false)
+      setShowDuplicateModal(false)
+    } catch (err) {
+      if (err?.status === 409 && err?.data?.duplicates) {
+        setPotentialDuplicates(err.data.duplicates)
+        setShowDuplicateModal(true)
+      } else {
+        setErrContent(err?.data?.message || "Unknown error");
       }
     }
   }
+}
 
   // When user chooses to "Proceed Anyway"
   const handleProceedAnyway = async () => {

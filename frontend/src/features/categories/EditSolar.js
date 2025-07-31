@@ -1,32 +1,45 @@
 import React, { useState, useEffect } from 'react'
 import { FormLabel, TextField, Input, InputAdornment, Box, Checkbox, FormControlLabel, FormGroup, Typography, Grid, Button } from '@mui/material'
-import { rawSolarUsage, rawSolarSysTypes, rawModuleTypes, rawBatteryTypes, rawMountingLoc, rawSolarPanelStatus, rawChargeControllerStatus, rawWiringsStatus, rawBatteryStatus, Status } from "../../config/techAssesment"
+import { rawSolarUsage, rawSolarSysTypes, Status } from "../../config/techAssesment"
 import { boxstyle } from '../../config/style'
 import HighlightOffSharpIcon from '@mui/icons-material/HighlightOffSharp'
 
 export const EditSolar = (props) => {
-  
-  const [formValues, setFormValues] = useState(props.reItems.assessment.solarUsage === 'Solar Street Lights' ? JSON.parse(JSON.stringify(props.reItems.assessment.solarStreetLights)) : [{ capacity: "", pcs: "" }])
-  // const [formValues, setFormValues] = useState()
+  const [formValues, setFormValues] = useState(
+    props.reItems.assessment.solarUsage === 'Solar Street Lights'
+      ? JSON.parse(JSON.stringify(props.reItems.assessment.solarStreetLights))
+      : [{ capacity: "", pcs: "" }]
+  )
   const [data, setData] = useState([])
 
   let solarUse = props?.reItems?.assessment?.solarUsage
-
   let found = rawSolarUsage.findIndex(item => item.name === solarUse)
-  
+
   const [capacity, setCapacity] = useState(props?.reItems?.assessment?.capacity || '')
+  const [annualEnergyProduction, setAnnualEnergyProduction] = useState(
+    props?.reItems?.assessment?.annualEnergyProduction || ''
+  )
 
-  const [solarUsage, setSolarUsage] = useState(found === -1 ? { index: '', value: 'Other', otherVal: solarUse || '' } : { index: '', value: solarUse || '', otherVal: '' })
-
-  const [solarSystemTypes, setSolarSysTypes] = useState({ index: '', value: props?.reItems?.assessment?.solarSystemTypes || '', otherVal: '' })
-
-  const [status, setStatus] = useState({ index: '', value: props?.reItems?.assessment?.status || '', otherVal: '' })
+  const [solarUsage, setSolarUsage] = useState(
+    found === -1
+      ? { index: '', value: 'Other', otherVal: solarUse || '' }
+      : { index: '', value: solarUse || '', otherVal: '' }
+  )
+  const [solarSystemTypes, setSolarSysTypes] = useState({
+    index: '',
+    value: props?.reItems?.assessment?.solarSystemTypes || '',
+    otherVal: ''
+  })
+  const [status, setStatus] = useState({
+    index: '',
+    value: props?.reItems?.assessment?.status || '',
+    otherVal: ''
+  })
 
   const [remarks, setRemarks] = useState(props?.reItems?.assessment?.remarks || '')
-
   const [flowRate, setFlowRate] = useState(props?.reItems?.assessment?.flowRate || '')
-
   const [serviceArea, setServiceArea] = useState(props?.reItems?.assessment?.serviceArea || '')
+
   useEffect(() => {
     setData({
       ...data,
@@ -38,8 +51,9 @@ export const EditSolar = (props) => {
       solarUsage: solarUsage?.otherVal === '' ? solarUsage?.value : solarUsage?.otherVal,
       status: status?.value,
       remarks: remarks,
+      annualEnergyProduction: solarUsage?.value === "Power Generation" ? annualEnergyProduction : undefined,
     })
-
+    // eslint-disable-next-line
   }, [
     capacity,
     formValues,
@@ -48,10 +62,13 @@ export const EditSolar = (props) => {
     serviceArea,
     solarSystemTypes,
     status,
-    remarks])
+    remarks,
+    annualEnergyProduction
+  ])
 
   useEffect(() => {
     props.setEditSolar(data)
+    // eslint-disable-next-line
   }, [data])
 
   const handleChange = (index) => (e) => {
@@ -80,11 +97,10 @@ export const EditSolar = (props) => {
     else {
       setSolarUsage({ index: index, value: rawSolarUsage[index].name, otherVal: '' })
     }
+    if (rawSolarUsage[index].name !== "Power Generation") setAnnualEnergyProduction('');
   }
 
-
   const valuesOfSolarSystem = (index) => (e) => {
-
     if (rawSolarSysTypes[index].name === 'Other' && e.target.value !== 'on' && e.target.value !== '') {
       setSolarSysTypes({ index: index, value: '', otherVal: e.target.value })
     }
@@ -94,9 +110,7 @@ export const EditSolar = (props) => {
     else {
       setSolarSysTypes({ index: index, value: rawSolarSysTypes[index].name, otherVal: '' })
     }
-
   }
-
 
   const statusValueofSolarEnergySystem = (index) => (e) => {
     if (Status[index].name === 'Other' && e.target.value !== 'on' && e.target.value !== '') {
@@ -112,9 +126,7 @@ export const EditSolar = (props) => {
 
   return (
     <>
-      <Box
-        sx={boxstyle}
-      >
+      <Box sx={boxstyle}>
         <Typography sx={{ fontStyle: 'italic' }} component="h1" variant="subtitle2">
           Primary use of Solar Energy System
         </Typography>
@@ -139,9 +151,7 @@ export const EditSolar = (props) => {
         ))}
       </Box>
 
-      <Box
-        sx={boxstyle}
-      >
+      <Box sx={boxstyle}>
         <Box sx={{ display: solarUsage?.value === "Solar Street Lights" ? 'block' : 'none' }}>
           <Typography sx={{ fontStyle: 'italic' }} component="h1" variant="subtitle2">
             For Solar Street Lights (leave blank if not applicable)
@@ -255,11 +265,27 @@ export const EditSolar = (props) => {
             size="small"
             id="capacity"
             name="capacity"
-            type="text"
+            type="number"
             value={capacity}
             onChange={(e) => setCapacity(e.target.value)}
             InputProps={{
               endAdornment: <InputAdornment position="end"><var>Wp</var></InputAdornment>,
+            }}
+          />
+          {/* Annual Energy Production input, only for Power Generation */}
+          <Typography sx={{ fontStyle: 'italic' }} component="h1" variant="subtitle2">
+            Annual Energy Production:
+          </Typography>
+          <TextField
+            fullWidth
+            size="small"
+            id="annualEnergyProduction"
+            name="annualEnergyProduction"
+            type="number"
+            value={annualEnergyProduction}
+            onChange={(e) => setAnnualEnergyProduction(e.target.value)}
+            InputProps={{
+              endAdornment: <InputAdornment position="end">kWh</InputAdornment>,
             }}
           />
           <Typography sx={{ fontStyle: 'italic' }} component="h1" variant="subtitle2">
@@ -292,7 +318,7 @@ export const EditSolar = (props) => {
             size="small"
             id="capacity"
             name="capacity"
-            type="text"
+            type="number"
             value={capacity}
             onChange={(e) => setCapacity(e.target.value)}
             InputProps={{

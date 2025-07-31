@@ -3,6 +3,7 @@ import { styled, alpha } from "@mui/material/styles"
 import { useNavigate, useLocation } from "react-router-dom"
 import useAuth from "../hooks/useAuth"
 import { useSendLogoutMutation } from '../features/auth/authApiSlice'
+import BarChartIcon from '@mui/icons-material/BarChart';
 import {
   AppBar,
   Box,
@@ -308,6 +309,10 @@ const DashHeader = () => {
     navigate('/dashboard/inventories/list')
     setOpen(false)
   }
+    const GoToPublicCharts = () => {
+    navigate('/dashboard/charts');
+    setOpen(false);
+  };
   //end inventories
   //renergies
   const GoToRenergies = () => {
@@ -345,120 +350,113 @@ const DashHeader = () => {
   const content = (
     <>
       <p className={errClass}>{error?.data?.message}</p>
-
-        <AppBar position="sticky">
-          <Toolbar>
-            <IconButton
-              size="large"
-              edge="start"
-              color="inherit"
-              aria-label="open drawer"
-              sx={{ mr: 1 }}
-              onClick={handleDrawerOpen}
-            >
-              <MenuIcon />
-            </IconButton>
-            <Drawer anchor="left" open={open} onClose={handleDrawerClose}>
-              <Box sx={{ width: 250 }} role="presentation">
-                <List>
-                  <ListItem>
+      <AppBar position="sticky">
+        <Toolbar>
+          <IconButton
+            size="large"
+            edge="start"
+            color="inherit"
+            aria-label="open drawer"
+            sx={{ mr: 1 }}
+            onClick={handleDrawerOpen}
+          >
+            <MenuIcon />
+          </IconButton>
+          <Drawer anchor="left" open={open} onClose={handleDrawerClose}>
+            <Box sx={{ width: 250 }} role="presentation">
+              <List>
+                <ListItem>
+                  <ListItemIcon>
+                    <IconButton sx={{ padding: 0 }} onClick={handleDrawerClose}>
+                      <MenuIcon />
+                    </IconButton>
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={
+                      <Typography
+                        sx={{ display: "inline", fontWeight: "bold" }}
+                        component="span"
+                        variant="h6"
+                        color="text.primary"
+                      >
+                        A<small>REC</small>GIS
+                      </Typography>
+                    }
+                  />
+                </ListItem>
+              </List>
+              <List>
+                <ListItem key="1" disablePadding>
+                  <ListItemButton onClick={GoHomeButton}>
                     <ListItemIcon>
-                      <IconButton sx={{ padding: 0 }} onClick={handleDrawerClose}>
-                        <MenuIcon />
-                      </IconButton>
+                      <HomeIcon color="primary" />
                     </ListItemIcon>
-                    <ListItemText
-                      primary={
-                        <Typography
-                          sx={{ display: "inline", fontWeight: "bold" }}
-                          component="span"
-                          variant="h6"
-                          color="text.primary"
-                        >
-                          A<small>REC</small>GIS
-                        </Typography>
-                      }
-                    />
-                  </ListItem>
-                </List>
-                <List>
-                  <ListItem key="1" disablePadding>
-                    <ListItemButton onClick={GoHomeButton}>
+                    <ListItemText primary="Home" />
+                  </ListItemButton>
+                </ListItem>
+                <ListItem key="3" disablePadding>
+                  <ListItemButton onClick={GoToInventories}>
+                    <ListItemIcon>
+                      <MapIcon color="primary" />
+                    </ListItemIcon>
+                    <ListItemText primary="Map Dashboard" />
+                  </ListItemButton>
+                </ListItem>
+                <ListItem key="4" disablePadding>
+                  <ListItemButton onClick={GoToInventoryList}>
+                    <ListItemIcon>
+                      <ListAltIcon color="primary" />
+                    </ListItemIcon>
+                    <ListItemText primary="My Inventory" />
+                  </ListItemButton>
+                </ListItem>
+                {/* --- NEW: Public Charts/Statistics, accessible by all users --- */}
+                <ListItem key="charts" disablePadding>
+                  <ListItemButton onClick={GoToPublicCharts}>
+                    <ListItemIcon>
+                      <BarChartIcon  color="primary" /> {/* You can change to a chart icon if you wish */}
+                    </ListItemIcon>
+                    <ListItemText primary="Charts & Statistics" />
+                  </ListItemButton>
+                </ListItem>
+                {/* --- End NEW --- */}
+                {(isManager || isAdmin) &&
+                  <ListItem key="6" disablePadding>
+                    <ListItemButton onClick={GoToUserSettings}>
                       <ListItemIcon>
-                        <HomeIcon color="primary" />
+                        <GroupIcon color="primary" />
                       </ListItemIcon>
-                      <ListItemText primary="Home" />
+                      <ListItemText primary="User Settings" />
                     </ListItemButton>
-                  </ListItem>
-                  {/* <ListItem key="2" disablePadding>
-                    <ListItemButton onClick={GoToRenergies}>
+                  </ListItem>}
+                {(isManager || isAdmin) &&
+                  <ListItem key="7" disablePadding>
+                    <ListItemButton onClick={GoToAddUser}>
                       <ListItemIcon>
-                        <MapIcon />
+                        <PersonAddIcon color="primary" />
                       </ListItemIcon>
-                      <ListItemText primary="Map Dashboard" />
+                      <ListItemText primary="Create New User" />
                     </ListItemButton>
-                  </ListItem> */}
-                  <ListItem key="3" disablePadding>
-                    <ListItemButton onClick={GoToInventories}>
-                      <ListItemIcon>
-                        <MapIcon color="primary" />
-                      </ListItemIcon>
-                      <ListItemText primary="Map Dashboard" />
-                    </ListItemButton>
-                  </ListItem>
-                  <ListItem key="4" disablePadding>
-                    <ListItemButton onClick={GoToInventoryList}>
-                      <ListItemIcon>
-                        <ListAltIcon color="primary" />
-                      </ListItemIcon>
-                      <ListItemText primary="My Inventory" />
-                    </ListItemButton>
-                  </ListItem>
-                  {/* <ListItem key="5" disablePadding>
-                    <ListItemButton onClick={GoToRenegyList}>
-                      <ListItemIcon>
-                        <ListAltIcon color="primary" />
-                      </ListItemIcon>
-                      <ListItemText primary="Technical Assessment list (RE)" />
-                    </ListItemButton>
-                  </ListItem> */}
-                  {(isManager || isAdmin) &&
-                    <ListItem key="6" disablePadding>
-                      <ListItemButton onClick={GoToUserSettings}>
-                        <ListItemIcon>
-                          <GroupIcon color="primary" />
-                        </ListItemIcon>
-                        <ListItemText primary="User Settings" />
-                      </ListItemButton>
-                    </ListItem>}
-                  {(isManager || isAdmin) &&
-                    <ListItem key="7" disablePadding>
-                      <ListItemButton onClick={GoToAddUser}>
-                        <ListItemIcon>
-                          <PersonAddIcon color="primary" />
-                        </ListItemIcon>
-                        <ListItemText primary="Create New User" />
-                      </ListItemButton>
-                    </ListItem>}
-                  <ListItem key="8" disablePadding>
-                    <ListItemButton disabled onClick={GoToServices}>
-                      <ListItemIcon>
-                        <LanguageIcon color="primary" />
-                      </ListItemIcon>
-                      <ListItemText primary="Services" />
-                    </ListItemButton>
-                  </ListItem>
-                  <ListItem key="9" disablePadding>
-                    <ListItemButton  onClick={handleClick}>
-                      <ListItemIcon>
-                        <DownloadIcon  color="primary" />
-                      </ListItemIcon>
-                      <ListItemText primary="Downloads" />
-                    </ListItemButton>
-                  </ListItem>
-                </List>
-                <Divider />
-                <StyledMenu
+                  </ListItem>}
+                <ListItem key="8" disablePadding>
+                  <ListItemButton disabled onClick={GoToServices}>
+                    <ListItemIcon>
+                      <LanguageIcon color="primary" />
+                    </ListItemIcon>
+                    <ListItemText primary="Services" />
+                  </ListItemButton>
+                </ListItem>
+                <ListItem key="9" disablePadding>
+                  <ListItemButton onClick={handleClick}>
+                    <ListItemIcon>
+                      <DownloadIcon color="primary" />
+                    </ListItemIcon>
+                    <ListItemText primary="Downloads" />
+                  </ListItemButton>
+                </ListItem>
+              </List>
+              <Divider />
+              <StyledMenu
                 id="demo-customized-menu"
                 MenuListProps={{
                   'aria-labelledby': 'demo-customized-button',
@@ -467,46 +465,37 @@ const DashHeader = () => {
                 open={openDownload}
                 onClose={handleClose}
               >
-                {/* <MenuItem onClick={handleClose} disableRipple>
-                  <DownloadIcon />
-                  <Link href="https://www.dropbox.com/scl/fi/tjrbfwwer7cd4w4omxoso/AREC-V1.apk?rlkey=pxr2vv40fd6m8ujyvaejersq8&dl=0" target="_blank" style={{textDecoration: 'none'}}>A<small>REC</small>GIS_v1.apk</Link>
-                  <a href={baseUrl+"mobile/"+"65336db4d90f0cc2036e3d68"} target="_blank">A<small>REC</small>GIS_beta.apk</a>
-                </MenuItem> */}
                 <MenuItem onClick={handleClose} disableRipple>
                   <DownloadIcon />
                   <a href={baseUrl+"mobile/"+"6535d746400c288fd3201c6f"} target="_blank">A<small>REC</small>GIS_v1.0.0.apk</a>
                 </MenuItem>
               </StyledMenu>
-                <List>
-                  <ListItem key="9" disablePadding>
-                    <ListItemButton onClick={GoToAbout}>
-                      <ListItemIcon>
-                        <InfoIcon color="primary" />
-                      </ListItemIcon>
-                      <ListItemText primary="About" />
-                    </ListItemButton>
-                  </ListItem>
-                  <ListItem key="10" disablePadding>
-                    <ListItemButton disabled onClick={GoToHelp}>
-                      <ListItemIcon>
-                        <HelpOutlineIcon color="primary" />
-                      </ListItemIcon>
-                      <ListItemText primary="Help" />
-                    </ListItemButton>
-                  </ListItem>
-                  <Divider />
-                  <ListItem key="11" disablePadding>
-                    <ListItemButton >
-                      {/* <ListItemIcon>
-                        <ManageAccountsIcon />
-                      </ListItemIcon>
-                      <ListItemText primary= /> */}
-                      <Chip icon={<ManageAccountsIcon />} label={status} size="small" color="error" />
-                    </ListItemButton>
-                  </ListItem>
-                </List>
-              </Box>
-            </Drawer>
+              <List>
+                <ListItem key="9" disablePadding>
+                  <ListItemButton onClick={GoToAbout}>
+                    <ListItemIcon>
+                      <InfoIcon color="primary" />
+                    </ListItemIcon>
+                    <ListItemText primary="About" />
+                  </ListItemButton>
+                </ListItem>
+                <ListItem key="10" disablePadding>
+                  <ListItemButton disabled onClick={GoToHelp}>
+                    <ListItemIcon>
+                      <HelpOutlineIcon color="primary" />
+                    </ListItemIcon>
+                    <ListItemText primary="Help" />
+                  </ListItemButton>
+                </ListItem>
+                <Divider />
+                <ListItem key="11" disablePadding>
+                  <ListItemButton >
+                    <Chip icon={<ManageAccountsIcon />} label={status} size="small" color="error" />
+                  </ListItemButton>
+                </ListItem>
+              </List>
+            </Box>
+          </Drawer>
             <Box
               component="img"
               sx={{
@@ -583,16 +572,6 @@ const DashHeader = () => {
               </div>
             </Grid>
 
-
-            {/* <Search>
-              <SearchIconWrapper>
-                <SearchIcon />
-              </SearchIconWrapper>
-              <StyledInputBase
-                placeholder="Search…"
-                inputProps={{ "aria-label": "search" }}
-              />
-            </Search> */}
             <Box sx={{ flexGrow: 1 }} />
             <Box sx={{ display: { xs: "none", md: "flex" } }}>
               

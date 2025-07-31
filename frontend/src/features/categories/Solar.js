@@ -4,15 +4,13 @@ import { rawSolarUsage, rawSolarSysTypes, Status } from "../../config/techAssesm
 import { boxstyle } from '../../config/style'
 import HighlightOffSharpIcon from '@mui/icons-material/HighlightOffSharp'
 
-
 export const Solar = (props) => {
 
-
   const [formValues, setFormValues] = useState([{ capacity: "", pcs: "" }])
-
   const [data, setData] = useState([])
 
   const [capacity, setCapacity] = useState('')
+  const [annualEnergyProduction, setAnnualEnergyProduction] = useState('') // <-- NEW STATE
 
   const [solarUsage, setSolarUsage] = useState({ index: '', value: '', otherVal: '' })
 
@@ -35,19 +33,21 @@ export const Solar = (props) => {
       serviceArea: serviceArea,
       solarSystemTypes: solarSystemTypes?.value,
       solarUsage: solarUsage?.otherVal === '' ? solarUsage?.value : solarUsage?.otherVal,
+      annualEnergyProduction: solarUsage?.index === 2 ? annualEnergyProduction : undefined, // <-- Only if Power Gen
       status: status?.value,
       remarks: remarks,
     })
-
   }, [
     capacity,
     formValues,
     flowRate,
     solarUsage,
+    annualEnergyProduction,
     serviceArea,
     solarSystemTypes,
     status,
-    remarks])
+    remarks
+  ])
 
   useEffect(() => {
     props.setSolar(data)
@@ -79,10 +79,11 @@ export const Solar = (props) => {
     else {
       setSolarUsage({ index: index, value: rawSolarUsage[index].name, otherVal: '' })
     }
+    // Reset annual energy production if usage changes away from Power Generation
+    if (index !== 2) setAnnualEnergyProduction('');
   }
 
   const valuesOfSolarSystem = (index) => (e) => {
-
     if (rawSolarSysTypes[index].name === 'Other' && e.target.value !== 'on' && e.target.value !== '') {
       setSolarSysTypes({ index: index, value: '', otherVal: e.target.value })
     }
@@ -92,9 +93,7 @@ export const Solar = (props) => {
     else {
       setSolarSysTypes({ index: index, value: rawSolarSysTypes[index].name, otherVal: '' })
     }
-
   }
-
 
   const statusValueofSolarEnergySystem = (index) => (e) => {
     if (Status[index].name === 'Other' && e.target.value !== 'on' && e.target.value !== '') {
@@ -108,12 +107,9 @@ export const Solar = (props) => {
     }
   }
 
-
   return (
     <>
-      <Box
-        sx={boxstyle}
-      >
+      <Box sx={boxstyle}>
         <Typography sx={{ fontStyle: 'italic' }} component="h1" variant="subtitle2">
           Primary use of Solar Energy System
         </Typography>
@@ -138,9 +134,7 @@ export const Solar = (props) => {
         ))}
       </Box>
 
-      <Box
-        sx={boxstyle}
-      >
+      <Box sx={boxstyle}>
         <Box sx={{ display: solarUsage?.index === 0 ? 'block' : 'none' }}>
           <Typography sx={{ fontStyle: 'italic' }} component="h1" variant="subtitle2">
             For Solar Street Lights (leave blank if not applicable)
@@ -261,6 +255,22 @@ export const Solar = (props) => {
               endAdornment: <InputAdornment position="end"><var>Wp</var></InputAdornment>,
             }}
           />
+          {/* Annual Energy Production visible ONLY when Power Generation */}
+          <Typography sx={{ fontStyle: 'italic' }} component="h1" variant="subtitle2">
+            Annual Energy Production:
+          </Typography>
+          <TextField
+            fullWidth
+            size="small"
+            id="annualEnergyProduction"
+            name="annualEnergyProduction"
+            type="number"
+            value={annualEnergyProduction}
+            onChange={(e) => setAnnualEnergyProduction(e.target.value)}
+            InputProps={{
+              endAdornment: <InputAdornment position="end">kWh</InputAdornment>,
+            }}
+          />
           <Typography sx={{ fontStyle: 'italic' }} component="h1" variant="subtitle2">
             Solar Energy System Types:
           </Typography>
@@ -318,20 +328,20 @@ export const Solar = (props) => {
           </FormGroup>
         ))}
 
-          <Typography sx={{ fontStyle: 'italic' }} component="h1" variant="subtitle2">
-            Remarks
-          </Typography>
-          <TextField
-            fullWidth
-            size="small"
-            id="remarks"
-            name="remarks"
-            type="text"
-            multiline
-            maxRows={4}
-            value={remarks}
-            onChange={(e) => setRemarks(e.target.value)}
-          />
+        <Typography sx={{ fontStyle: 'italic' }} component="h1" variant="subtitle2">
+          Remarks
+        </Typography>
+        <TextField
+          fullWidth
+          size="small"
+          id="remarks"
+          name="remarks"
+          type="text"
+          multiline
+          maxRows={4}
+          value={remarks}
+          onChange={(e) => setRemarks(e.target.value)}
+        />
       </Box>
     </>
   )

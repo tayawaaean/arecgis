@@ -8,7 +8,7 @@
     "@fvilers/disable-react-devtools": "github:fvilers/disable-react-devtools",
     "@mui/icons-material": "^5.11.0",
     "@mui/material": "^5.11.8",
-    "@mui/x-charts": "^6.0.0-alpha.5",
+    "@mui/x-charts": "^6.19.8",
     "@mui/x-data-grid": "^6.0.2",
     "@mui/x-date-pickers": "^6.12.1",
     "@reduxjs/toolkit": "^1.9.2",
