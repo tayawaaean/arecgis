@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-// const AutoIncrement = require('mongoose-sequence')(mongoose)
 
 const renergySchema = new mongoose.Schema({
     user: {
@@ -18,10 +17,6 @@ const renergySchema = new mongoose.Schema({
     images:{
         type: Array
     },
-    // images:{
-    //     data: Buffer,
-    //     contentType: String
-    // },
     assessment:{
         type: mongoose.Schema.Types.Mixed
     },
@@ -29,6 +24,30 @@ const renergySchema = new mongoose.Schema({
         ownerName: {
             type: String,
             required: true,
+        },
+        retype: [{
+            type: String,
+            default: 'Solar Energy System'
+        }],
+        reCat: {
+            type: String // Add if not already present
+        },
+        reClass: {
+            type: String // Add if not already present
+        },
+        yearEst: {
+            type: String // Add if not already present
+        },
+        acquisition: {
+            type: String // Add if not already present
+        },
+        isNetMetered: {
+            type: String, // or Boolean if you want true/false
+            default: 'No'
+        },
+        ownUse: {
+            type: String, // or Boolean if you want true/false
+            default: 'No'
         },
         address: {
             country:{
@@ -51,20 +70,12 @@ const renergySchema = new mongoose.Schema({
                 type: String,
                 required: true,
             },
-        },
-        retype: [{
-            type: String,
-            default: 'Solar Energy System'
-        }]
-        
-
-    },
-    
+        }
+    }
 },
     {
-        timestamps: false,
+        timestamps: true,
     }
 )
-
 
 module.exports = mongoose.model('Renergy', renergySchema)

@@ -1,9 +1,14 @@
 import React, { useState, useEffect } from 'react'
-import { FormLabel, TextField, Input, InputAdornment, Box, Checkbox, FormControlLabel, FormGroup, Typography } from '@mui/material'
+import { FormLabel, TextField, Input, InputAdornment, Box, Checkbox, FormControlLabel, FormGroup, Typography, Alert } from '@mui/material'
 import { rawWindSysTypes, rawWindUsage, rawWindSystemStatus, rawWindTurbineTypes, rawWindTowerTypes, Status } from '../../config/techAssesment'
 import { boxstyle } from '../../config/style'
 
 export const EditWind = (props) => {
+  // Check if this is a commercial RE installation
+  const isCommercial = props.reClass === "Commercial";
+  
+  // Find the index of Power Generation in rawWindUsage
+  const powerGenerationIndex = rawWindUsage.findIndex(usage => usage.name === "Power Generation");
 
   const [data, setData] = useState([])
 
@@ -13,13 +18,27 @@ export const EditWind = (props) => {
 
   const [capacity, setCapacity] = useState(props?.reItems?.assessment?.capacity || '')
 
-  const [windUsage, setWindUsage] = useState(found === -1 ? { index: '', value: 'Other', otherVal: windUse || '' } : { index: '', value: windUse || '', otherVal: '' })
+  const [windUsage, setWindUsage] = useState(found === -1 ? 
+    { index: '', value: 'Other', otherVal: windUse || '' } : 
+    { index: found, value: windUse || '', otherVal: '' }
+  )
 
   const [serviceArea, setServiceArea] = useState(props?.reItems?.assessment?.serviceArea || '')
 
   const [status, setStatus] = useState({ index: '', value: props?.reItems?.assessment?.status || '', otherVal: '' })
 
   const [remarks, setRemarks] = useState(props?.reItems?.assessment?.remarks || '')
+
+  // Auto-select Power Generation for Commercial RE
+  useEffect(() => {
+    if (isCommercial && powerGenerationIndex >= 0) {
+      setWindUsage({ 
+        index: powerGenerationIndex, 
+        value: rawWindUsage[powerGenerationIndex].name, 
+        otherVal: '' 
+      });
+    }
+  }, [isCommercial, powerGenerationIndex]);
 
   useEffect(() => {
     setData({
@@ -43,20 +62,26 @@ export const EditWind = (props) => {
     props.setEditWind(data)
   }, [data])
 
-
   const valuesOfWindUsage = (index) => (e) => {
+    // If Commercial, only allow Power Generation selection
+    if (isCommercial && index !== powerGenerationIndex) {
+      return;
+    }
 
     if (rawWindUsage[index].name === 'Other' && e.target.value !== 'on' && e.target.value !== '') {
       setWindUsage({ index: index, value: rawWindUsage[index].name, otherVal: e.target.value })
     }
     else if (index === windUsage?.index) {
+      // If commercial, don't allow deselecting Power Generation
+      if (isCommercial && index === powerGenerationIndex) {
+        return;
+      }
       setWindUsage({ index: '', value: '', otherVal: '' })
     }
     else {
       setWindUsage({ index: index, value: rawWindUsage[index].name, otherVal: '' })
     }
   }
-
 
   const valuesOfStatus = (index) => (e) => {
     if (Status[index].name === 'Other' && e.target.value !== 'on' && e.target.value !== '') {
@@ -72,12 +97,17 @@ export const EditWind = (props) => {
 
   return (
     <>
-      <Box
-        sx={boxstyle}
-      >
+      <Box sx={boxstyle}>
         <Typography sx={{ fontStyle: 'italic' }} component="h1" variant="subtitle2">
           Primary use of Wind Power System
         </Typography>
+        
+        {isCommercial && (
+          <Alert severity="info" sx={{ mb: 2 }}>
+            Commercial RE systems must use Power Generation. Other options are disabled.
+          </Alert>
+        )}
+        
         {rawWindUsage.map((type, index) => (
           <FormGroup key={index}>
             <FormControlLabel
@@ -86,22 +116,21 @@ export const EditWind = (props) => {
                 <Checkbox
                   onChange={valuesOfWindUsage(index)}
                   checked={type.name === windUsage?.value}
+                  disabled={isCommercial && index !== powerGenerationIndex} // Disable non-Power Generation options if Commercial
                 />
               }
               label={type.name === 'Other' ? <Input
-              onChange={valuesOfWindUsage(index)}
-              disabled={type.name !== windUsage?.value}
-              value={windUsage?.otherVal}
-              startAdornment={<InputAdornment position="start">Other:</InputAdornment>}
-          /> : type.name}
+                onChange={valuesOfWindUsage(index)}
+                disabled={(type.name !== windUsage?.value) || isCommercial}
+                value={windUsage?.otherVal}
+                startAdornment={<InputAdornment position="start">Other:</InputAdornment>}
+              /> : type.name}
             />
           </FormGroup>
         ))}
-
       </Box>
-      <Box
-        sx={boxstyle}
-      >
+
+      <Box sx={boxstyle}>
         <Typography sx={{ fontStyle: "italic", mb: 2 }} component="h1" variant="subtitle2">
           For {windUsage?.value || windUsage?.otherVal} (leave blank if not applicable)
         </Typography>
@@ -138,9 +167,8 @@ export const EditWind = (props) => {
           />
         </Box>
       </Box>
-      <Box
-        sx={boxstyle}
-      >
+      
+      <Box sx={boxstyle}>
         <Typography sx={{ fontStyle: 'italic' }} component="h1" variant="subtitle2">
           Status:
         </Typography>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react"
 import { styled, alpha } from "@mui/material/styles"
 import { useNavigate, useLocation } from "react-router-dom"
+import { SwapHoriz as SwapHorizIcon } from "@mui/icons-material/";
 import useAuth from "../hooks/useAuth"
 import { useSendLogoutMutation } from '../features/auth/authApiSlice'
 import BarChartIcon from '@mui/icons-material/BarChart';
@@ -313,6 +314,12 @@ const DashHeader = () => {
     navigate('/dashboard/charts');
     setOpen(false);
   };
+
+  const GoToTransactions = () => {
+  navigate('/dashboard/transfers');
+  setOpen(false);
+};
+
   //end inventories
   //renergies
   const GoToRenergies = () => {
@@ -408,6 +415,14 @@ const DashHeader = () => {
                       <ListAltIcon color="primary" />
                     </ListItemIcon>
                     <ListItemText primary="My Inventory" />
+                  </ListItemButton>
+                </ListItem>
+                <ListItem key="transfers" disablePadding>
+                  <ListItemButton onClick={GoToTransactions}>
+                    <ListItemIcon>
+                      <SwapHorizIcon color="primary" />
+                    </ListItemIcon>
+                    <ListItemText primary="Transfer Requests" />
                   </ListItemButton>
                 </ListItem>
                 {/* --- NEW: Public Charts/Statistics, accessible by all users --- */}

@@ -2,20 +2,16 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import { setCredentials } from '../../features/auth/authSlice'
 
 const baseQuery = fetchBaseQuery({
-    //baseUrl: 'https://arecgis-api.onrender.com',
-    // baseUrl:  'http://arecgis.nberic.org:31122',
-    // baseUrl:  'https://api.arecmmsu.com',
-    baseUrl: 'http://localhost:3001',
+    baseUrl: process.env.REACT_APP_API_URL,
     credentials: 'include',
     prepareHeaders: (headers, { getState }) => {
-        const token = getState().auth.token
-
+        const token = getState().auth.token;
         if (token) {
-            headers.set("authorization", `Bearer ${token}`)
+            headers.set("authorization", `Bearer ${token}`);
         }
-        return headers
+        return headers;
     }
-})
+});
 
 const baseQueryWithReauth = async (args, api, extraOptions) => {
     // console.log(args) // request url, method, body

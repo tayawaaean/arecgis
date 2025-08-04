@@ -1,14 +1,12 @@
-const Inventory = require('../models/Inventory')
-const User = require('../models/User')
+const Inventory = require('../models/Inventory');
+const User = require('../models/User');
 const GridFsStorage = require('multer-gridfs-storage').GridFsStorage;
-const mongoose = require('mongoose')
-const mongoURI = process.env.DATABASE_URI
-const { Readable } = require("stream"); // from nodejs
+const mongoose = require('mongoose');
+const mongoURI = process.env.DATABASE_URI;
+const { Readable } = require("stream");
 const sharp = require("sharp");
-const crypto = require('crypto')
+const crypto = require('crypto');
 var CryptoJS = require("crypto-js");
-// const fs = require('fs');
-// const assert = require('assert');
 
 let gfsi;
 (async () => {
@@ -20,356 +18,517 @@ let gfsi;
     catch (err) {
         console.log(err);
     }
-})()
+})();
 
+const DUPLICATE_RADIUS_METERS = 100;
 
+// Helper: Extract coordinates as flat array from any format
+function extractCoordinates(coords) {
+    if (Array.isArray(coords) && coords.length === 2) {
+        return coords.map(Number);
+    }
+    if (coords && coords.type === "Point" && Array.isArray(coords.coordinates) && coords.coordinates.length === 2) {
+        return coords.coordinates.map(Number);
+    }
+    if (typeof coords === "string") {
+        try { 
+            const parsed = JSON.parse(coords);
+            if (Array.isArray(parsed) && parsed.length === 2) {
+                return parsed.map(Number);
+            }
+            if (parsed && parsed.coordinates && Array.isArray(parsed.coordinates) && parsed.coordinates.length === 2) {
+                return parsed.coordinates.map(Number);
+            }
+        } catch {}
+    }
+    return null;
+}
 
-// @desc Get all inventories 
+// Helper: Create GeoJSON Point for spatial queries (but not for storage)
+function createGeoJsonPoint(coords) {
+    const coordArray = extractCoordinates(coords);
+    if (coordArray && coordArray.length === 2) {
+        return { type: "Point", coordinates: coordArray };
+    }
+    return null;
+}
+
+// Helper: Validate if a string is a valid number (integer or decimal, no special chars, no letters)
+function isValidNumber(val) {
+    if (typeof val === 'number') {
+        return !isNaN(val);
+    }
+    if (typeof val === 'string') {
+        return /^(\d+(\.\d+)?|\.\d+)$/.test(val.trim());
+    }
+    return false;
+}
+
+// Helper: Validate year is 4-digit and reasonable
+function isValidYear(val) {
+    return /^[1-2][0-9]{3}$/.test(val) && Number(val) >= 1900 && Number(val) <= (new Date()).getFullYear() + 10;
+}
+
+// Helper: Validate required string
+function isNonEmptyString(val) {
+    return typeof val === 'string' && val.trim().length > 0;
+}
+
+// Helper: Validate coordinates
+function isValidCoordinates(coords) {
+    const coordArray = extractCoordinates(coords);
+    return coordArray && coordArray.length === 2 &&
+           !isNaN(coordArray[0]) && !isNaN(coordArray[1]);
+}
+
+// @desc Get all inventories, with optional filter by solarSystemTypes
 // @route GET /inventories
 // @access Private
 const getAllInventories = async (req, res) => {
-    // Get all inventories from MongoDB
-
-    const inventories = await Inventory.find().lean()
-
-
-    // If no Technical assessment
-    if (!inventories?.length) {
-        return res.status(400).json({ message: 'No Technical assessment found' })
+    const { solarSystemTypes } = req.query;
+    let query = {};
+    if (solarSystemTypes) {
+        query = { "assessment.solarSystemTypes": solarSystemTypes };
     }
-
-    
-    // out = String.fromCharCode(...response.split("!"))
-    // out = JSON.parse(out)
-
-
-    // Add username to each inventory before sending the response 
-    // See Promise.all with map() here: https://youtu.be/4lqJBBEpjRE 
-    // You could also do this with a for...of loop
+    const inventories = await Inventory.find(query).lean();
+    if (!inventories?.length) {
+        return res.status(400).json({ message: 'No Technical assessment found' });
+    }
     const inventoriesWithUser = await Promise.all(inventories.map(async (inventory) => {
-        const user = await User.findById(inventory.user).lean().exec()
-        return { ...inventory, username: user.username }
-    }))
-    const encrypted = CryptoJS.AES.encrypt(JSON.stringify(inventoriesWithUser), process.env.SECRET_KEY).toString()
-    // let x = JSON.stringify(inventoriesWithUser)
+        const user = await User.findById(inventory.user).lean().exec();
+        return { ...inventory, username: user?.username };
+    }));
+    const encrypted = CryptoJS.AES.encrypt(JSON.stringify(inventoriesWithUser), process.env.SECRET_KEY).toString();
+    res.json(encrypted);
+};
 
-    // let charCodeArr = []
-
-    // for(let i = 0; i < x.length; i++){
-    //     let code = x.charCodeAt(i);
-    //     charCodeArr.push(code);
-    // }
-    // let response
-    // response = charCodeArr.toString()
-    // response = response.replace(/,/g, '!')
- 
-
-    // out = String.fromCharCode(...response.split("!"))
-    // out = JSON.parse(out)
-
-    res.json(encrypted)
-
-}
-
-// @desc Create new inventory
+// @desc Create new inventory (with geolocation-based duplicate detection)
 // @route POST /inventories
 // @access Private
-
 const createNewInventory = async (req, res) => {
+    let { type, user, coordinates, properties, assessment, forceCreate } = req.body;
 
-    const { type, user, coordinates, properties, assessment } = req.body
+    if (typeof properties === 'string') {
+        try { properties = JSON.parse(properties); } catch { properties = {}; }
+    }
+    if (typeof assessment === 'string') {
+        try { assessment = JSON.parse(assessment); } catch { assessment = {}; }
+    }
 
-    const images = req.files.map((file) => {
+    // Validate required fields
+    if (!user
+        || !type
+        || !coordinates
+        || !properties.ownerName
+        || !properties.reCat
+        || !properties.reClass
+        || !properties.yearEst
+        || !properties.acquisition
+        || !properties.address
+        || !properties.address.country
+        || !properties.address.region
+        || !properties.address.province
+        || !properties.address.city
+        || !properties.address.brgy
+    ) {
+        return res.status(400).json({ message: 'All fields are required' });
+    }
+    if (!isNonEmptyString(properties.ownerName)
+        || !isNonEmptyString(properties.reCat)
+        || !isNonEmptyString(properties.reClass)
+        || !isValidYear(properties.yearEst)
+        || !isNonEmptyString(properties.acquisition)
+        || !isNonEmptyString(properties.address.country)
+        || !isNonEmptyString(properties.address.region)
+        || !isNonEmptyString(properties.address.province)
+        || !isNonEmptyString(properties.address.city)
+        || !isNonEmptyString(properties.address.brgy)) {
+        return res.status(400).json({ message: 'Some fields are empty or invalid.' });
+    }
+    if (!(type === "Point")) {
+        return res.status(400).json({ message: 'Type must be "Point".' });
+    }
 
-        const randombytes = crypto.randomBytes(16)
-        const filename = randombytes.toString('hex') + '.webp'
+    // --- FIT validation for Commercial RE ---
+    if (properties.reClass === "Commercial") {
+        if (!properties.fit) {
+            return res.status(400).json({ message: 'FIT info is required for Commercial RE.' });
+        }
+        
+        const validPhases = ["FIT1", "FIT2", "Non-FIT"];
+        
+        // Convert string to boolean if needed
+        if (typeof properties.fit.eligible === 'string') {
+            properties.fit.eligible = properties.fit.eligible.toLowerCase() === 'true';
+        }
+        
+        if (typeof properties.fit.eligible !== 'boolean') {
+            return res.status(400).json({ message: 'FIT eligibility must be true or false.' });
+        }
+        
+        if (!validPhases.includes(properties.fit.phase)) {
+            return res.status(400).json({ message: 'FIT phase must be FIT1, FIT2, or Non-FIT.' });
+        }
+        
+        // Check rate without using hasOwnProperty
+        const rate = properties.fit.rate;
+        if (rate !== undefined && rate !== null && rate !== '') {
+            if (!isValidNumber(rate)) {
+                return res.status(400).json({ message: 'FIT rate must be a valid number if provided.' });
+            }
+        }
+    } else {
+        // Remove FIT if not commercial
+        if (properties.fit) delete properties.fit;
+    }
+
+    // Extract and validate coordinates as flat array
+    const coordArray = extractCoordinates(coordinates);
+    if (!coordArray) {
+        return res.status(400).json({ message: "Invalid coordinates format" });
+    }
+
+    // Create GeoJSON Point for spatial queries
+    const geoJsonPoint = createGeoJsonPoint(coordArray);
+
+    // Capacity validation (optional, but if present, must be valid number)
+    if (assessment && Object.prototype.hasOwnProperty.call(assessment, 'capacity') && assessment.capacity !== "") {
+        if (!isValidNumber(assessment.capacity)) {
+            return res.status(400).json({
+                message: 'Capacity must be a valid number (digits and optional decimal point only).'
+            });
+        }
+    }
+
+    // Annual Energy Production validation (if Power Generation)
+    if (
+        assessment &&
+        assessment.solarUsage === "Power Generation" &&
+        Object.prototype.hasOwnProperty.call(assessment, 'annualEnergyProduction')
+    ) {
+        if (!isValidNumber(assessment.annualEnergyProduction)) {
+            return res.status(400).json({
+                message: 'Annual Energy Production must be a valid number (digits and optional decimal point only).'
+            });
+        }
+    }
+
+    // Solar system types optional, but if not blank, must match allowed
+    if (assessment && assessment.solarSystemTypes) {
+        const allowedTypes = ['Off-grid', 'Grid-tied', 'Hybrid'];
+        if (assessment.solarSystemTypes && !allowedTypes.includes(assessment.solarSystemTypes)) {
+            return res.status(400).json({ message: 'Invalid solarSystemTypes value.' });
+        }
+    }
+
+    // Handle files/images
+    const images = req.files?.map((file) => {
+        const randombytes = crypto.randomBytes(16);
+        const filename = randombytes.toString('hex') + '.webp';
         const gridFsStorage = new GridFsStorage({
             url: mongoURI,
-            options: { useUnifiedTopology: true }, // silence the warning
+            options: { useUnifiedTopology: true },
             file: () => ({ bucketName: "uploads", filename: filename, contentType: 'image/webp' }),
-        })
-
+        });
         sharp(file.buffer)
             .rotate()
             .toFormat('webp')
             .resize(1080)
             .webp({ quality: 70 })
-            // .jpeg({ quality: 70 })  
             .toBuffer((err, data, info) => {
-                // data here directly contains the buffer object.
                 const fileStream = Readable.from(data);
-                // write the resized stream to the database.
-                gridFsStorage.fromStream(fileStream)
+                gridFsStorage.fromStream(fileStream);
             });
+        return filename;
+    }) || [];
 
-            return filename
-    })
-    // var images = req.files.map( (file) => {
-    //     const img = {
-    //         data: fs.readFileSync(path.join('./public/uploads/postimages/' + file.filename)),
-    //         contentType: 'image/png'
-    //     }
+    // Set default Yes/No for net metered and own use if not present
+    properties.isNetMetered = properties.isNetMetered || "No";
+    properties.ownUse = properties.ownUse || "No";
 
-    //     return  img
-    //     return file.filename // or file.originalname
-    // })
-    // var img = {
-    //         data: fs.readFileSync(path.join('./public/uploads/postimages/' + req.file.filename)),
-    //         contentType: 'image/png'
-    //     }
-    //Confirm data
-    if (!user 
-        || !type 
+    if (!forceCreate) {
+        const possibleDuplicates = await Inventory.find({
+            coordinates: {
+                $near: {
+                    $geometry: geoJsonPoint,
+                    $maxDistance: DUPLICATE_RADIUS_METERS
+                }
+            }
+        }).lean();
+
+        if (possibleDuplicates && possibleDuplicates.length > 0) {
+            return res.status(409).json({
+                message: "Potential duplicate detected",
+                duplicates: possibleDuplicates
+            });
+        }
+    }
+
+    // Save with flat coordinates structure
+    const inventory = await Inventory.create({
+        user,
+        type,
+        coordinates: coordArray, // Store as flat array
+        properties,
+        assessment,
+        images
+    });
+
+    if (inventory) {
+        return res.status(201).json({ message: 'New Technical assessment created' });
+    } else {
+        return res.status(400).json({ message: 'Invalid Technical assessment data received' });
+    }
+};
+
+// @desc Update a inventory (with geolocation-based duplicate detection)
+// @route PATCH /inventories
+// @access Private
+const updateInventory = async (req, res) => {
+    let { id, user, type, coordinates, properties, assessment, forceUpdate } = req.body;
+
+    if (typeof forceUpdate === "string") {
+        forceUpdate = forceUpdate === "true";
+    }
+
+    if (typeof properties === 'string') {
+        try { properties = JSON.parse(properties); } catch { properties = {}; }
+    }
+    if (typeof assessment === 'string') {
+        try { assessment = JSON.parse(assessment); } catch { assessment = {}; }
+    }
+
+    // Validate required fields
+    if (!id
+        || !type
         || !coordinates
         || !properties.ownerName
         || !properties.reCat
         || !properties.reClass
         || !properties.yearEst
-        || !properties.acquisition  
+        || !properties.acquisition
+        || !properties.address
         || !properties.address.country
         || !properties.address.region
         || !properties.address.province
         || !properties.address.city
         || !properties.address.brgy) {
-        return res.status(400).json({ message: 'All fields are required' })
+        return res.status(400).json({ message: 'All fields are required' });
+    }
+    if (!isNonEmptyString(properties.ownerName)
+        || !isNonEmptyString(properties.reCat)
+        || !isNonEmptyString(properties.reClass)
+        || !isValidYear(properties.yearEst)
+        || !isNonEmptyString(properties.acquisition)
+        || !isNonEmptyString(properties.address.country)
+        || !isNonEmptyString(properties.address.region)
+        || !isNonEmptyString(properties.address.province)
+        || !isNonEmptyString(properties.address.city)
+        || !isNonEmptyString(properties.address.brgy)) {
+        return res.status(400).json({ message: 'Some fields are empty or invalid.' });
+    }
+    if (!(type === "Point")) {
+        return res.status(400).json({ message: 'Type must be "Point".' });
     }
 
-    // Check for duplicate re
-    // const duplicate = await Inventory.findOne({ title }).lean().exec()
-
-    // if (duplicate) {
-    //     return res.status(409).json({ message: 'Duplicate inventory title' })
-    // }
-
-    // Create and store the new RE Tech assessment
-    const inventory = await Inventory.create({ user, type, coordinates, properties, assessment, images })
-
-    if (inventory) { // Created 
-        return res.status(201).json({ message: 'New Technical assessment created' })
+    // --- FIT validation for Commercial RE ---
+    if (properties.reClass === "Commercial") {
+        if (!properties.fit) {
+            return res.status(400).json({ message: 'FIT info is required for Commercial RE.' });
+        }
+        
+        const validPhases = ["FIT1", "FIT2", "Non-FIT"];
+        
+        // Convert string to boolean if needed
+        if (typeof properties.fit.eligible === 'string') {
+            properties.fit.eligible = properties.fit.eligible.toLowerCase() === 'true';
+        }
+        
+        if (typeof properties.fit.eligible !== 'boolean') {
+            return res.status(400).json({ message: 'FIT eligibility must be true or false.' });
+        }
+        
+        if (!validPhases.includes(properties.fit.phase)) {
+            return res.status(400).json({ message: 'FIT phase must be FIT1, FIT2, or Non-FIT.' });
+        }
+        
+        // Check rate without using hasOwnProperty
+        const rate = properties.fit.rate;
+        if (rate !== undefined && rate !== null && rate !== '') {
+            if (!isValidNumber(rate)) {
+                return res.status(400).json({ message: 'FIT rate must be a valid number if provided.' });
+            }
+        }
     } else {
-        return res.status(400).json({ message: 'Invalid Technical assessment data received' })
+        // Remove FIT if not commercial
+        if (properties.fit) delete properties.fit;
     }
 
-}
+    // Extract and validate coordinates as flat array
+    const coordArray = extractCoordinates(coordinates);
+    if (!coordArray) {
+        return res.status(400).json({ message: "Invalid coordinates format" });
+    }
 
-// @desc Update a inventory
-// @route PATCH /inventories
-// @access Private
-const updateInventory = async (req, res, err) => {
+    // Create GeoJSON Point for spatial queries
+    const geoJsonPoint = createGeoJsonPoint(coordArray);
 
+    // Capacity validation (optional, but if present, must be valid number)
+    if (assessment && Object.prototype.hasOwnProperty.call(assessment, 'capacity') && assessment.capacity !== "") {
+        if (!isValidNumber(assessment.capacity)) {
+            return res.status(400).json({
+                message: 'Capacity must be a valid number (digits and optional decimal point only).'
+            });
+        }
+    }
+    
+    // Annual Energy Production validation (if Power Generation)
+    if (
+        assessment &&
+        assessment.solarUsage === "Power Generation" &&
+        Object.prototype.hasOwnProperty.call(assessment, 'annualEnergyProduction')
+    ) {
+        if (!isValidNumber(assessment.annualEnergyProduction)) {
+            return res.status(400).json({
+                message: 'Annual Energy Production must be a valid number (digits and optional decimal point only).'
+            });
+        }
+    }
 
-    const { id, user, type, coordinates, properties, assessment } = req.body
-    // fs.createReadStream('./ARECGIS_v1.0.0.apk').
-    // pipe(gfsi.openUploadStream('ARECGIS_v1.0.0.apk')).
-    // on('error', function(error) {
-    //     assert.ifError(error);
-    //   }).
-    //   on('finish', function() {
-    //     console.log('done!');
-    //     process.exit(0);
-    //   });
+    // Solar system types optional, but if not blank, must match allowed
+    if (assessment && assessment.solarSystemTypes) {
+        const allowedTypes = ['Off-grid', 'Grid-tied', 'Hybrid'];
+        if (assessment.solarSystemTypes && !allowedTypes.includes(assessment.solarSystemTypes)) {
+            return res.status(400).json({ message: 'Invalid solarSystemTypes value.' });
+        }
+    }
 
-    // var images = req.files.map( (file) => {
-    //     const img = {
-    //         data: fs.readFileSync(path.join('./public/uploads/postimages/' + file.filename)),
-    //         contentType: file.mimetype
-    //     }
-
-    //     return  img
-    //     return file.filename // or file.originalname
-    // })
-
-    // var imagesz = req.files.map((file) => {
-    //     const img = file.filename
-    //     return img
-    // })
-    // console.log(imagesz)
-
-
-    const images = req.files.map((file) => {
-
-        const randombytes = crypto.randomBytes(5)
-        const filename = randombytes.toString('hex') +'.webp'
+    const images = req.files?.map((file) => {
+        const randombytes = crypto.randomBytes(5);
+        const filename = randombytes.toString('hex') + '.webp';
         const gridFsStorage = new GridFsStorage({
             url: mongoURI,
-            options: { useUnifiedTopology: true }, // silence the warning
+            options: { useUnifiedTopology: true },
             file: () => ({ bucketName: "uploads", filename: filename, contentType: 'image/webp' }),
-        })
-
+        });
         sharp(file.buffer)
             .rotate()
             .toFormat('webp')
             .resize(1080)
-            .webp({  quality: 70 })
-            // .rotate()
-            // .webp({ lossless: true })
-            // .jpeg({ quality: 70 })  
+            .webp({ quality: 70 })
             .toBuffer((err, data, info) => {
-                // data here directly contains the buffer object.
                 const fileStream = Readable.from(data);
-                // write the resized stream to the database.
-                gridFsStorage.fromStream(fileStream)
-            })
+                gridFsStorage.fromStream(fileStream);
+            });
+        return filename;
+    }) || [];
 
-            return filename
-    })
+    if (!forceUpdate) {
+        const possibleDuplicates = await Inventory.find({
+            _id: { $ne: id }, // exclude the inventory being edited
+            coordinates: {
+                $near: {
+                    $geometry: geoJsonPoint,
+                    $maxDistance: DUPLICATE_RADIUS_METERS
+                }
+            }
+        }).lean();
 
-    // Confirm data
-    if (!id
-        || !type 
-        || !coordinates
-        || !properties.ownerName
-        || !properties.reCat
-        || !properties.reClass
-        || !properties.yearEst
-        || !properties.acquisition  
-        || !properties.address.country
-        || !properties.address.region
-        || !properties.address.province
-        || !properties.address.city
-        || !properties.address.brgy) {
-        return res.status(400).json({ message: 'All fields are required' })
+        if (possibleDuplicates && possibleDuplicates.length > 0) {
+            return res.status(409).json({
+                message: "Potential duplicate detected",
+                duplicates: possibleDuplicates
+            });
+        }
     }
-    
-    // var images = req.files.map( (file) => {
-    //     return file.filename // or file.originalname
-    // })
 
-    // Confirm inventory exists to update
-    const inventory = await Inventory.findById(id).exec()
-
+    const inventory = await Inventory.findById(id).exec();
     if (!inventory) {
-        return res.status(400).json({ message: 'Technical assessment not found' })
+        return res.status(400).json({ message: 'Technical assessment not found' });
     }
-    // // Check for duplicate title
-    // const duplicate = await Inventory.findOne({ title }).lean().exec()
 
-    // // Allow renaming of the original inventory 
-    // if (duplicate && duplicate?._id.toString() !== id) {
-    //     return res.status(409).json({ message: 'Duplicate inventory title' })
-    // }
+    inventory.user = user;
+    inventory.type = type;
+    inventory.coordinates = coordArray; // Store as flat array
+    inventory.images = [...(inventory.images || []), ...images];
+    inventory.properties.address.country = properties.address.country;
+    inventory.properties.address.region = properties.address.region;
+    inventory.properties.address.province = properties.address.province;
+    inventory.properties.address.city = properties.address.city;
+    inventory.properties.address.brgy = properties.address.brgy;
+    inventory.properties.ownerName = properties.ownerName;
+    inventory.properties.reCat = properties.reCat;
+    inventory.properties.reClass = properties.reClass;
+    inventory.properties.yearEst = properties.yearEst;
+    inventory.properties.acquisition = properties.acquisition;
 
-    inventory.user = user
-    inventory.type = type
-    inventory.coordinates = coordinates
-    inventory.images = [...inventory.images, ...images]
-    inventory.properties.address.country = properties.address.country
-    inventory.properties.address.region = properties.address.region
-    inventory.properties.address.province = properties.address.province
-    inventory.properties.address.city = properties.address.city
-    inventory.properties.address.brgy = properties.address.brgy
-    inventory.properties.ownerName = properties.ownerName
-    inventory.properties.reCat = properties.reCat
-    inventory.properties.reClass = properties.reClass
-    inventory.properties.yearEst = properties.yearEst
-    inventory.properties.acquisition = properties.acquisition
-    inventory.assessment = assessment
+    if (properties && Object.prototype.hasOwnProperty.call(properties, 'isNetMetered')) {
+        inventory.properties.isNetMetered = properties.isNetMetered;
+    }
+    if (properties && Object.prototype.hasOwnProperty.call(properties, 'ownUse')) {
+        inventory.properties.ownUse = properties.ownUse;
+    }
 
-    const updatedInventory = await inventory.save()
+    // Save FIT only if commercial, else remove
+    if (properties.reClass === "Commercial") {
+        inventory.properties.fit = properties.fit;
+    } else {
+        if (inventory.properties.fit) delete inventory.properties.fit;
+    }
 
-    res.json(`'${updatedInventory.type}' updated`)
-}
+    inventory.assessment = assessment;
+
+    const updatedInventory = await inventory.save();
+    res.json(`'${updatedInventory.type}' updated`);
+};
 
 const deleteImageInventory = async (req, res) => {
+    const { images, id } = req.body;
+    const inventory = await Inventory.findById(id).exec();
+    const prevImages = inventory.images;
 
-    const { images, id } = req.body
-    const inventory = await Inventory.findById(id).exec()
-    const prevImages = inventory.images
-
-    const newImages = prevImages.splice(images, 1)
-    inventory.images = prevImages
-    const item = newImages[0]
+    const newImages = prevImages.splice(images, 1);
+    inventory.images = prevImages;
+    const item = newImages[0];
 
     const file = await gfsi.find({ filename: item }).toArray();
 
     if (file.length > 0) {
         await gfsi.delete(file[0]._id);
-        const updatedInventory = await inventory.save()
-        res.json(`'${updatedInventory.type}' updated`)
-      } else {
+        const updatedInventory = await inventory.save();
+        res.json(`'${updatedInventory.type}' updated`);
+    } else {
         console.log('Image file not found.');
-      }
-    } 
-    // gfsi.delete(new mongoose.Types.ObjectId(newImages[0]), (err, data) => {
-    //     if (err) {
-    //         return res.status(404).json({ err: err })
-    //     }
-
-
-    // })
-    // fs.unlink('./public/uploads/postimages/' + newImages, (err) => {
-    //     if (err) {
-    //         throw err;
-    //     }
-
-    //     console.log("Delete File successfully.");
-    // });
-
-
+    }
+};
 
 // @desc Delete a inventory
 // @route DELETE /inventories
 // @access Private
 const deleteInventory = async (req, res) => {
-
-    const { id } = req.body
-    // console.log(id.length)
-    // console.log(id)
-    //Confirm data
+    const { id } = req.body;
     if (!id) {
-        return res.status(400).json({ message: 'Inventory ID required' })
+        return res.status(400).json({ message: 'Inventory ID required' });
     }
-
-    // Confirm inventory exists to delete 
-    // id.map
-    // const inventory = await Inventory.findById(id).exec()
     const inventory = id.map(async x =>  {
-        const singleInventory = await Inventory.findById(x).exec()
+        const singleInventory = await Inventory.findById(x).exec();
         if (!singleInventory) {
-            return res.status(400).json({ message: 'Inventory not found' })
+            return res.status(400).json({ message: 'Inventory not found' });
         }
-        const prevImages = singleInventory.images
-
+        const prevImages = singleInventory.images;
         prevImages.map(async file => {
-
             const documents = await gfsi.find({ filename: file }).toArray();
-    
             if (documents.length > 0) {
-                await gfsi.delete(documents[0]._id)
-    
+                await gfsi.delete(documents[0]._id);
             } else {
-                console.log('Image file not found.')
+                console.log('Image file not found.');
             }
-        })
-        singleInventory.deleteOne()
-
-    })
-
-    // if (!inventory) {
-    //     return res.status(400).json({ message: 'Inventory not found' })
-    // }
-    // const prevImages = inventory.images
-
-    // prevImages.map(async file => {
-
-    //     const documents = await gfsi.find({ filename: file }).toArray();
-
-    //     if (documents.length > 0) {
-    //         await gfsi.delete(documents[0]._id)
-
-    //     } else {
-    //         console.log('Image file not found.')
-    //     }
-    // })
-
-    // const result = await inventory.deleteOne()
-    // const reply = `Inventory '${result.type}' with ID ${result._id} deleted`
-    const reply = `Inventory deleted`
-
-    res.json(reply)
-}
-
-
+        });
+        singleInventory.deleteOne();
+    });
+    const reply = `Inventory deleted`;
+    res.json(reply);
+};
 
 module.exports = {
     getAllInventories,
@@ -377,5 +536,4 @@ module.exports = {
     deleteImageInventory,
     updateInventory,
     deleteInventory,
-
-}
+};

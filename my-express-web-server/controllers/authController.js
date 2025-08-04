@@ -15,12 +15,12 @@ const login = async (req, res) => {
     const foundUser = await User.findOne({ username }).exec()
 
     if (!foundUser || !foundUser.active) {
-        return res.status(401).json({ message: 'Username doesn’t exist.' })
+        return res.status(401).json({ message: 'Username doesn\'t exist.' })
     }
 
     const match = await bcrypt.compare(password, foundUser.password)
 
-    if (!match) return res.status(401).json({ message: 'The password you’ve entered is incorrect.' })
+    if (!match) return res.status(401).json({ message: 'The password you\'ve entered is incorrect.' })
     if (checkedTerms===false) return res.status(401).json({ message: 'You must acknowledge that you have read and understood the Terms of Use, Conditions and Privacy Policy' })
 
     const accessToken = jwt.sign(
@@ -104,8 +104,46 @@ const logout = (req, res) => {
     res.json({ message: 'Cookie cleared' })
 }
 
+// @desc Verify user password
+// @route POST /auth/verify
+// @access Private - requires authentication
+const verifyPassword = async (req, res) => {
+    const { password } = req.body
+    const username = req.user
+
+    if (!password) {
+        return res.status(400).json({ message: 'Password is required' })
+    }
+
+    try {
+        // Find the user by username
+        const foundUser = await User.findOne({ username }).exec()
+
+        if (!foundUser || !foundUser.active) {
+            return res.status(401).json({ message: 'Unauthorized' })
+        }
+
+        // Compare password with stored hash
+        const match = await bcrypt.compare(password, foundUser.password)
+
+        if (!match) {
+            return res.status(401).json({ message: 'Incorrect password' })
+        }
+
+        // Password is correct
+        return res.status(200).json({ 
+            success: true,
+            message: 'Password verified successfully' 
+        })
+    } catch (err) {
+        console.error('Error verifying password:', err)
+        return res.status(500).json({ message: 'Server error during password verification' })
+    }
+}
+
 module.exports = {
     login,
     refresh,
-    logout
+    logout,
+    verifyPassword
 }

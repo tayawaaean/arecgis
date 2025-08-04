@@ -45,6 +45,14 @@ export const authApiSlice = apiSlice.injectEndpoints({
                 }
             }
         }),
+        // Add new endpoint for password verification
+        verifyPassword: builder.mutation({
+            query: credentials => ({
+                url: '/auth/verify',
+                method: 'POST',
+                body: { ...credentials }
+            })
+        }),
     })
 })
 
@@ -52,4 +60,5 @@ export const {
     useLoginMutation,
     useSendLogoutMutation,
     useRefreshMutation,
+    useVerifyPasswordMutation, // Export the new hook
 } = authApiSlice 

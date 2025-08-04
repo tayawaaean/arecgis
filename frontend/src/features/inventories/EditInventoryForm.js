@@ -26,6 +26,7 @@ import {
   List,
   ListItem,
   ListItemText,
+  Alert,
 } from '@mui/material'
 import {
   Upload as UploadFileIcon,
@@ -110,6 +111,23 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
   const [acquisition, setAcquisition] = useState(reItems?.properties?.acquisition)
   const [yearEst, setYearEst] = useState(reItems?.properties?.yearEst)
   
+  // FIT-related states
+  const [isFitEligible, setIsFitEligible] = useState(
+    reItems?.properties?.fit?.eligible === true || 
+    reItems?.properties?.fit?.eligible === "true"
+  )
+  const [fitPhase, setFitPhase] = useState(
+    reItems?.properties?.fit?.phase || "Non-FIT"
+  )
+  const [fitRate, setFitRate] = useState(
+    reItems?.properties?.fit?.rate || ""
+  )
+  const [fitRef, setFitRef] = useState(
+    reItems?.properties?.fit?.fitRef || ""
+  )
+  const [fitStatus, setFitStatus] = useState(
+    reItems?.properties?.fit?.fitStatus || ""
+  )
 
   const [myUploads, setmyUploads] = useState('')
   const [filesCount, setFilesCount] = useState(null)
@@ -161,6 +179,23 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
       setIsOwnUse(reItems.properties.ownUse === "Yes" ? "Yes" : "No")
     }
   }, [reItems])
+
+  // Keep FIT phase and eligibility in sync
+  useEffect(() => {
+    if (isFitEligible === false) {
+      setFitPhase("Non-FIT");
+    } else if (isFitEligible === true && fitPhase === "Non-FIT") {
+      setFitPhase("FIT1"); // Default to FIT1 when becoming eligible
+    }
+  }, [isFitEligible]);
+
+  // Auto-set Net Metered and Own Use to "No" when Commercial is selected
+  useEffect(() => {
+    if (reClass === "Commercial") {
+      setIsNetMetered("No");
+      setIsOwnUse("No");
+    }
+  }, [reClass]);
 
   const openDelAlert = (index) => {
     setDelAlert({ bool: true, value: index })
@@ -248,7 +283,22 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
     setCoordinates([parseFloat(e.target.value), parseFloat(lat)])
   }
   const onUserIdChanged = (e) => setUserId(e.target.value)
-  const onReClassChanged = (e) => setReClass(e.target.value)
+  const onReClassChanged = (e) => {
+    setReClass(e.target.value);
+    
+    if (e.target.value === "Commercial") {
+      // Auto-select "No" for Net Metering and Own Use when Commercial is selected
+      setIsNetMetered("No");
+      setIsOwnUse("No");
+    } else {
+      // Reset FIT fields if changing away from Commercial
+      setIsFitEligible(false);
+      setFitPhase("Non-FIT");
+      setFitRate("");
+      setFitRef("");
+      setFitStatus("");
+    }
+  }
   const onReCatChanged = (e) => setReCat(e.target.value)
   const onAquisitionChanged = (e) => setAcquisition(e.target.value)
   const onYearEstChanged = (e) => setYearEst(e.target.value)
@@ -272,115 +322,119 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
   // Fixed: Removed type from canSave since it's not needed for validation
   const canSave = [ownerName, userId].every(Boolean) && !isLoading
 
-  // Debug: Add console.log to check values
-  // console.log('Debug canSave:', {
-  //   ownerName,
-  //   userId,
-  //   isLoading,
-  //   canSave
-  // })
-
   // -- EDIT INVENTORY SUBMIT HANDLER --
-const onSaveInventoryClicked = async (e, isForce = false) => {
-  e.preventDefault();
+  const onSaveInventoryClicked = async (e, isForce = false) => {
+    e.preventDefault();
 
-  // Build properties object for correct backend parsing!
-  const propertiesObj = {
-    ownerName,
-    reCat,
-    reClass,
-    yearEst,
-    acquisition,
-    isNetMetered,
-    ownUse: isOwnUse,
-    address: {
-      country,
-      region,
-      province,
-      city,
-      brgy,
+    // Build properties object for correct backend parsing!
+    const propertiesObj = {
+      ownerName,
+      reCat,
+      reClass,
+      yearEst,
+      acquisition,
+      isNetMetered,
+      ownUse: isOwnUse,
+      address: {
+        country,
+        region,
+        province,
+        city,
+        brgy,
+      }
+    };
+
+    // Add FIT information when Commercial
+    if (reClass === "Commercial") {
+      propertiesObj.fit = {
+        eligible: isFitEligible,
+        phase: fitPhase,
+      };
+
+      if (fitRate) propertiesObj.fit.rate = fitRate;
+      if (fitRef) propertiesObj.fit.fitRef = fitRef;
+      if (fitStatus) propertiesObj.fit.fitStatus = fitStatus;
     }
-  };
 
-  // Build assessment object (customize per your logic)
-  let assessmentObj = {};
-  if (reCat === "Solar Energy" && solar) {
-    Object.assign(assessmentObj, solar);
-  }
-  if (reCat === "Wind Energy" && wind) {
-    Object.assign(assessmentObj, wind);
-  }
-  if (reCat === "Biomass" && biomass) {
-    Object.assign(assessmentObj, biomass);
-  }
-  if (reCat === "Hydropower" && hydropower) {
-    Object.assign(assessmentObj, hydropower);
-  }
-
-  // ---- CLEANUP: Remove empty or invalid solarStreetLights ----
-  if (assessmentObj.solarStreetLights && Array.isArray(assessmentObj.solarStreetLights)) {
-    assessmentObj.solarStreetLights = assessmentObj.solarStreetLights.filter(
-      s =>
-        (s.capacity !== "" && !isNaN(Number(s.capacity))) ||
-        (s.pcs !== "" && !isNaN(Number(s.pcs)))
-    );
-    // If after filtering, array is empty, remove the key entirely
-    if (assessmentObj.solarStreetLights.length === 0) {
-      delete assessmentObj.solarStreetLights;
+    // Build assessment object (customize per your logic)
+    let assessmentObj = {};
+    if (reCat === "Solar Energy" && solar) {
+      Object.assign(assessmentObj, solar);
     }
-  }
-
-  // ---- CLEANUP: Convert capacity and annualEnergyProduction to numbers if possible ----
-  if (assessmentObj.capacity !== undefined && assessmentObj.capacity !== '') {
-    assessmentObj.capacity = Number(assessmentObj.capacity);
-  }
-  if (
-    assessmentObj.annualEnergyProduction !== undefined &&
-    assessmentObj.annualEnergyProduction !== ''
-  ) {
-    assessmentObj.annualEnergyProduction = Number(assessmentObj.annualEnergyProduction);
-  }
-
-  // Build coordinates object in GeoJSON format
-  const coordinatesObj = {
-    type: "Point",
-    coordinates: [parseFloat(lng), parseFloat(lat)]
-  };
-
-  const data = new FormData();
-  data.append('id', reItems.id)
-  data.append('user', userId)
-  data.append('type', 'Point');
-  // Send coordinates as GeoJSON object
-  data.append('coordinates', JSON.stringify(coordinatesObj));
-  data.append('properties', JSON.stringify(propertiesObj));
-  data.append('assessment', JSON.stringify(assessmentObj));
-
-  // Add images if any
-  if (myUploads && myUploads.length > 0) {
-    for (const file of myUploads) {
-      data.append('myUploads', file)
+    if (reCat === "Wind Energy" && wind) {
+      Object.assign(assessmentObj, wind);
     }
-  }
-  if (isForce) data.append('forceUpdate', true)
+    if (reCat === "Biomass" && biomass) {
+      Object.assign(assessmentObj, biomass);
+    }
+    if (reCat === "Hydropower" && hydropower) {
+      Object.assign(assessmentObj, hydropower);
+    }
 
-  setLastFormData(data) // Save for retry
+    // ---- CLEANUP: Remove empty or invalid solarStreetLights ----
+    if (assessmentObj.solarStreetLights && Array.isArray(assessmentObj.solarStreetLights)) {
+      assessmentObj.solarStreetLights = assessmentObj.solarStreetLights.filter(
+        s =>
+          (s.capacity !== "" && !isNaN(Number(s.capacity))) ||
+          (s.pcs !== "" && !isNaN(Number(s.pcs)))
+      );
+      // If after filtering, array is empty, remove the key entirely
+      if (assessmentObj.solarStreetLights.length === 0) {
+        delete assessmentObj.solarStreetLights;
+      }
+    }
 
-  if (canSave) {
-    try {
-      await updateInventory(data).unwrap();
-      setForceUpdate(false)
-      setShowDuplicateModal(false)
-    } catch (err) {
-      if (err?.status === 409 && err?.data?.duplicates) {
-        setPotentialDuplicates(err.data.duplicates)
-        setShowDuplicateModal(true)
-      } else {
-        setErrContent(err?.data?.message || "Unknown error");
+    // ---- CLEANUP: Convert capacity and annualEnergyProduction to numbers if possible ----
+    if (assessmentObj.capacity !== undefined && assessmentObj.capacity !== '') {
+      assessmentObj.capacity = Number(assessmentObj.capacity);
+    }
+    if (
+      assessmentObj.annualEnergyProduction !== undefined &&
+      assessmentObj.annualEnergyProduction !== ''
+    ) {
+      assessmentObj.annualEnergyProduction = Number(assessmentObj.annualEnergyProduction);
+    }
+
+    // Build coordinates object in GeoJSON format
+    const coordinatesObj = {
+      type: "Point",
+      coordinates: [parseFloat(lng), parseFloat(lat)]
+    };
+
+    const data = new FormData();
+    data.append('id', reItems.id)
+    data.append('user', userId)
+    data.append('type', 'Point');
+    // Send coordinates as GeoJSON object
+    data.append('coordinates', JSON.stringify(coordinatesObj));
+    data.append('properties', JSON.stringify(propertiesObj));
+    data.append('assessment', JSON.stringify(assessmentObj));
+
+    // Add images if any
+    if (myUploads && myUploads.length > 0) {
+      for (const file of myUploads) {
+        data.append('myUploads', file)
+      }
+    }
+    if (isForce) data.append('forceUpdate', true)
+
+    setLastFormData(data) // Save for retry
+
+    if (canSave) {
+      try {
+        await updateInventory(data).unwrap();
+        setForceUpdate(false)
+        setShowDuplicateModal(false)
+      } catch (err) {
+        if (err?.status === 409 && err?.data?.duplicates) {
+          setPotentialDuplicates(err.data.duplicates)
+          setShowDuplicateModal(true)
+        } else {
+          setErrContent(err?.data?.message || "Unknown error");
+        }
       }
     }
   }
-}
 
   // When user chooses to "Proceed Anyway"
   const handleProceedAnyway = async () => {
@@ -533,7 +587,113 @@ const onSaveInventoryClicked = async (e, isForce = false) => {
                 </TextField> : ''
               }
 
-              {/* --- Net Metered and Own Use as radio-like checkboxes --- */}
+              {/* FIT Information Section - Only when Commercial */}
+              {reClass === "Commercial" && (
+                <Box sx={{ mt: 2, pb: 2, borderTop: '1px solid #eee', pt: 2 }}>
+                  <Typography variant="h6" sx={{ mb: 1 }}>
+                    FIT Information
+                  </Typography>
+                  
+                  {/* FIT Eligible */}
+                  <Typography sx={{ fontWeight: 700, mb: 1 }} component="label">
+                    Is FIT eligible?
+                  </Typography>
+                  <Box sx={{ display: "flex", flexDirection: "row", alignItems: "center", mb: 2 }}>
+                   <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={isFitEligible === true}
+                          onChange={() => {
+                            setIsFitEligible(true);
+                            // Auto-select FIT1 when eligible (since Non-FIT is no longer valid)
+                            if (fitPhase === "Non-FIT") {
+                              setFitPhase("FIT1");
+                            }
+                          }}
+                          color="primary"
+                        />
+                      }
+                      label="Yes"
+                      sx={{ mr: 2, ml: 1 }}
+                    />
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={isFitEligible === false}
+                          onChange={() => {
+                            setIsFitEligible(false);
+                            // Auto-select Non-FIT when not eligible
+                            setFitPhase("Non-FIT");
+                          }}
+                          color="primary"
+                        />
+                      }
+                      label="No"
+                      sx={{ ml: 2 }}
+                    />
+                  </Box>
+                  
+                  {/* FIT Phase - Disabled when not eligible */}
+                  <TextField
+                      fullWidth
+                      size="small"
+                      id="fitPhase"
+                      select
+                      label="FIT Phase"
+                      value={fitPhase}
+                      onChange={(e) => setFitPhase(e.target.value)}
+                      disabled={isFitEligible === false}
+                      sx={{ mb: 2 }}
+                    >
+                      <MenuItem value="FIT1">FIT1</MenuItem>
+                      <MenuItem value="FIT2">FIT2</MenuItem>
+                      {/* Only show Non-FIT option when not eligible */}
+                      {!isFitEligible && <MenuItem value="Non-FIT">Non-FIT</MenuItem>}
+                    </TextField>
+                  
+                  {/* Optional FIT Rate */}
+                  <TextField
+                    fullWidth
+                    size="small"
+                    label="FIT Rate (PHP/kWh, optional)"
+                    id="fitRate"
+                    name="fitRate"
+                    type="number"
+                    value={fitRate}
+                    onChange={(e) => setFitRate(e.target.value)}
+                    disabled={isFitEligible === false}
+                    sx={{ mb: 2 }}
+                  />
+                  
+                  {/* Optional FIT Reference */}
+                  <TextField
+                    fullWidth
+                    size="small"
+                    label="FIT Reference Number (optional)"
+                    id="fitRef"
+                    name="fitRef"
+                    value={fitRef}
+                    onChange={(e) => setFitRef(e.target.value)}
+                    disabled={isFitEligible === false}
+                    sx={{ mb: 2 }}
+                  />
+                  
+                  {/* Optional FIT Status */}
+                  <TextField
+                    fullWidth
+                    size="small"
+                    label="FIT Status (e.g. active, expired - optional)"
+                    id="fitStatus"
+                    name="fitStatus"
+                    value={fitStatus}
+                    onChange={(e) => setFitStatus(e.target.value)}
+                    disabled={isFitEligible === false}
+                    sx={{ mb: 1 }}
+                  />
+                </Box>
+              )}
+
+              {/* Net Metered and Own Use as radio-like checkboxes */}
               <Box sx={{ mt: 2 }}>
                 <Typography sx={{ fontWeight: 700, mb: 1 }} component="label">
                   Is net-metered?
@@ -545,6 +705,7 @@ const onSaveInventoryClicked = async (e, isForce = false) => {
                         checked={isNetMetered === "Yes"}
                         onChange={() => setIsNetMetered("Yes")}
                         color="primary"
+                        disabled={reClass === "Commercial"} // Disable when Commercial
                       />
                     }
                     label="Yes"
@@ -556,12 +717,18 @@ const onSaveInventoryClicked = async (e, isForce = false) => {
                         checked={isNetMetered === "No"}
                         onChange={() => setIsNetMetered("No")}
                         color="primary"
+                        disabled={reClass === "Commercial"} // Disable when Commercial
                       />
                     }
                     label="No"
                     sx={{ ml: 2 }}
                   />
                 </Box>
+                {reClass === "Commercial" && (
+                  <Alert severity="info" sx={{ mb: 2 }}>
+                    Commercial RE systems are automatically set as not net-metered.
+                  </Alert>
+                )}
                 <Typography sx={{ fontWeight: 700, mb: 1 }} component="label">
                   Own use?
                 </Typography>
@@ -572,6 +739,7 @@ const onSaveInventoryClicked = async (e, isForce = false) => {
                         checked={isOwnUse === "Yes"}
                         onChange={() => setIsOwnUse("Yes")}
                         color="primary"
+                        disabled={reClass === "Commercial"} // Disable when Commercial
                       />
                     }
                     label="Yes"
@@ -583,12 +751,18 @@ const onSaveInventoryClicked = async (e, isForce = false) => {
                         checked={isOwnUse === "No"}
                         onChange={() => setIsOwnUse("No")}
                         color="primary"
+                        disabled={reClass === "Commercial"} // Disable when Commercial
                       />
                     }
                     label="No"
                     sx={{ ml: 2 }}
                   />
                 </Box>
+                {reClass === "Commercial" && (
+                  <Alert severity="info" sx={{ mb: 2 }}>
+                    Commercial RE systems are automatically set as not for own use.
+                  </Alert>
+                )}
               </Box>
             </Box>
 
@@ -729,8 +903,8 @@ const onSaveInventoryClicked = async (e, isForce = false) => {
               />
             </Box>
             {reCat === null ? null :
-              reCat === 'Solar Energy' ? <EditSolar setEditSolar={setEditSolar} reItems={reItems} allUsers={allUsers} /> :
-                reCat === 'Wind Energy' ? <EditWind setEditWind={setEditWind} reItems={reItems} allUsers={allUsers} /> :
+              reCat === 'Solar Energy' ? <EditSolar setEditSolar={setEditSolar} reItems={reItems} allUsers={allUsers} reClass={reClass} /> :
+                reCat === 'Wind Energy' ? <EditWind setEditWind={setEditWind} reItems={reItems} allUsers={allUsers} reClass={reClass} /> :
                   reCat === 'Biomass' ? <EditBiomass setEditBiomass={setEditBiomass} reItems={reItems} allUsers={allUsers} /> :
                     reCat === 'Hydropower' ? <EditHydropower setEditHydropower={setEditHydropower} reItems={reItems} allUsers={allUsers} /> : ''}
             <Box

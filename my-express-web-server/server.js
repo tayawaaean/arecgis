@@ -37,6 +37,8 @@ app.use('/blogs', require('./routes/blogRoutes'))
 app.use('/publicBlogs', require('./routes/publicBlogRoutes'))
 app.use('/publicInventories', require('./routes/publicInventoryRoutes'))
 app.use('/image', require('./routes/imagesRoutes'))
+app.use('/inventory-list', require('./routes/inventoryListRoutes'))
+app.use('/transfers', require('./routes/transferRoutes'))
 
 app.all('*', (req, res) => {
     res.status(404)

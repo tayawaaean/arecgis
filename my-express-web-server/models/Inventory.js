@@ -1,79 +1,115 @@
 const mongoose = require('mongoose');
-// const AutoIncrement = require('mongoose-sequence')(mongoose)
+
+// --- FIT sub-schema for Commercial RE ---
+const fitSchema = new mongoose.Schema({
+  eligible: { type: Boolean, default: false }, // Is FIT-eligible?
+  phase: { type: String, enum: ["FIT1", "FIT2", "Non-FIT"], default: "Non-FIT" },
+  rate: { type: Number }, // PHP/kWh, optional
+  fitRef: { type: String }, // Reference code, optional
+  fitStatus: { type: String } // e.g. active, expired, optional
+}, { _id: false });
+
+// --- Assessment sub-schema ---
+const assessmentSchema = new mongoose.Schema({
+  solarUsage: { type: String },
+  capacity: { type: Number },
+  annualEnergyProduction: { type: Number }, // annual energy prod.
+  solarSystemTypes: { type: String },
+  remarks: { type: String },
+  status: { type: String },
+  // Add other solar, wind, biomass, hydro fields as needed
+}, { _id: false });
 
 const inventorySchema = new mongoose.Schema({
-    user: {
-        type: mongoose.Schema.Types.ObjectId,
-        required: true,
-        ref: 'User'
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  previousUsers: [{  // <-- change here
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
+  type: {
+    type: String,
+    enum: ['Point'],
+    required: true
+  },
+  coordinates: {
+    type: [Number], // [longitude, latitude]
+    required: true,
+    index: '2dsphere'
+  },
+  images: [{
+    type: String,
+  }],
+  assessment: {
+    type: assessmentSchema,
+    default: {}
+  },
+  properties: {
+    ownerName: {
+      type: String,
+      required: true,
     },
-    type: {
+    reCat: {
+      type: String,
+      default: 'Solar Energy System'
+    },
+    reClass: {
+      type: String,
+      required: true,
+    },
+    yearEst: {
+      type: String,
+      required: true,
+    },
+    acquisition: {
+      type: String,
+      required: true,
+    },
+    isNetMetered: {
+      type: String,
+      enum: ["Yes", "No"],
+      default: "No"
+    },
+    ownUse: {
+      type: String,
+      enum: ["Yes", "No"],
+      default: "No"
+    },
+    address: {
+      country: {
         type: String,
-        default: 'Point'
-    },
-    coordinates: {
-        type: Array,
         required: true,
+      },
+      region: {
+        type: String,
+        required: true,
+      },
+      province: {
+        type: String,
+        required: true,
+      },
+      city: {
+        type: String,
+        required: true,
+      },
+      brgy: {
+        type: String,
+        required: true,
+      },
     },
-    images:
-        [{
-            type: String,
-        }],
-    // images:{
-    //     type: Array
-    // },
-    assessment: {
-        type: mongoose.Schema.Types.Mixed
-    },
-    properties: {
-        ownerName: {
-            type: String,
-            required: true,
-        },
-        reCat: {
-            type: String,
-            default: 'Solar Energy System'
-        },
-        reClass: {
-            type: String,
-            required: true,
-        },
-        yearEst: {
-            type: String,
-            required: true,
-        },
-        acquisition: {
-            type: String,
-            required: true,
-        },
-        address: {
-            country: {
-                type: String,
-                required: true,
-            },
-            region: {
-                type: String,
-                required: true,
-            },
-            province: {
-                type: String,
-                required: true,
-            },
-            city: {
-                type: String,
-                required: true,
-            },
-            brgy: {
-                type: String,
-                required: true,
-            },
-        },
-    },
+    // --- FIT info for Commercial RE, optional ---
+    fit: { type: fitSchema, default: undefined }
+  },
 
 },
-    {
-        timestamps: true,
-    }
-)
+  {
+    timestamps: true,
+  }
+);
 
-module.exports = mongoose.model('Inventory', inventorySchema)
+inventorySchema.index({ coordinates: '2dsphere' });
+
+module.exports = mongoose.model('Inventory', inventorySchema);

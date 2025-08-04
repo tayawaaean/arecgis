@@ -29,6 +29,11 @@ import NewInventory from './features/inventories/NewInventory'
 
 import Charts from './features/charts/Chart';
 
+import Transactions from './features/transfers/Transactions';
+import TransferDetail from './features/transfers/TransferDetail';
+import TransferForm from './features/transfers/TransferForm';
+import NewTransfer from './features/transfers/NewTransfer';
+
 import BlogMap from './features/blogs/BlogMap'
 import BlogsList from './features/blogs/BlogsList'
 import EditBlog from './features/blogs/EditBlog'
@@ -143,6 +148,13 @@ function App() {
                   </Route>
 
                   <Route path='charts' element={<Charts />} />
+
+                  <Route path="/dashboard/transfers/new" element={<NewTransfer />} />
+                  <Route path="transfers">
+                    <Route index element={<Transactions />} />
+                    <Route path=":id" element={<TransferDetail />} />
+                    <Route path="new" element={<TransferForm />} />
+                  </Route>
 
                   <Route path='blogs'>
                     <Route index element={<BlogMap />} />

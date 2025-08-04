@@ -1,12 +1,15 @@
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Container, Button, Box, Paper, Grid, Typography, IconButton } from '@mui/material'
+import { 
+  Container, Button, Box, Paper, Grid, Typography, IconButton
+} from '@mui/material'
 import { ArrowBack as ArrowBackIcon } from '@mui/icons-material/'
 import { DataGrid, GridToolbar } from '@mui/x-data-grid'
 import useAuth from "../../hooks/useAuth"
 import useTitle from '../../hooks/useTitle'
 import { boxmain, boxpaper } from '../../config/style'
 import { useGetInventoryListQuery } from './inventoryListApiSlice'
+import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 
 const InventoriesList = () => {
     useTitle('ArecGIS | RE List')
@@ -15,21 +18,19 @@ const InventoriesList = () => {
     const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 100 })
 
     // Protected, paginated API call
+    // Add explicit passing of username and role information
     const { data, isLoading, isError, error } = useGetInventoryListQuery({
         page: paginationModel.page + 1,
         limit: paginationModel.pageSize,
-    })
+        username: username,
+        isAdmin: isAdmin || isManager // Pass a boolean flag to indicate admin/manager status
+    });
 
-    // Always provide id for DataGrid, use MongoDB _id
+    // Remove the client-side filtering since we'll do it on the server
     const inventories = useMemo(() => {
         if (!data?.data) return []
-        let all = data.data.map(row => ({ ...row, id: row._id }))
-        if (isManager || isAdmin) {
-            return all
-        } else {
-            return all.filter(user => user.username === username)
-        }
-    }, [data, isManager, isAdmin, username])
+        return data.data.map(row => ({ ...row, id: row._id }))
+    }, [data])
 
     const meta = data?.meta || { page: 1, total: 0, limit: paginationModel.pageSize, totalPages: 1 }
 
@@ -48,26 +49,56 @@ const InventoriesList = () => {
     }
 
     const handleEdit = (params) => navigate(`/dashboard/inventories/${params.id}`)
-    const renderEditButton = (params) => (
-        <Button
+    
+    // Updated to navigate to transfer form instead of opening modal
+    const handleTransferClick = (params) => {
+        navigate('/dashboard/transfers/new', { 
+            state: { inventory: params.row } 
+        });
+    }
+
+    // Render buttons for actions column - Edit and Transfer
+    const renderActionButtons = (params) => (
+        <Box sx={{ display: 'flex', gap: 1 }}>
+            <Button
+                variant="contained"
+                size="small"
+                onClick={() => handleEdit(params)}
+            >
+                Edit
+            </Button>
+            <Button
             variant="contained"
-            size="small"
-            style={{ margin: 'auto' }}
-            onClick={() => { handleEdit(params) }}
-        >
-            Edit
-        </Button>
+            startIcon={<SwapHorizIcon />}
+            sx={{
+                backgroundColor: '#1976d2',
+                color: 'white',
+                borderRadius: 2,
+                paddingX: 2.5,
+                paddingY: 1,
+                fontWeight: 'bold',
+                textTransform: 'none',
+                '&:hover': {
+                backgroundColor: '#1565c0',
+                },
+            }}
+             onClick={() => handleTransferClick(params)}
+            >
+            Transfer
+            </Button>
+
+        </Box>
     )
 
     const columns = [
         {
             field: 'action',
-            headerName: 'Action',
+            headerName: 'Actions',
             headerAlign: 'center',
-            width: 130,
+            width: 200, // Increased width for two buttons
             sortable: false,
             disableClickEventBubbling: true,
-            renderCell: renderEditButton,
+            renderCell: renderActionButtons,
         },
         {
             field: 'ownerName',
@@ -81,6 +112,16 @@ const InventoriesList = () => {
             headerName: 'RE Category',
             width: 100,
             valueGetter: (inventories) => inventories.row.properties.reCat,
+            disableClickEventBubbling: true,
+        },
+        {
+            field: 'reClass',
+            headerName: 'RE Class',
+            width: 130,
+            type: 'singleSelect',
+            filterable: true,
+            valueOptions: ['Commercial', 'Non-Commercial'],
+            valueGetter: (params) => params.row.properties?.reClass || 'Non-Commercial',
             disableClickEventBubbling: true,
         },
         {
@@ -112,6 +153,38 @@ const InventoriesList = () => {
                 row.row.properties.reCat === 'Solar Energy'
                     ? row.row.assessment.solarSystemTypes || ''
                     : '',
+            disableClickEventBubbling: true,
+        },
+        // Conditionally show different fields based on RE class
+        {
+            field: 'fitEligible',
+            headerName: 'FIT Eligible',
+            width: 120,
+            filterable: true,
+            type: 'singleSelect',
+            valueOptions: ['Yes', 'No'],
+            valueGetter: (params) => {
+                if (params.row.properties.reClass === 'Commercial') {
+                    const eligible = params.row.properties?.fit?.eligible;
+                    return eligible === true || eligible === "true" ? "Yes" : "No";
+                }
+                return '';
+            },
+            hide: true, // Initially hidden, can be shown by user
+            disableClickEventBubbling: true,
+        },
+        {
+            field: 'fitPhase',
+            headerName: 'FIT Phase',
+            width: 120,
+            filterable: true,
+            type: 'singleSelect',
+            valueOptions: ['FIT1', 'FIT2', 'Non-FIT'],
+            valueGetter: (params) => 
+                params.row.properties.reClass === 'Commercial' 
+                    ? (params.row.properties?.fit?.phase || 'Non-FIT')
+                    : '',
+            hide: true, // Initially hidden, can be shown by user
             disableClickEventBubbling: true,
         },
         {

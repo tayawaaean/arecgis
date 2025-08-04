@@ -1,28 +1,61 @@
 import React, { useState, useEffect } from 'react'
-import { TextField, Input, InputAdornment, Box, Checkbox, FormControlLabel, FormGroup, Typography, Link, Button, Grid } from '@mui/material'
-import { rawSolarUsage, rawSolarSysTypes, Status } from "../../config/techAssesment"
+import { FormLabel, TextField, Input, InputAdornment, Box, Checkbox, FormControlLabel, FormGroup, Typography, Grid, Button, Alert } from '@mui/material'
+import { rawSolarUsage, rawSolarSysTypes, Status } from '../../config/techAssesment'
 import { boxstyle } from '../../config/style'
 import HighlightOffSharpIcon from '@mui/icons-material/HighlightOffSharp'
 
 export const Solar = (props) => {
+  // Check if this is a commercial RE installation
+  const isCommercial = props.reClass === "Commercial";
+  
+  // Find indexes for auto-selection
+  const powerGenerationIndex = rawSolarUsage.findIndex(usage => usage.name === "Power Generation");
+  const gridTiedIndex = rawSolarSysTypes.findIndex(type => type.name === "Grid-tied");
 
-  const [formValues, setFormValues] = useState([{ capacity: "", pcs: "" }])
+  const [formValues, setFormValues] = useState([
+    { capacity: "", pcs: "" },
+  ])
+
   const [data, setData] = useState([])
 
-  const [capacity, setCapacity] = useState('')
-  const [annualEnergyProduction, setAnnualEnergyProduction] = useState('') // <-- NEW STATE
+  const [capacity, setCapacity] = useState("")
+  const [annualEnergyProduction, setAnnualEnergyProduction] = useState("")
+  const [solarUsage, setSolarUsage] = useState({
+    index: '', value: '', otherVal: ''
+  })
+  const [solarSystemTypes, setSolarSysTypes] = useState({
+    index: '', value: '', otherVal: ''
+  })
+  const [status, setStatus] = useState({
+    index: '', value: '', otherVal: ''
+  })
 
-  const [solarUsage, setSolarUsage] = useState({ index: '', value: '', otherVal: '' })
+  const [remarks, setRemarks] = useState("")
+  const [flowRate, setFlowRate] = useState("")
+  const [serviceArea, setServiceArea] = useState("")
 
-  const [solarSystemTypes, setSolarSysTypes] = useState({ index: '', value: '', otherVal: '' })
-
-  const [status, setStatus] = useState({ index: '', value: '', otherVal: '' })
-
-  const [remarks, setRemarks] = useState('')
-
-  const [flowRate, setFlowRate] = useState('')
-
-  const [serviceArea, setServiceArea] = useState('')
+  // Auto-select Power Generation & Grid-tied for Commercial RE
+  useEffect(() => {
+    if (isCommercial) {
+      // Auto-select Power Generation
+      if (powerGenerationIndex !== -1) {
+        setSolarUsage({ 
+          index: powerGenerationIndex, 
+          value: rawSolarUsage[powerGenerationIndex].name,
+          otherVal: ''
+        });
+      }
+      
+      // Auto-select Grid-tied
+      if (gridTiedIndex !== -1) {
+        setSolarSysTypes({
+          index: gridTiedIndex,
+          value: rawSolarSysTypes[gridTiedIndex].name,
+          otherVal: ''
+        });
+      }
+    }
+  }, [isCommercial, powerGenerationIndex, gridTiedIndex]);
 
   useEffect(() => {
     setData({
@@ -33,24 +66,26 @@ export const Solar = (props) => {
       serviceArea: serviceArea,
       solarSystemTypes: solarSystemTypes?.value,
       solarUsage: solarUsage?.otherVal === '' ? solarUsage?.value : solarUsage?.otherVal,
-      annualEnergyProduction: solarUsage?.index === 2 ? annualEnergyProduction : undefined, // <-- Only if Power Gen
       status: status?.value,
       remarks: remarks,
+      annualEnergyProduction: solarUsage?.value === "Power Generation" ? annualEnergyProduction : undefined,
     })
+    // eslint-disable-next-line
   }, [
     capacity,
     formValues,
     flowRate,
     solarUsage,
-    annualEnergyProduction,
     serviceArea,
     solarSystemTypes,
     status,
-    remarks
+    remarks,
+    annualEnergyProduction
   ])
 
   useEffect(() => {
     props.setSolar(data)
+    // eslint-disable-next-line
   }, [data])
 
   const handleChange = (index) => (e) => {
@@ -70,24 +105,41 @@ export const Solar = (props) => {
   }
 
   const valuesOfSolarUsage = (index) => (e) => {
+    // If Commercial, only allow Power Generation (index should match Power Generation)
+    if (isCommercial && index !== powerGenerationIndex) {
+      return;
+    }
+    
     if (rawSolarUsage[index].name === 'Other' && e.target.value !== 'on' && e.target.value !== '') {
       setSolarUsage({ index: index, value: rawSolarUsage[index].name, otherVal: e.target.value })
     }
     else if (index === solarUsage?.index) {
+      // If commercial, don't allow deselecting Power Generation
+      if (isCommercial && index === powerGenerationIndex) {
+        return;
+      }
       setSolarUsage({ index: '', value: '', otherVal: '' })
     }
     else {
       setSolarUsage({ index: index, value: rawSolarUsage[index].name, otherVal: '' })
     }
-    // Reset annual energy production if usage changes away from Power Generation
-    if (index !== 2) setAnnualEnergyProduction('');
+    if (rawSolarUsage[index].name !== "Power Generation") setAnnualEnergyProduction('');
   }
 
   const valuesOfSolarSystem = (index) => (e) => {
+    // If Commercial, only allow Grid-tied (index should match Grid-tied)
+    if (isCommercial && index !== gridTiedIndex) {
+      return;
+    }
+    
     if (rawSolarSysTypes[index].name === 'Other' && e.target.value !== 'on' && e.target.value !== '') {
       setSolarSysTypes({ index: index, value: '', otherVal: e.target.value })
     }
     else if (index === solarSystemTypes?.index) {
+      // If commercial, don't allow deselecting Grid-tied
+      if (isCommercial && index === gridTiedIndex) {
+        return;
+      }
       setSolarSysTypes({ index: '', value: '', otherVal: '' })
     }
     else {
@@ -113,6 +165,13 @@ export const Solar = (props) => {
         <Typography sx={{ fontStyle: 'italic' }} component="h1" variant="subtitle2">
           Primary use of Solar Energy System
         </Typography>
+        
+        {isCommercial && (
+          <Alert severity="info" sx={{ mb: 2 }}>
+            Commercial RE systems must use Power Generation. Other options are disabled.
+          </Alert>
+        )}
+        
         {rawSolarUsage.map((type, index) => (
           <FormGroup key={index}>
             <FormControlLabel
@@ -121,11 +180,12 @@ export const Solar = (props) => {
                 <Checkbox
                   onChange={valuesOfSolarUsage(index)}
                   checked={type.name === solarUsage?.value}
+                  disabled={isCommercial && index !== powerGenerationIndex} // Disable all except Power Generation if Commercial
                 />
               }
               label={type.name === 'Other' ? <Input
                 onChange={valuesOfSolarUsage(index)}
-                disabled={type.name !== solarUsage?.value}
+                disabled={(type.name !== solarUsage?.value) || isCommercial}
                 value={solarUsage?.otherVal}
                 startAdornment={<InputAdornment position="start">Other:</InputAdornment>}
               /> : type.name}
@@ -135,7 +195,7 @@ export const Solar = (props) => {
       </Box>
 
       <Box sx={boxstyle}>
-        <Box sx={{ display: solarUsage?.index === 0 ? 'block' : 'none' }}>
+        <Box sx={{ display: solarUsage?.value === "Solar Street Lights" ? 'block' : 'none' }}>
           <Typography sx={{ fontStyle: 'italic' }} component="h1" variant="subtitle2">
             For Solar Street Lights (leave blank if not applicable)
           </Typography>
@@ -186,7 +246,7 @@ export const Solar = (props) => {
             <Button onClick={addFormFields} component="button" underline="none">Add More..</Button>
           </div>
         </Box>
-        <Box sx={{ display: solarUsage?.index === 1 ? 'block' : 'none' }}>
+        <Box sx={{ display: solarUsage?.value === "Solar Pump" ? 'block' : 'none' }}>
           <Typography sx={{ fontStyle: "italic", mb: 2 }} component="h1" variant="subtitle2">
             For Solar Pump (leave blank if not applicable)
           </Typography>
@@ -236,7 +296,7 @@ export const Solar = (props) => {
             }}
           />
         </Box>
-        <Box sx={{ display: solarUsage?.index === 2 ? 'block' : 'none' }}>
+        <Box sx={{ display: solarUsage?.value === 'Power Generation' ? 'block' : 'none' }}>
           <Typography sx={{ fontStyle: 'italic', mb: 2 }} component="h1" variant="subtitle2">
             For Power Generation (leave blank if not applicable)
           </Typography>
@@ -248,14 +308,14 @@ export const Solar = (props) => {
             size="small"
             id="capacity"
             name="capacity"
-            type="text"
+            type="number"
             value={capacity}
             onChange={(e) => setCapacity(e.target.value)}
             InputProps={{
               endAdornment: <InputAdornment position="end"><var>Wp</var></InputAdornment>,
             }}
           />
-          {/* Annual Energy Production visible ONLY when Power Generation */}
+          {/* Annual Energy Production input, only for Power Generation */}
           <Typography sx={{ fontStyle: 'italic' }} component="h1" variant="subtitle2">
             Annual Energy Production:
           </Typography>
@@ -274,6 +334,13 @@ export const Solar = (props) => {
           <Typography sx={{ fontStyle: 'italic' }} component="h1" variant="subtitle2">
             Solar Energy System Types:
           </Typography>
+          
+          {isCommercial && (
+            <Alert severity="info" sx={{ mb: 2 }}>
+              Commercial RE systems must use Grid-tied configuration. Other options are disabled.
+            </Alert>
+          )}
+          
           {rawSolarSysTypes.map((type, index) => (
             <FormGroup key={index}>
               <FormControlLabel
@@ -282,6 +349,7 @@ export const Solar = (props) => {
                   <Checkbox
                     onChange={valuesOfSolarSystem(index)}
                     checked={type.name === solarSystemTypes?.value}
+                    disabled={isCommercial && index !== gridTiedIndex} // Disable all except Grid-tied if Commercial
                   />
                 }
                 label={type.name}
@@ -289,7 +357,7 @@ export const Solar = (props) => {
             </FormGroup>
           ))}
         </Box>
-        <Box sx={{ display: solarUsage?.index === 3 ? 'block' : 'none' }}>
+        <Box sx={{ display: solarUsage?.value === 'Other' ? 'block' : 'none' }}>
           <Typography sx={{ fontStyle: 'italic', mb: 2 }} component="h1" variant="subtitle2">
             For Other Solar Energy System
           </Typography>
@@ -301,7 +369,7 @@ export const Solar = (props) => {
             size="small"
             id="capacity"
             name="capacity"
-            type="text"
+            type="number"
             value={capacity}
             onChange={(e) => setCapacity(e.target.value)}
             InputProps={{
