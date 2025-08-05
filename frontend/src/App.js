@@ -154,6 +154,7 @@ function App() {
                     <Route index element={<Transactions />} />
                     <Route path=":id" element={<TransferDetail />} />
                     <Route path="new" element={<TransferForm />} />
+
                   </Route>
 
                   <Route path='blogs'>

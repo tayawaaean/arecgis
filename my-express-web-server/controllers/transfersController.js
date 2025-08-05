@@ -311,6 +311,7 @@ const getUserTransfersById = async (req, res) => {
     }
 }
 
+
 // @desc Get a single transfer document
 // @route GET /transfers/:id/documents/:docId
 // @access Private
@@ -345,19 +346,22 @@ const getTransferDocument = async (req, res) => {
         }
 
         const document = transfer.documents[docIndex]
-
-        res.json({
-            name: document.name,
-            type: document.type,
-            size: document.size,
-            data: document.data
-        })
+        
+        // Convert base64 to buffer
+        const fileBuffer = Buffer.from(document.data, 'base64')
+        
+        // Set appropriate headers for document display/download
+        res.setHeader('Content-Type', document.type)
+        res.setHeader('Content-Disposition', `inline; filename="${document.name}"`)
+        res.setHeader('Content-Length', fileBuffer.length)
+        
+        // Send the file data directly, not as JSON
+        return res.send(fileBuffer)
     } catch (error) {
         console.error('Error in getTransferDocument:', error)
         res.status(500).json({ message: 'Error retrieving document' })
     }
 }
-
 // @desc Approve a transfer (updates inventory owner and pushes to previousUsers)
 // @route PATCH /transfers/:id/approve
 // @access Private (Admin/Manager only)

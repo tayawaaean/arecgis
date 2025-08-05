@@ -23,17 +23,15 @@ export const transferApiSlice = apiSlice.injectEndpoints({
 
     // Get a single transfer by ID
     getTransfer: builder.query({
-  query: (id) => `/transfers/${id}`,
-  transformResponse: (response) => {
-    // Add any missing fields or transform data here
-    return {
-      ...response,
-      // Example: Set default values for missing fields
-      status: response.status || 'unknown'
-    };
-  },
-  providesTags: (result, error, id) => [{ type: "Transfer", id }],
-}),
+      query: (id) => `/transfers/${id}`,
+      transformResponse: (response) => {
+        return {
+          ...response,
+          status: response.status || 'unknown'
+        };
+      },
+      providesTags: (result, error, id) => [{ type: "Transfer", id }],
+    }),
 
     // Add a new transfer request
     addNewTransfer: builder.mutation({
@@ -55,7 +53,7 @@ export const transferApiSlice = apiSlice.injectEndpoints({
       invalidatesTags: (result, error, { id }) => [
         { type: "Transfer", id },
         { type: "Transfer", id: "LIST" },
-        { type: "Inventory", id: "LIST" }, // Also invalidate inventories
+        { type: "Inventory", id: "LIST" },
       ],
     }),
 
@@ -79,6 +77,15 @@ export const transferApiSlice = apiSlice.injectEndpoints({
         { type: "TransferCheck", id: inventoryId },
       ],
     }),
+    
+    // Get document data as blob - using mutation for on-demand requests
+    getTransferDocument: builder.mutation({
+      query: ({ transferId, documentIndex }) => ({
+        url: `/transfers/${transferId}/documents/${documentIndex}`,
+        method: 'GET',
+        responseHandler: 'blob',
+      }),
+    }),
   }),
 });
 
@@ -89,4 +96,5 @@ export const {
   useApproveTransferMutation,
   useRejectTransferMutation,
   useCheckExistingTransfersQuery,
+  useGetTransferDocumentMutation,
 } = transferApiSlice;

@@ -91,7 +91,7 @@ router.get(
 router.get('/:id', transfersController.getTransferById)
 
 // Get document from transfer 
-router.get('/:id/documents/:docId', transfersController.getTransferDocument)
+router.get('/:id/documents/:docId', verifyJWT, transfersController.getTransferDocument);
 
 // Approve a transfer (Admin/Manager only)
 router.patch(
