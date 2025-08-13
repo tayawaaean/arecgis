@@ -17,7 +17,6 @@ const BlogsList = () => {
 
     const { username, isManager, isAdmin } = useAuth()
     const rawblogs = useSelector(selectAllBlogs)
-    console.log(rawblogs)
     let blogs
 
     if (isManager || isAdmin) {
@@ -120,6 +119,7 @@ const BlogsList = () => {
                                     <Box sx={{ mt: 1 }}>
                                         <Box sx={{ height: 400, width: '100%' }}>
                                             <DataGrid
+                                                aria-label="Blogs list table"
                                                 rows={blogs}
                                                 columns={columns}
                                                 initialState={{
@@ -131,7 +131,11 @@ const BlogsList = () => {
                                                 }}
                                                 // pageSizeOptions={[5]}
                                                 disableColumnSelector
-                                                slots={{ toolbar: GridToolbar }}
+                                                slots={{ toolbar: GridToolbar, noRowsOverlay: () => (
+                                                    <Box role="status" aria-live="polite" sx={{ p: 3, textAlign: 'center' }}>
+                                                        <Typography variant="body2" color="text.secondary">No blogs to display.</Typography>
+                                                    </Box>
+                                                ) }}
                                                 slotProps={{
                                                     toolbar: {
                                                         showQuickFilter: true,

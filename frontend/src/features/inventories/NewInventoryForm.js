@@ -27,12 +27,13 @@ import { boxstyle } from "../../config/style";
 import useAuth from "../../hooks/useAuth";
 import { reCats } from "../../config/reCats";
 import { Classification, mannerOfAcquisition } from "../../config/techAssesment";
-import { Upload as UploadFileIcon, MyLocation as MyLocationIcon, ArrowBack as ArrowBackIcon } from "@mui/icons-material";
+import { Upload as UploadFileIcon, MyLocation as MyLocationIcon, ArrowBack as ArrowBackIcon, Help as HelpIcon } from "@mui/icons-material";
 import { Coordinates } from "../../components/Coordinates";
 import { Solar } from "../categories/Solar";
 import { Wind } from "../categories/Wind";
 import { Biomass } from "../categories/Biomass";
 import { Hydropower } from "../categories/Hydropower";
+import InventoryHelpModal from "../../components/InventoryHelpModal";
 
 const DUPLICATE_RADIUS_METERS = 100; // Should match backend value!
 
@@ -89,6 +90,9 @@ const NewInventoryForm = ({ allUsers }) => {
   const [showDuplicateModal, setShowDuplicateModal] = useState(false);
   const [forceCreate, setForceCreate] = useState(false);
   const [lastFormData, setLastFormData] = useState(null);
+
+  // HELP MODAL STATE
+  const [openHelpModal, setOpenHelpModal] = useState(false);
 
   useEffect(() => {
     if (!isManager || !isAdmin) {
@@ -369,11 +373,20 @@ const NewInventoryForm = ({ allUsers }) => {
             </Collapse>
             <Grid container>
               <Grid item xs key="1">
-                <Typography component="h1" variant="h5">
+                <Typography component="h1" variant="h5" sx={{ color: 'white' }}>
                   New Inventory
                 </Typography>
               </Grid>
               <Grid item key="2">
+                <Tooltip title="Help & Guide" placement="top">
+                  <IconButton 
+                    onClick={() => setOpenHelpModal(true)}
+                    sx={{ mr: 1 }}
+                    color="primary"
+                  >
+                    <HelpIcon />
+                  </IconButton>
+                </Tooltip>
                 <IconButton onClick={() => navigate(-1)}>
                   <ArrowBackIcon />
                 </IconButton>
@@ -883,6 +896,13 @@ const NewInventoryForm = ({ allUsers }) => {
           </DialogActions>
         </Dialog>
       </form>
+
+      {/* Help Modal */}
+      <InventoryHelpModal
+        open={openHelpModal}
+        onClose={() => setOpenHelpModal(false)}
+        formType="new"
+      />
     </Container>
   );
 };

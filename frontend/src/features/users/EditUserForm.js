@@ -22,15 +22,24 @@ import {
     DialogContent,
     DialogContentText,
     DialogActions,
+    Alert,
+    Divider,
 } from "@mui/material"
 import {
     ArrowBack as ArrowBackIcon,
     Save as SaveIcon,
+    Edit as EditIcon,
+    Lock as LockIcon,
+    Person as PersonIcon,
+    Badge as BadgeIcon,
+    Business as BusinessIcon,
     DeleteForever as DeleteForeverIcon
 }
     from '@mui/icons-material/'
 import { useUpdateUserMutation, useDeleteUserMutation } from "./usersApiSlice"
+import { useGetAffiliationsQuery } from '../affiliations/affiliationsApiSlice'
 import { ROLES } from "../../config/roles"
+import { DEFAULT_AFFILIATIONS } from '../../config/affiliations'
 import { boxmain, boxpaper } from '../../config/style'
 import useAuth from "../../hooks/useAuth"
 
@@ -84,6 +93,12 @@ const EditUserForm = ({ user }) => {
         error: delerror
     }] = useDeleteUserMutation()
 
+    const {
+        data: affiliations,
+        isLoading: affiliationsLoading,
+        isError: affiliationsError
+    } = useGetAffiliationsQuery()
+
     const navigate = useNavigate()
     const { id, isAdmin, isManager } = useAuth()
     const [username, setUsername] = useState(user.username)
@@ -92,7 +107,17 @@ const EditUserForm = ({ user }) => {
     const [validPassword, setValidPassword] = useState(false)
     const [roles, setRoles] = useState(user.roles)
     const [active, setActive] = useState(user.active)
+    const [fullName, setFullName] = useState(user.fullName || '')
+    const [address, setAddress] = useState(user.address || '')
+    const [contactNumber, setContactNumber] = useState(user.contactNumber || '')
+    const [affiliation, setAffiliation] = useState(user.affiliation || '')
+    const [companyName, setCompanyName] = useState(user.companyName || '')
+    const [companyContactNumber, setCompanyContactNumber] = useState(user.companyContactNumber || '')
     const [delAlert, setDelAlert] = useState(false)
+
+    // Phone validations: must start with +63 and contain digits only
+    const [validContactNumber, setValidContactNumber] = useState(true)
+    const [validCompanyContactNumber, setValidCompanyContactNumber] = useState(true)
 
     useEffect(() => {
         setValidUsername(USER_REGEX.test(username))
@@ -108,6 +133,12 @@ const EditUserForm = ({ user }) => {
             setUsername('')
             setPassword('')
             setRoles([])
+            setFullName('')
+            setAddress('')
+            setContactNumber('')
+            setAffiliation('')
+            setCompanyName('')
+            setCompanyContactNumber('')
             navigate('/dashboard/users')
         }
 
@@ -115,14 +146,79 @@ const EditUserForm = ({ user }) => {
 
     const onUsernameChanged = e => setUsername(e.target.value)
     const onPasswordChanged = e => setPassword(e.target.value)
+    const onFullNameChanged = e => setFullName(e.target.value)
+    const onAddressChanged = e => setAddress(e.target.value)
+    const onContactNumberChanged = e => {
+        const value = e.target.value
+        // Only allow +63 followed by digits
+        if (value.startsWith('+63') && /^\+63\d*$/.test(value)) {
+            setContactNumber(value)
+        }
+    }
+    const onAffiliationChanged = e => setAffiliation(e.target.value)
+    const onCompanyNameChanged = e => setCompanyName(e.target.value)
+    const onCompanyContactNumberChanged = e => {
+        const value = e.target.value
+        // Only allow +63 followed by digits
+        if (value.startsWith('+63') && /^\+63\d*$/.test(value)) {
+            setCompanyContactNumber(value)
+        }
+    }
+
+    const onContactNumberFocus = () => {
+        if (!contactNumber.startsWith('+63')) {
+            setContactNumber('+63')
+        }
+    }
+
+    const onCompanyContactNumberFocus = () => {
+        if (!companyContactNumber.startsWith('+63')) {
+            setCompanyContactNumber('+63')
+        }
+    }
+
+    useEffect(() => {
+        const ok = contactNumber === '' || /^\+63\d+$/.test(contactNumber)
+        setValidContactNumber(ok)
+    }, [contactNumber])
+
+    useEffect(() => {
+        const ok = companyContactNumber === '' || /^\+63\d+$/.test(companyContactNumber)
+        setValidCompanyContactNumber(ok)
+    }, [companyContactNumber])
 
     const onActiveChanged = () => setActive(prev => !prev)
 
     const onSaveUserClicked = async (e) => {
         if (password) {
-            await updateUser({ id: user.id, username, password, roles, active, isAdmin, isManager })
+            await updateUser({ 
+                id: user.id, 
+                username, 
+                password, 
+                roles, 
+                active, 
+                fullName, 
+                address, 
+                contactNumber, 
+                affiliation,
+                companyName,
+                companyContactNumber,
+                isAdmin, 
+                isManager 
+            })
         } else {
-            await updateUser({ id: user.id, username, roles, active })
+            await updateUser({ 
+                id: user.id, 
+                username, 
+                roles, 
+                active, 
+                fullName, 
+                address, 
+                contactNumber, 
+                affiliation,
+                companyName,
+                companyContactNumber
+            })
         }
     }
 
@@ -132,9 +228,11 @@ const EditUserForm = ({ user }) => {
 
     let canSave
     if (password) {
-        canSave = [roles.length, validUsername, validPassword].every(Boolean) && !isLoading
+        const companyContactOk = roles.includes('Installer') ? validCompanyContactNumber : true
+        canSave = [roles.length, validUsername, validPassword, validContactNumber, companyContactOk].every(Boolean) && !isLoading
     } else {
-        canSave = [roles.length, validUsername].every(Boolean) && !isLoading
+        const companyContactOk = roles.includes('Installer') ? validCompanyContactNumber : true
+        canSave = [roles.length, validUsername, validContactNumber, companyContactOk].every(Boolean) && !isLoading
     }
 
     const errClass = (isError || isDelError) ? "errmsg" : "offscreen"
@@ -157,29 +255,55 @@ const EditUserForm = ({ user }) => {
     const content = (
         <>
             <p className={errClass}>{errContent}</p>
-            <Container component="main" maxWidth="sm">
+            <Container component="main" maxWidth="md" sx={{ height: '100vh', py: 2 }}>
                 <CssBaseline />
                 <Box
-                    sx={boxmain}
+                    sx={{
+                        height: '100%',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'center'
+                    }}
                 >
-                    <Box
-                        sx={boxpaper}
+                    <Paper 
+                        elevation={3} 
+                        sx={{ 
+                            p: 3,
+                            height: 'fit-content',
+                            maxHeight: '95vh',
+                            overflow: 'hidden'
+                        }}
                     >
-                        <Paper elevate={3}>
-                            <Grid container>
-                                <Grid item xs>
-                                    <Typography component="h1" variant="h5">
-                                        Edit user
-                                    </Typography>
-                                </Grid>
-                                <Grid item>
-                                    <IconButton onClick={() => navigate(-1)}>
-                                        <ArrowBackIcon />
-                                    </IconButton>
-                                </Grid>
+                        <Grid container spacing={2} alignItems="center" sx={{ mb: 3 }}>
+                            <Grid item xs>
+                                <Typography component="h1" variant="h5" sx={{ fontWeight: 600 }}>
+                                    Edit User
+                                </Typography>
                             </Grid>
-                            <Box sx={{ mt: 1 }}>
-                                <form onSubmit={e => e.preventDefault()}>
+                            <Grid item>
+                                <IconButton 
+                                    onClick={() => navigate(-1)}
+                                    sx={{ 
+                                        color: 'primary.main',
+                                        '&:hover': { backgroundColor: 'primary.light', color: 'white' }
+                                    }}
+                                >
+                                    <ArrowBackIcon />
+                                </IconButton>
+                            </Grid>
+                        </Grid>
+                        
+                        <form onSubmit={e => e.preventDefault()}>
+                            <Grid container spacing={3}>
+                                {/* Left Column - Basic Info */}
+                                <Grid item xs={12} md={6}>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                                        <LockIcon sx={{ mr: 1, color: 'primary.main' }} />
+                                        <Typography sx={{ fontStyle: 'italic', mb: 0, fontWeight: 600, color: 'primary.main' }} component="h3" variant="subtitle1">
+                                            Account Settings
+                                        </Typography>
+                                    </Box>
+                                    
                                     <TextField
                                         margin="normal"
                                         required
@@ -188,7 +312,10 @@ const EditUserForm = ({ user }) => {
                                         label="Username"
                                         value={username}
                                         onChange={onUsernameChanged}
+                                        size="small"
+                                        sx={{ mb: 2 }}
                                     />
+                                    
                                     <TextField
                                         margin="normal"
                                         fullWidth
@@ -198,15 +325,21 @@ const EditUserForm = ({ user }) => {
                                         id="password"
                                         value={password}
                                         onChange={onPasswordChanged}
+                                        size="small"
+                                        sx={{ mb: 2 }}
+                                        helperText="Leave blank to keep current password"
                                     />
+                                    
+                                    <Typography sx={{ fontStyle: 'italic', mb: 1, fontWeight: 500 }} component="h2" variant="subtitle2">
+                                        Select role(s):
+                                    </Typography>
                                     <Select
-                                        sx={{ my: 2 }}
-                                        label="Roles"
+                                        size="small"
                                         multiple
                                         fullWidth
                                         value={roles}
                                         onChange={onRolesChange}
-                                        input={<OutlinedInput id="select-multiple-chip" label="Roles" />}
+                                        input={<OutlinedInput id="select-multiple-chip" />}
                                         renderValue={(selected) => (
                                             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                                                 {selected.map((value) => (
@@ -215,6 +348,7 @@ const EditUserForm = ({ user }) => {
                                             </Box>
                                         )}
                                         MenuProps={MenuProps}
+                                        sx={{ mb: 2 }}
                                     >
                                         {Object.values(ROLES).map((name) => (
                                             <MenuItem
@@ -226,39 +360,214 @@ const EditUserForm = ({ user }) => {
                                             </MenuItem>
                                         ))}
                                     </Select>
+                                    
                                     <FormControlLabel
                                         control={<Checkbox id="user-active" checked={active} onChange={onActiveChanged} color="primary" />}
                                         label="Active"
+                                        sx={{ mt: 1 }}
                                     />
+                                </Grid>
+                                
+                                {/* Right Column - Profile Info */}
+                                <Grid item xs={12} md={6}>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                                        <BadgeIcon sx={{ mr: 1, color: 'primary.main' }} />
+                                        <Typography sx={{ fontStyle: 'italic', mb: 0, fontWeight: 600, color: 'primary.main' }} component="h3" variant="subtitle1">
+                                            Profile Information
+                                        </Typography>
+                                    </Box>
+                                    
+                                    <TextField
+                                        margin="normal"
+                                        fullWidth
+                                        id="fullName"
+                                        label="Full Name"
+                                        value={fullName}
+                                        onChange={onFullNameChanged}
+                                        placeholder="Enter full name"
+                                        size="small"
+                                        sx={{ mb: 2 }}
+                                    />
+                                    
+                                    <TextField
+                                        margin="normal"
+                                        fullWidth
+                                        multiline
+                                        rows={2}
+                                        id="address"
+                                        label="Address"
+                                        value={address}
+                                        onChange={onAddressChanged}
+                                        placeholder="Enter address"
+                                        size="small"
+                                        sx={{ mb: 2 }}
+                                    />
+                                    
+                                    <TextField
+                                        margin="normal"
+                                        fullWidth
+                                        id="contactNumber"
+                                        label="Contact Number"
+                                        value={contactNumber}
+                                        onChange={onContactNumberChanged}
+                                        onFocus={onContactNumberFocus}
+                                        placeholder="Enter contact number"
+                                        error={!validContactNumber}
+                                        helperText={!validContactNumber ? 'Format: +63 followed by digits only' : ' '}
+                                        size="small"
+                                        sx={{ mb: 2 }}
+                                    />
+                                    
+                                    <Typography sx={{ fontStyle: 'italic', mb: 1, fontWeight: 500 }} component="h2" variant="subtitle2">
+                                        Affiliation:
+                                    </Typography>
+                                    <Select
+                                        size="small"
+                                        fullWidth
+                                        value={affiliation}
+                                        onChange={onAffiliationChanged}
+                                        displayEmpty
+                                        sx={{ mb: 2 }}
+                                    >
+                                        <MenuItem value="">
+                                            <em>Not Affiliated</em>
+                                        </MenuItem>
+                                        {affiliationsLoading ? (
+                                            DEFAULT_AFFILIATIONS.map((affil) => (
+                                                <MenuItem key={affil.code} value={affil.code}>
+                                                    {affil.name} ({affil.code})
+                                                </MenuItem>
+                                            ))
+                                        ) : affiliations?.ids?.length ? (
+                                            affiliations.ids.map((id) => {
+                                                const affil = affiliations.entities[id];
+                                                return (
+                                                    <MenuItem key={affil.code} value={affil.code}>
+                                                        {affil.name} ({affil.code})
+                                                    </MenuItem>
+                                                );
+                                            })
+                                        ) : (
+                                            DEFAULT_AFFILIATIONS.map((affil) => (
+                                                <MenuItem key={affil.code} value={affil.code}>
+                                                    {affil.name} ({affil.code})
+                                                </MenuItem>
+                                            ))
+                                        )}
+                                    </Select>
+                                </Grid>
+                                
+                                {/* Company fields - Full width when Installer role is selected */}
+                                {roles.includes('Installer') && (
+                                    <Grid item xs={12}>
+                                        <Divider sx={{ my: 2 }} />
+                                        <Box sx={{ 
+                                            p: 3, 
+                                            backgroundColor: 'grey.50', 
+                                            borderRadius: 2,
+                                            border: '1px solid',
+                                            borderColor: 'primary.light',
+                                            boxShadow: 1
+                                        }}>
+                                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                                                <BusinessIcon sx={{ mr: 1, color: 'primary.main' }} />
+                                                <Typography sx={{ fontStyle: 'italic', fontWeight: 600, color: 'primary.main' }} component="h3" variant="subtitle1">
+                                                    Company Information
+                                                </Typography>
+                                            </Box>
+                                            <Grid container spacing={3}>
+                                                <Grid item xs={12} md={6}>
+                                                    <Typography sx={{ fontStyle: 'italic', mb: 1, fontWeight: 500 }} component="h2" variant="subtitle2">
+                                                        Company Name:
+                                                    </Typography>
+                                                    <TextField
+                                                        size="small"
+                                                        fullWidth
+                                                        id="companyName"
+                                                        label="Company Name"
+                                                        value={companyName}
+                                                        onChange={onCompanyNameChanged}
+                                                        placeholder="Enter company name"
+                                                    />
+                                                </Grid>
+                                                <Grid item xs={12} md={6}>
+                                                    <Typography sx={{ fontStyle: 'italic', mb: 1, fontWeight: 500 }} component="h2" variant="subtitle2">
+                                                        Company Contact Number:
+                                                    </Typography>
+                                                    <TextField
+                                                        size="small"
+                                                        fullWidth
+                                                        id="companyContactNumber"
+                                                        label="Company Contact Number"
+                                                        value={companyContactNumber}
+                                                        onChange={onCompanyContactNumberChanged}
+                                                        onFocus={onCompanyContactNumberFocus}
+                                                        placeholder="Enter company contact number"
+                                                        error={roles.includes('Installer') && !validCompanyContactNumber}
+                                                        helperText={roles.includes('Installer') && !validCompanyContactNumber ? 'Format: +63 followed by digits only' : ' '}
+                                                    />
+                                                </Grid>
+                                            </Grid>
+                                        </Box>
+                                    </Grid>
+                                )}
+                                
+                                {/* Action Buttons */}
+                                <Grid item xs={12}>
+                                    <Divider sx={{ my: 2 }} />
                                     <Box
                                         sx={{
                                             display: "flex",
-                                            flexDirection: "row-reverse",
+                                            justifyContent: "flex-end",
+                                            gap: 2,
+                                            pt: 1
                                         }}
                                     >
                                         <Button
                                             variant="contained"
-                                            sx = {{ my: 1 ,backgroundColor: "primary"}}
-                                            onClick={onSaveUserClicked}
-                                            disabled={!canSave}
+                                            color="error"
+                                            onClick={openDelAlert}
+                                            sx={{ 
+                                                px: 3,
+                                                py: 1.5,
+                                                fontWeight: 600,
+                                                borderRadius: 2,
+                                                boxShadow: 2,
+                                                '&:hover': {
+                                                    boxShadow: 4,
+                                                    transform: 'translateY(-1px)'
+                                                }
+                                            }}
                                         >
-                                            <SaveIcon />
+                                            <DeleteForeverIcon sx={{ mr: 1 }} />
+                                            Delete User
                                         </Button>
                                         <Button
                                             variant="contained"
-                                            color="error"
-                                            sx={{ m: 1 }}
-                                            onClick={openDelAlert}
+                                            onClick={onSaveUserClicked}
+                                            disabled={!canSave}
+                                            sx={{ 
+                                                px: 4,
+                                                py: 1.5,
+                                                fontSize: '1rem',
+                                                fontWeight: 600,
+                                                borderRadius: 2,
+                                                boxShadow: 2,
+                                                '&:hover': {
+                                                    boxShadow: 4,
+                                                    transform: 'translateY(-1px)'
+                                                }
+                                            }}
                                         >
-                                            <DeleteForeverIcon />
+                                            <SaveIcon sx={{ mr: 1 }} />
+                                            Save Changes
                                         </Button>
                                     </Box>
-                                </form>
-                            </Box>
-                        </Paper>
-                    </Box>
+                                </Grid>
+                            </Grid>
+                        </form>
+                    </Paper>
                 </Box>
-                
             </Container>
             <Dialog
                 open={delAlert}

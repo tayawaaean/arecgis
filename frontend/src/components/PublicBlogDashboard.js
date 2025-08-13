@@ -6,7 +6,6 @@ import { CssBaseline, Grid } from "@mui/material"
 
 
 import useTitle from '../hooks/useTitle'
-import { MoonLoader } from 'react-spinners'
 import { useNavigate, useLocation } from 'react-router-dom'
 // import { selectAllBlogs } from '../features/blogs/blogsApiSlice'
 import { selectAllBlogs } from '../features/blogs/publicBlogsApiSlice'

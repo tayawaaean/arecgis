@@ -202,12 +202,12 @@ const PublicAppbar = () => {
         </Box>
         <Stack direction="row" alignItems="center" gap={1} sx={{ display: { xs: 'none', md: 'flex' } }}>
           {pages.map((page) => (
-            <Button key={page.id} color='white' onClick={() => navigate(page.href)} variant={'text'} sx={{ my: 1 }}>
+            <Button key={page.id} color='inherit' onClick={() => navigate(page.href)} variant={'text'} sx={{ my: 1 }}>
               {page.title}
             </Button>
           ))}
           <Button
-            color='white'
+            color='inherit'
             id="demo-customized-button"
             aria-controls={open ? 'demo-customized-menu' : undefined}
             aria-haspopup="true"
@@ -238,7 +238,7 @@ const PublicAppbar = () => {
               <a href={baseUrl + "mobile/" + "6535d746400c288fd3201c6f"} target="_blank">A<small>REC</small>GIS_v1.0.0.apk</a>
             </MenuItem>
           </StyledMenu>
-          <Button color='white' onClick={() => navigate('/login')} variant={'outlined'} sx={{ my: 1 }}>
+          <Button color='inherit' onClick={() => navigate('/login')} variant={'outlined'} sx={{ my: 1, borderColor: 'rgba(255,255,255,0.6)' }}>
             Log in
           </Button>
         </Stack>

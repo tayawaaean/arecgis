@@ -285,9 +285,8 @@ const Renergy = () => {
           <Control prepend position="topright">
             <Button
               variant="contained"
-              color= "white"
+              color="primary"
               onClick={handleDrawerOpen}
-              sx={{ color: 'primary.main'}}
             >
               <FilterAltIcon />
             </Button>
@@ -317,7 +316,7 @@ const Renergy = () => {
           <ZoomControl position="bottomright" />
           {/* This control will be below the default zoom control. Note the wrapping Stack component */}
           <Control position="topright">
-            <Button variant="contained" color= "white" sx={{ color: 'primary.main'}} onClick={onAddClicked}>
+            <Button variant="contained" color="primary" onClick={onAddClicked}>
               <AddIcon />
             </Button>
           </Control>

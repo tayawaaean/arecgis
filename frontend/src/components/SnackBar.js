@@ -127,34 +127,7 @@ export const SnackBar = (props) => {
           <Box>
             <TableContainer component={Paper} sx={{ maxWidth: 350, boxShadow: 'none', mb: 6 }}>
               <Table size="small" >
-                {/* <TableHead>
-              <TableRow>
-                <TableCell>Details</TableCell>
-                <TableCell align="right">
-                  <IconButton
-                    size="small"
-                    aria-label="close"
-                    color="inherit"
-                    onClick={handleClose}
-                  >
-                    <CloseIcon fontSize="small" />
-                  </IconButton>
-                </TableCell>
-              </TableRow>
-            </TableHead> */}
                 <TableBody >
-                  {/* <TableRow >
-                <TableCell sx={{ fontWeight: "Medium" }}>Type</TableCell>
-                <TableCell align="left">
-                  {project?.properties?.reCat}
-                </TableCell>
-              </TableRow> */}
-                  {/* <TableRow>
-                <TableCell sx={{ fontWeight: "Medium" }}>RE class</TableCell>
-                <TableCell align="left">
-                  {project?.properties?.reClass}
-                </TableCell>
-              </TableRow>*/}
                   <TableRow>
                     <TableCell sx={{ fontWeight: "Medium" }}>Primary Usage</TableCell>
                     <TableCell align="left">

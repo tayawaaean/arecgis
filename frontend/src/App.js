@@ -1,51 +1,57 @@
+import React, { Suspense, lazy } from 'react'
 import { Routes, Route } from 'react-router-dom'
+import { ThemeProvider, createTheme, responsiveFontSizes } from '@mui/material/styles'
+import { CssBaseline } from '@mui/material'
+import ErrorBoundary from './components/ErrorBoundary'
 import Layout from './components/Layout'
-import Public from './components/Public'
-import PublicMapDashboard from './components/PublicMapDashboard'
-import PublicBlogDashboard from './components/PublicBlogDashboard'
-import REsources from './components/resources/REsources'
-import About from './features/misc/About'
-
+import PublicDashLayout from './components/PublicDashLayout'
 import PublicFetch from './config/PublicFetch'
-
-
-import Login from './features/auth/Login'
-import DashLayout from './components/DashLayout'
-import Welcome from './features/auth/Welcome'
-import UsersList from './features/users/UsersList'
-import EditUser from './features/users/EditUser'
-import NewUserForm from './features/users/NewUserForm'
-import AccountSettings from './features/users/AccountSettings'
-
-import RenergiesMap from './features/renergies/RenergiesMap'
-import RenergiesList from './features/renergies/RenergiesList'
-import EditRenergy from './features/renergies/EditRenergy'
-import NewRenergy from './features/renergies/NewRenergy'
-
-import InventoryMap from './features/inventories/InventoryMap'
-import InventoriesList from './features/inventories/InventoriesList'
-import EditInventory from './features/inventories/EditInventory'
-import NewInventory from './features/inventories/NewInventory'
-
-import Charts from './features/charts/Chart';
-
-import Transactions from './features/transfers/Transactions';
-import TransferDetail from './features/transfers/TransferDetail';
-import TransferForm from './features/transfers/TransferForm';
-import NewTransfer from './features/transfers/NewTransfer';
-
-import BlogMap from './features/blogs/BlogMap'
-import BlogsList from './features/blogs/BlogsList'
-import EditBlog from './features/blogs/EditBlog'
-import NewBlog from './features/blogs/NewBlog'
-
 import Prefetch from './features/auth/Prefetch'
 import PersistLogin from './features/auth/PersistLogin'
 import RequireAuth from './features/auth/RequireAuth'
 import { ROLES } from './config/roles'
-import { ThemeProvider, createTheme, responsiveFontSizes } from '@mui/material/styles'
 import useTitle from './hooks/useTitle';
-import PublicDashLayout from './components/PublicDashLayout'
+import GlobalLoading from './components/GlobalLoading'
+import NotFound from './components/NotFound'
+import Forbidden from './components/Forbidden'
+
+const Public = lazy(() => import('./components/Public'))
+const PublicMapDashboard = lazy(() => import('./components/PublicMapDashboard'))
+const PublicBlogDashboard = lazy(() => import('./components/PublicBlogDashboard'))
+const REsources = lazy(() => import('./components/resources/REsources'))
+const About = lazy(() => import('./features/misc/About'))
+
+const Login = lazy(() => import('./features/auth/Login'))
+const DashLayout = lazy(() => import('./components/DashLayout'))
+const Welcome = lazy(() => import('./features/auth/Welcome'))
+const UsersList = lazy(() => import('./features/users/UsersList'))
+const EditUser = lazy(() => import('./features/users/EditUser'))
+const NewUserForm = lazy(() => import('./features/users/NewUserForm'))
+const AccountSettings = lazy(() => import('./features/users/AccountSettings'))
+const UserProfile = lazy(() => import('./features/users/UserProfile'))
+
+const RenergiesMap = lazy(() => import('./features/renergies/RenergiesMap'))
+const RenergiesList = lazy(() => import('./features/renergies/RenergiesList'))
+const EditRenergy = lazy(() => import('./features/renergies/EditRenergy'))
+const NewRenergy = lazy(() => import('./features/renergies/NewRenergy'))
+
+const InventoryMap = lazy(() => import('./features/inventories/InventoryMap'))
+const InventoriesList = lazy(() => import('./features/inventories/InventoriesList'))
+const EditInventory = lazy(() => import('./features/inventories/EditInventory'))
+const NewInventory = lazy(() => import('./features/inventories/NewInventory'))
+
+const Charts = lazy(() => import('./features/charts/Chart'));
+
+const RequestsList = lazy(() => import('./features/requests/RequestsList'))
+const RequestDetail = lazy(() => import('./features/requests/RequestDetail'))
+const RequestForm = lazy(() => import('./features/requests/RequestForm'))
+
+const BlogMap = lazy(() => import('./features/blogs/BlogMap'))
+const BlogsList = lazy(() => import('./features/blogs/BlogsList'))
+const EditBlog = lazy(() => import('./features/blogs/EditBlog'))
+const NewBlog = lazy(() => import('./features/blogs/NewBlog'))
+
+const AffiliationsManagement = lazy(() => import('./features/affiliations/AffiliationsManagement'))
 
 
 
@@ -55,30 +61,28 @@ let theme = createTheme({
   palette: {
     primary: {
       main: '#000066',
-      secondary: '#7ba6b7',
-      yellow: '#FFBF00',
-      ocean: '#CBCBD4',
-      error: '#e23046',
-      grey: '#dee7e6',
-      dark: '#1d2830',
+      light: '#3c3c99',
+      dark: '#000043',
+      contrastText: '#FFFFFF'
     },
-  white: {
-    main: '#FFF'
-  },
-  custom: {
-    main: '#000066',
-    secondary: '#7ba6b7',
-    error: '#e23046',
-    grey: '#dee7e6',
-    dark: '#1d2830',
-  }
+    secondary: {
+      main: '#7ba6b7',
+      light: '#a8c4cf',
+      dark: '#4f7b8a',
+      contrastText: '#0b1b22'
+    },
+    error: { main: '#e23046' },
+    warning: { main: '#FFBF00' },
+    info: { main: '#CBCBD4' },
+    grey: { 100: '#dee7e6' }
   },
   typography: {
     allVariants: {
-      fontFamily:'Poppins',
+      fontFamily: 'Poppins',
       textTransform: 'none',
     },
     fontFamily: [
+      'Poppins',
       '-apple-system',
       'BlinkMacSystemFont',
       "'Segoe UI'",
@@ -98,8 +102,11 @@ theme = responsiveFontSizes(theme)
 function App() {
   useTitle('Affiliated Renewable Energy Center - MMSU')
   return (
-    <ThemeProvider theme={theme}>
-      <Routes>
+    <ErrorBoundary>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <Suspense fallback={<GlobalLoading message="Loading application…" /> }>
+        <Routes>
         <Route path='/' element={<Layout />}>
           {/* public routes */}
           <Route index element={<Public />} />
@@ -130,7 +137,15 @@ function App() {
                   <Route path='about' element={<About/>} />
                       <Route path='settings'>
                           <Route path=':id' element={<AccountSettings />} />
-
+                      </Route>
+                      
+                      <Route path='profile'>
+                          <Route index element={<UserProfile />} />
+                          <Route path=':id' element={<UserProfile />} />
+                      </Route>
+                      
+                      <Route element={<RequireAuth allowedRoles={[ROLES.Manager, ROLES.Admin]} />}>
+                          <Route path='affiliations' element={<AffiliationsManagement />} />
                       </Route>
 
                   <Route path='inventories'>
@@ -149,12 +164,10 @@ function App() {
 
                   <Route path='charts' element={<Charts />} />
 
-                  <Route path="/dashboard/transfers/new" element={<NewTransfer />} />
-                  <Route path="transfers">
-                    <Route index element={<Transactions />} />
-                    <Route path=":id" element={<TransferDetail />} />
-                    <Route path="new" element={<TransferForm />} />
-
+                  <Route path="requests">
+                    <Route index element={<RequestsList />} />
+                    <Route path=":id" element={<RequestDetail />} />
+                    <Route path="new" element={<RequestForm />} />
                   </Route>
 
                   <Route path='blogs'>
@@ -168,9 +181,13 @@ function App() {
               </Route>
             </Route>
           </Route>{/*end protected routes */}
+          <Route path='forbidden' element={<Forbidden />} />
+          <Route path='*' element={<NotFound />} />
         </Route>
       </Routes>
-    </ThemeProvider>
+      </Suspense>
+      </ThemeProvider>
+    </ErrorBoundary>
   )
 }
 

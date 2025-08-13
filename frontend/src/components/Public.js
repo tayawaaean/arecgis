@@ -24,7 +24,6 @@ import {
 
 import MenuIcon from '@mui/icons-material/Menu'
 
-
 import { experimentalStyled as styled } from '@mui/material/styles'
 import { pages } from '../config/techAssesment'
 import PublicAppbar from '../config/PublicAppbar'
@@ -52,6 +51,7 @@ const SolarEnergyCard = () => {
     </Card>
   )
 }
+
 const WindEnergyCard = () => {
   const navigate = useNavigate()
   return (
@@ -75,6 +75,7 @@ const WindEnergyCard = () => {
     </Card>
   )
 }
+
 const BiogasEnergyCard = () => {
   const navigate = useNavigate()
   return (
@@ -105,6 +106,7 @@ const BiogasEnergyCard = () => {
     </>
   )
 }
+
 const Copyright = () => {
   return (
     <Typography variant="body2" color="text.secondary" align="center" >
@@ -118,12 +120,7 @@ const Copyright = () => {
   );
 }
 
-
-// const pages = ['Products', 'Pricing', 'Blog']
-const settings = ['Profile', 'Account', 'Dashboard', 'Logout']
-
 const Public = () => {
-
   const content = (
     <>
       <CssBaseline />
@@ -174,4 +171,5 @@ const Public = () => {
   )
   return content
 }
+
 export default Public

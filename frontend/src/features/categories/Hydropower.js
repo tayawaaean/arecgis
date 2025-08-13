@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react'
-import { TextField, Input, InputAdornment, Box, Checkbox, FormControlLabel, FormGroup, Typography } from '@mui/material'
+import { TextField, Input, InputAdornment, Box, Checkbox, FormControlLabel, FormGroup, Typography, Alert } from '@mui/material'
 import { Status } from "../../config/techAssesment"
 import { boxstyle } from '../../config/style'
 
 
 export const Hydropower = (props) => {
+  // Check if this is a commercial RE installation
+  const isCommercial = props.reClass === "Commercial";
 
   const [data, setData] = useState([])
 
@@ -54,6 +56,12 @@ export const Hydropower = (props) => {
         <Typography sx={{ fontStyle: "italic", mb: 2 }} component="h1" variant="subtitle2">
           For Hydropower System (leave blank if not applicable)
         </Typography>
+        
+        {isCommercial && (
+          <Alert severity="info" sx={{ mb: 2 }}>
+            This is a Commercial hydropower system for power generation.
+          </Alert>
+        )}
         <Typography sx={{ fontStyle: 'italic' }} component="h1" variant="subtitle2">
           Capacity:
         </Typography>

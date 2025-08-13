@@ -49,6 +49,8 @@ const MapContent = () => {
   const [loadingOv, setLoadingOv] = useState(false);
   const navigate = useNavigate();
   
+  // Monitor position changes (no console output in production)
+  
   // Access the filter context to get filtered inventories
   const { filterInventories } = useInventoryFilter();
   
@@ -80,8 +82,8 @@ const MapContent = () => {
   };
 
   const AddRE = () => (
-    <Tooltip title="Add Inventory" placement="left-start">
-      <button className="leaflet-control-layers controlStyle" aria-label="place-icon" onClick={onAddClicked}>
+    <Tooltip title="Add inventory item" placement="left-start">
+      <button className="leaflet-control-layers controlStyle" aria-label="add inventory" onClick={onAddClicked}>
         <AddIcon fontSize="small" />
       </button>
     </Tooltip>
@@ -96,13 +98,31 @@ const MapContent = () => {
     return null;
   };
 
-  const handleFlyTo = (coordinates) => {
+  const handleFlyTo = (coordinates, projectData) => {
+    // Debug logging removed for production
+    
+    // Set the project data
+    if (projectData) {
+      setProject(projectData);
+      setActive(true); // Activate the snackbar
+    }
+    
     setPosition(coordinates);
-    map.flyTo([...coordinates].reverse(), 14, { duration: 3 });
+    // position state updated
+    
+    // Get the map instance and fly to the coordinates
+    const mapInstance = map;
+    if (mapInstance && coordinates) {
+      const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      const duration = prefersReducedMotion ? 0 : 3
+      // flying to coordinates
+      mapInstance.flyTo([...coordinates].reverse(), 14, { duration });
+    }
   };
 
   // Map reference to be able to call flyTo from components
-  let map = useMap();
+  const map = useMap();
+  const owmKey = process.env.REACT_APP_OWM_KEY;
 
   return (
     <>
@@ -114,6 +134,12 @@ const MapContent = () => {
               setActive(true);
             },
           }}
+          icon={L.divIcon({
+            className: 'custom-marker',
+            html: '<div style="background-color: red; width: 20px; height: 20px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 10px rgba(0,0,0,0.5);"></div>',
+            iconSize: [20, 20],
+            iconAnchor: [10, 10]
+          })}
         />
       )}
       
@@ -134,26 +160,30 @@ const MapContent = () => {
             url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
           />
         </LayersControl.BaseLayer>
-        <LayersControl.Overlay name="Open Weather Map">
-          <LayerGroup>
+        {owmKey && (
+          <LayersControl.Overlay name="Open Weather Map">
+            <LayerGroup>
+              <TileLayer
+                eventHandlers={{ loading: () => setLoadingOv(true), load: () => setLoadingOv(false) }}
+                url={`https://tile.openweathermap.org/map/clouds_new/{z}/{x}/{y}.png?appid=${owmKey}`}
+              />
+              <TileLayer
+                url={`https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=${owmKey}`}
+              />
+              <TileLayer
+                url={`https://tile.openweathermap.org/map/wind_new/{z}/{x}/{y}.png?appid=${owmKey}`}
+              />
+            </LayerGroup>
+          </LayersControl.Overlay>
+        )}
+        {owmKey && (
+          <LayersControl.Overlay name="OWM Temperature">
             <TileLayer
               eventHandlers={{ loading: () => setLoadingOv(true), load: () => setLoadingOv(false) }}
-              url="https://tile.openweathermap.org/map/clouds_new/{z}/{x}/{y}.png?appid=a30ee7b050677eb2e7e16b14dc7080a5"
+              url={`https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=${owmKey}`}
             />
-            <TileLayer
-              url="https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=a30ee7b050677eb2e7e16b14dc7080a5"
-            />
-            <TileLayer
-              url="https://tile.openweathermap.org/map/wind_new/{z}/{x}/{y}.png?appid=a30ee7b050677eb2e7e16b14dc7080a5"
-            />
-          </LayerGroup>
-        </LayersControl.Overlay>
-        <LayersControl.Overlay name="OWM Temperature">
-          <TileLayer
-            eventHandlers={{ loading: () => setLoadingOv(true), load: () => setLoadingOv(false) }}
-            url="https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=a30ee7b050677eb2e7e16b14dc7080a5"
-          />
-        </LayersControl.Overlay>
+          </LayersControl.Overlay>
+        )}
       </LayersControl>
       
       {/* Map Filters Control */}
@@ -166,7 +196,7 @@ const MapContent = () => {
         <InventoryTable 
           setClearVal={setClearVal} 
           clearVal={clearVal} 
-          onFlyTo={handleFlyTo} 
+          onFlyTo={(coordinates, projectData) => handleFlyTo(coordinates, projectData)} 
         />
       </Control>
       

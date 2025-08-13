@@ -35,7 +35,7 @@ import { ROLES } from "../../config/roles"
 import { boxmain, boxpaper } from '../../config/style'
 import useAuth from "../../hooks/useAuth"
 import { useSendLogoutMutation } from "../auth/authApiSlice"
-import { MoonLoader } from "react-spinners"
+import SectionLoading from '../../components/SectionLoading'
 
 const USER_REGEX = /^[A-z]{3,20}$/
 const PWD_REGEX = /^[A-z0-9!@#$%]{4,12}$/
@@ -124,23 +124,7 @@ const AccountSettingsForm = ({ user }) => {
     }, [isSuccess, isError, navigate])
 
 
-    if (isLogoutLoading) return (
-        <>
-          <CssBaseline />
-          <Grid
-            container
-            spacing={0}
-            direction="row"
-            alignItems="center"
-            justifyContent="center"
-            style={{ minHeight: '100vh' }}
-          >
-            <Grid item >
-              <MoonLoader color={"#fffdd0"} />
-            </Grid>
-          </Grid>
-        </>
-      )
+    if (isLogoutLoading) return <SectionLoading label="Signing out…" />
     
     
       if (isLogoutError) return <p>Error: {logouterror?.data?.message}</p>

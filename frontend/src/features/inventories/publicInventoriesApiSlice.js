@@ -50,7 +50,7 @@ export const publicInventoriesApiSlice = apiSlice.injectEndpoints({
 })
 
 export const {
-    useGetInventoriesQuery,
+    useGetPublicInventoriesQuery,
 
 } = publicInventoriesApiSlice
 

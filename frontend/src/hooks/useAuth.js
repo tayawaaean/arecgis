@@ -12,30 +12,28 @@ const useAuth = () => {
     let roles = []
 
     if (token) {
-        const decoded = jwtDecode(token)
-        const { username, roles: userRoles, id } = decoded.UserInfo
-        
-        roles = userRoles || []
-        isManager = roles.includes('Manager')
-        isAdmin = roles.includes('Admin')
-        isInstaller = roles.includes('Installer')
-        userId = id
+        try {
+            const decoded = jwtDecode(token)
+            const { username, roles: userRoles, id } = decoded.UserInfo || {}
+            roles = userRoles || []
+            isManager = roles.includes('Manager')
+            isAdmin = roles.includes('Admin')
+            isInstaller = roles.includes('Installer')
+            userId = id || ''
 
-        if (isInstaller) status = "Installer"
-        if (isManager) status = "Manager"
-        if (isAdmin) status = "Admin"
+            if (isInstaller) status = "Installer"
+            if (isManager) status = "Manager"
+            if (isAdmin) status = "Admin"
 
-        console.log('Auth Debug:', { 
-            userId, 
-            username, 
-            roles, 
-            isInstaller, 
-            isManager, 
-            isAdmin, 
-            status 
-        })
-
-        return { userId, username, roles, status, isManager, isAdmin, isInstaller }
+            return { userId, username: username || '', roles, status, isManager, isAdmin, isInstaller }
+        } catch (error) {
+            if (process.env.NODE_ENV === 'development') {
+                // eslint-disable-next-line no-console
+                console.error('Failed to decode JWT', error)
+            }
+            // Return safe defaults when token is invalid/corrupt/expired
+            return { userId, username: '', roles: [], isManager, isAdmin, isInstaller, status }
+        }
     }
 
     return { userId, username: '', roles: [], isManager, isAdmin, isInstaller, status }

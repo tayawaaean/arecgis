@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from 'react'
-import { TextField, Input, InputAdornment, Box, Checkbox, FormControlLabel, FormGroup, Typography } from '@mui/material'
+import { TextField, Input, InputAdornment, Box, Checkbox, FormControlLabel, FormGroup, Typography, Alert } from '@mui/material'
 import { rawBiomassPriUsage, rawBioUsage, Status } from "../../config/techAssesment"
 import { boxstyle } from '../../config/style'
 
 
 export const Biomass = (props) => {
+    // Check if this is a commercial RE installation
+    const isCommercial = props.reClass === "Commercial";
+    
+    // Find the index of Power Generation in rawBioUsage
+    const powerGenerationIndex = rawBioUsage.findIndex(usage => usage.name === "Power Generation");
 
     const [data, setData] = useState([])
     // console.log(data)
@@ -18,6 +23,18 @@ export const Biomass = (props) => {
 
     const [remarks, setRemarks] = useState('')
 
+    // Auto-select Power Generation for Commercial RE
+    useEffect(() => {
+        if (isCommercial && powerGenerationIndex >= 0) {
+            if (!bioUsage.value || bioUsage.value !== rawBioUsage[powerGenerationIndex].name) {
+                setBioUsage({ 
+                    index: powerGenerationIndex, 
+                    value: rawBioUsage[powerGenerationIndex].name, 
+                    otherVal: '' 
+                });
+            }
+        }
+    }, [isCommercial, powerGenerationIndex, bioUsage.value]);
 
     useEffect(() => {
         setData({
@@ -53,6 +70,10 @@ export const Biomass = (props) => {
 
 
     const valuesOfBioUsage = (index) => (e) => {
+        // If Commercial, only allow Power Generation selection
+        if (isCommercial && index !== powerGenerationIndex) {
+            return;
+        }
 
         if (rawBioUsage[index].name === 'Other' && e.target.value !== 'on' && e.target.value !== '') {
             setBioUsage({ index: index, value: '', otherVal: e.target.value })
@@ -132,6 +153,13 @@ export const Biomass = (props) => {
                     <Typography sx={{ fontStyle: 'italic' }} component="h1" variant="subtitle2">
                         Usage:
                     </Typography>
+                    
+                    {isCommercial && (
+                        <Alert severity="info" sx={{ mb: 2 }}>
+                            Commercial RE systems must use Power Generation. Other options are disabled.
+                        </Alert>
+                    )}
+                    
                     {rawBioUsage.map((type, index) => (
                         <FormGroup key={index}>
                             <FormControlLabel
@@ -140,6 +168,7 @@ export const Biomass = (props) => {
                                     <Checkbox
                                         onChange={valuesOfBioUsage(index)}
                                         checked={type.name === bioUsage?.value}
+                                        disabled={isCommercial && index !== powerGenerationIndex} // Disable non-Power Generation options if Commercial
                                     />
                                 }
                                 label={type.name}

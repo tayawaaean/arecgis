@@ -3,6 +3,7 @@ import { GeoSearchControl, OpenStreetMapProvider } from 'leaflet-geosearch';
 import Control from "react-leaflet-custom-control"
 import { FadeLoader } from "react-spinners"
 import PropTypes from "prop-types"
+import L from 'leaflet'
 import {
     MapContainer,
     TileLayer,
@@ -35,6 +36,14 @@ import {
 } from "@mui/icons-material"
 import { useEffect, useMemo, useState } from "react"
 import { useMapEvents } from "react-leaflet"
+
+// Fix Leaflet marker icon issues
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+    iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
+    iconUrl: require('leaflet/dist/images/marker-icon.png'),
+    shadowUrl: require('leaflet/dist/images/marker-shadow.png')
+});
 const { BaseLayer } = LayersControl
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
     "& .MuiDialogContent-root": {
@@ -123,7 +132,7 @@ export const Coordinates = (props) => {
         })
         return (
             <>
-                <button className="leaflet-control-layers controlStyle" aria-label="find-icon" onClick={fly}>
+                <button className="leaflet-control-layers controlStyle" aria-label="center map to my location" onClick={fly}>
                     <MyLocationIcon fontSize="small"/>
                 </button>
             </>
@@ -148,7 +157,7 @@ export const Coordinates = (props) => {
         
         return (
             <>
-                <button className="leaflet-control-layers controlStyle" aria-label="place-icon" onClick={tap}>
+                <button className="leaflet-control-layers controlStyle" aria-label="set marker at map center" onClick={tap}>
                     <PlaceIcon fontSize="small"/>
                 </button>
             </>

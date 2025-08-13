@@ -5,7 +5,7 @@ import usePersist from "../../hooks/usePersist"
 import { useSelector } from 'react-redux'
 import { selectCurrentToken } from "./authSlice"
 import { Button, CssBaseline, Grid } from "@mui/material"
-import { MoonLoader } from 'react-spinners'
+import SectionLoading from '../../components/SectionLoading'
 
 const PersistLogin = () => {
     const navigate = useNavigate()
@@ -55,24 +55,7 @@ const PersistLogin = () => {
         // console.log('no persist')
         content = <Outlet />
     } else if (isLoading) { //persist: yes, token: no
-        // console.log('loading')
-        content =  (
-            <>
-                <CssBaseline />
-                <Grid
-                    container
-                    spacing={0}
-                    direction="row"
-                    alignItems="center"
-                    justifyContent="center"
-                    style={{ minHeight: '100vh' }}
-                >
-                    <Grid item >
-                        <MoonLoader color={"#fffdd0"} />
-                    </Grid>
-                </Grid>
-            </>
-        )
+        content = <SectionLoading label="Restoring your session…" />
     } else if (isError) { //persist: yes, token: no
         // console.log('error')
         content = (<>

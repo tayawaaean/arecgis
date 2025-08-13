@@ -25,7 +25,7 @@ import {
 }
   from "@mui/icons-material"
 
-import { MoonLoader } from 'react-spinners'
+import SectionLoading from '../../components/SectionLoading'
 import { boxstyle } from '../../config/style'
 import { LazyLoadImage } from 'react-lazy-load-image-component'
 import Terms from '../misc/Terms'
@@ -82,23 +82,7 @@ const Login = () => {
 
   const errClass = errMsg ? "errmsg" : "offscreen"
 
-  if (isLoading) return (
-    <>
-      <CssBaseline />
-      <Grid
-        container
-        spacing={0}
-        direction="row"
-        alignItems="center"
-        justifyContent="center"
-        style={{ minHeight: '100vh' }}
-      >
-        <Grid item >
-          <MoonLoader color={"#fffdd0"} />
-        </Grid>
-      </Grid>
-    </>
-  )
+  if (isLoading) return <SectionLoading label="Signing in…" />
 
   const content = (
     <>
@@ -194,7 +178,7 @@ const Login = () => {
                     }}
                   />
                   <FormControlLabel
-                    control={<Checkbox color="primary" id="persist" hidden onChange={handleToggle} checked={persist} />}
+                    control={<Checkbox color="primary" id="persist" onChange={handleToggle} checked={persist} />}
                     label="Remember me"
                   />
 

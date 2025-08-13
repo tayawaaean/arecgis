@@ -139,7 +139,7 @@ const NewBlogForm = ({ allUsers }) => {
             >
               <Grid container>
                 <Grid item xs>
-                  <Typography component="h1" variant="h5">
+                  <Typography component="h1" variant="h5" sx={{ color: 'white' }}>
                     New Blog
                   </Typography>
                 </Grid>

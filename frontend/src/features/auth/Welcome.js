@@ -1,116 +1,423 @@
-import { Box, Button, Card, CardActions, CardContent, CardMedia, CssBaseline, Divider, Grid, Typography } from '@mui/material'
-import { Container, Stack, Paper } from '@mui/material'
-import { Link, useNavigate } from 'react-router-dom'
+import React from 'react'
+import { 
+  Box, 
+  Button, 
+  CssBaseline, 
+  Typography, 
+  Container, 
+  Grid, 
+  Card, 
+  CardContent,
+  Chip,
+  Divider,
+  Paper,
+  useTheme,
+  Tooltip,
+  Skeleton
+} from '@mui/material'
+import { useNavigate } from 'react-router-dom'
 import useAuth from '../../hooks/useAuth'
-import { styled } from '@mui/material/styles'
-import Carousel from 'react-material-ui-carousel'
-import MainFeaturedPost from '../../config/MainFeaturedPost'
-import FeaturedPost from '../../config/FeaturedPost'
-
-
-const Copyright = () => {
-
-    const date = new Date()
-    const today = new Intl.DateTimeFormat('en-US', { dateStyle: 'full', timeStyle: 'long' }).format(date)
-    return (
-        <Typography variant='body2' color='text.secondary' align='center' component={'div'} >
-            {'Copyright © '}
-            <Link color='inherit' href='https://localhost:3000/'>
-                A<small>REC</small>GIS
-            </Link>{''}
-            {new Date().getFullYear()}
-            {'.'}
-            <p>{today}</p>
-        </Typography>
-    );
-}
-
-
-const mainFeaturedPost = {
-    title: '𝗡𝗘𝗪𝗦 | 𝗠𝗠𝗦𝗨 𝗲𝗾𝘂𝗶𝗽𝘀 𝘁𝗿𝗮𝗶𝗻𝗲𝗿𝘀 𝗳𝗼𝗿 𝗿𝗲𝗻𝗲𝘄𝗮𝗯𝗹𝗲 𝗲𝗻𝗲𝗿𝗴𝘆 𝗰𝗼𝗺𝗽𝗲𝘁𝗲𝗻𝗰𝘆 𝗽𝗿𝗼𝗴𝗿𝗮𝗺',
-    description:
-        "True to its commitment to championing renewable energy development, Mariano Marcos State University (MMSU) has equipped a pool of trainers with executive competency skills on renewable energy.",
-    image: '/mmsu-reecp.jpg',
-    imageText: 'main image description',
-    linkText: 'Continue reading…',
-};
-
-const featuredPosts = [
-    {
-        title: 'Benguet State University',
-        date: 'Nov 12',
-        description:
-            'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut   .',
-        image: '/bsu.jpg',
-        imageLabel: 'Image Text',
-    },
-    {
-        title: 'DMMSU',
-        date: 'Nov 11',
-        description:
-            'Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium.',
-        image: '/dmmsu.jpg',
-        imageLabel: 'Image Text',
-    },
-];
-
+import { useSelector } from 'react-redux'
+import { selectAllInventories } from '../inventories/inventoriesApiSlice'
+import { selectAllUsers } from '../users/usersApiSlice'
+import { selectAllBlogs } from '../blogs/blogsApiSlice'
+import { 
+  SolarPower as SolarIcon,
+  Air as WindIcon,
+  Water as HydroIcon,
+  Grass as BiomassIcon,
+  People as UsersIcon,
+  Article as BlogIcon,
+  Assessment as AssessmentIcon,
+  Map as MapIcon,
+  Add as AddIcon,
+  CheckCircle as OperationalIcon,
+  Warning as WarningIcon,
+  Error as ErrorIcon
+} from '@mui/icons-material'
 
 const Welcome = () => {
-    const navigate = useNavigate()
-    const { username, isManager, isAdmin } = useAuth()
+  const navigate = useNavigate()
+  const { username, isManager, isAdmin } = useAuth()
+  const theme = useTheme()
+  
+  // Get data from Redux store
+  const inventories = useSelector(selectAllInventories)
+  const users = useSelector(selectAllUsers)
+  const blogs = useSelector(selectAllBlogs)
+  
+  // Lightweight loading heuristic for skeletons (no RTK Query here)
+  const isOverviewLoading =
+    (!inventories || inventories.length === 0) &&
+    (!users || users.length === 0) &&
+    (!blogs || blogs.length === 0)
+  
+  // Calculate summary statistics
+  const totalSystems = inventories?.length || 0
+  const totalCapacity = inventories?.reduce((sum, inv) => {
+    return sum + (Number(inv.assessment?.capacity) || 0)
+  }, 0) || 0
+  
+  const systemsByCategory = inventories?.reduce((acc, inv) => {
+    const category = inv.properties?.reCat || 'Solar Energy'
+    acc[category] = (acc[category] || 0) + 1
+    return acc
+  }, {}) || {}
+  
+  const operationalSystems = inventories?.filter(inv => 
+    inv.assessment?.status === 'Operational'
+  ).length || 0
+  
+  const recentInventories = inventories?.slice(-3) || []
+  const totalUsers = users?.length || 0
+  
+  const getCategoryIcon = (category) => {
+    switch(category) {
+      case 'Solar Energy': return <SolarIcon fontSize="small" />
+      case 'Wind Energy': return <WindIcon fontSize="small" />
+      case 'Hydropower': return <HydroIcon fontSize="small" />
+      case 'Biomass': return <BiomassIcon fontSize="small" />
+      default: return <SolarIcon fontSize="small" />
+    }
+  }
+  
+  const getStatusIcon = (status) => {
+    switch(status) {
+      case 'Operational': return <OperationalIcon color="success" fontSize="small" />
+      case 'For Repair': return <WarningIcon color="warning" fontSize="small" />
+      case 'Condemable': return <ErrorIcon color="error" fontSize="small" />
+      default: return <OperationalIcon color="success" fontSize="small" />
+    }
+  }
+  
+  const formatCapacity = (capacity) => {
+    if (!capacity || capacity === 0) return '0 kW'
     
-    const content = (
-        <>
-            <CssBaseline />
-
-            <Container disableGutters maxWidth='sm' component='main' sx={{ pt: 8, pb: 6 }}>
-                <Typography
-                    component='h1'
-                    variant='h2'
-                    align='center'
-                    color='text.primary'
-                    gutterBottom
-                >
-                    Hello {username}!
-                </Typography>
-                <Typography variant="h5" align="center" color="text.secondary" component="p">
-                Welcome to Affiliated Renewable Energy Center Geographic Information System (A<small>REC</small>GIS) <br/>
-                 We are currently developing a GIS-based multi-platform application that can gather, manage, and analyze data of Renewable Energy Systems.
-                </Typography>
-                <Container maxWidth='md' sx={{ pt: 8, pb: 6 }} >
-                    <Stack spacing={2} alignItems='center' justifyContent='center' direction='row' divider={<Divider orientation='vertical' flexItem />}>
-                        <Button fullWidth variant='contained' sx = {{backgroundColor: "custom.error"}} onClick={() => navigate('/dashboard/inventories')}>Map Dashboard</Button>
-                        <Button fullWidth variant='contained'  onClick={() => navigate('/dashboard/inventories/new')}>Assessment form</Button>
-                    </Stack>
-
-                </Container>
-            </Container>
-            {/* End hero unit */}
-                {/* <Container maxWidth="lg"  sx={{
-                        borderTop: (theme) => `1px solid ${theme.palette.divider}`,
-                        mt: 8,
-                        py: [3, 6],
-                    }}>
-                    <MainFeaturedPost post={mainFeaturedPost} />
-                    <Grid container spacing={4}>
-                        {featuredPosts.map((post) => (
-                            <FeaturedPost key={post.title} post={post} />
-                        ))}
-                    </Grid>
-                </Container> */}
-            <Container
-                maxWidth='md'
-                component='footer'
-                sx={{
-                    borderTop: (theme) => `1px solid ${theme.palette.divider}`,
-                    mt: 8,
-                    py: [3, 6],
+    // Handle extremely large values (GW range)
+    if (capacity >= 1000000) {
+      return `${(capacity / 1000000).toFixed(2)} GW`
+    }
+    // Handle large values (MW range)
+    if (capacity >= 1000) {
+      return `${(capacity / 1000).toFixed(1)} MW`
+    }
+    // Handle medium values (kW range)
+    if (capacity >= 1) {
+      return `${capacity.toFixed(1)} kW`
+    }
+    // Handle very small values (W range)
+    return `${(capacity * 1000).toFixed(0)} W`
+  }
+  
+  const content = (
+    <Box sx={{ 
+      minHeight: '100vh',
+      backgroundImage: 'url(/sun-tornado.svg)',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      backgroundAttachment: 'fixed',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      py: 4
+    }}>
+      <CssBaseline />
+      
+      <Container maxWidth="xl">
+        <Grid container spacing={4} alignItems="stretch" justifyContent="center">
+          {/* Left Side - Welcome Text & Actions */}
+          <Grid item xs={12} md={5}>
+            <Box sx={{ 
+              textAlign: 'center',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: '100%'
+            }}>
+              <Typography
+                component='h1'
+                variant='h2'
+                sx={{ 
+                  fontWeight: 700, 
+                  mb: 3,
+                  color: 'white',
+                  textShadow: '2px 2px 4px rgba(0, 0, 0, 0.5)'
                 }}
-            >
-                <Copyright sx={{ mt: 5 }} />
-            </Container>
-        </>
-    )
-    return content
+              >
+                Hello{' '}
+                <Tooltip title={username} placement="top" arrow>
+                  <Box
+                    component="span"
+                    sx={{
+                      display: 'inline-block',
+                      maxWidth: { xs: '65vw', sm: '50vw', md: '40vw' },
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      verticalAlign: 'bottom',
+                      cursor: 'help'
+                    }}
+                  >
+                    {username}
+                  </Box>
+                </Tooltip>
+                {' '}! 👋
+              </Typography>
+              
+              <Typography variant="h5" sx={{ mb: 4, color: 'white', textShadow: '1px 1px 2px rgba(0, 0, 0, 0.5)' }}>
+                Welcome to Affiliated Renewable Energy Center Geographic Information System (ARECGIS)
+              </Typography>
+              
+              <Typography variant="body1" sx={{ mb: 5, color: 'white', textShadow: '1px 1px 2px rgba(0, 0, 0, 0.5)', lineHeight: 1.6 }}>
+                We are currently developing a GIS-based multi-platform application that can gather, manage, and analyze data of Renewable Energy Systems.
+              </Typography>
+              
+              {/* Action Buttons */}
+              <Box sx={{ display: 'flex', gap: 3, justifyContent: 'center', flexWrap: 'wrap', mb: 4 }}>
+                <Button 
+                  variant='contained' 
+                  size='large'
+                  startIcon={<MapIcon />}
+                  sx={{ 
+                    background: 'linear-gradient(45deg, #dc2626, #ef4444)',
+                    px: 4,
+                    py: 1.5,
+                    fontSize: '1.1rem',
+                    fontWeight: 600,
+                    boxShadow: '0 4px 12px rgba(220, 38, 38, 0.4)',
+                    '&:hover': {
+                      background: 'linear-gradient(45deg, #b91c1c, #dc2626)',
+                      transform: 'translateY(-2px)',
+                      boxShadow: '0 6px 16px rgba(220, 38, 38, 0.5)',
+                    }
+                  }} 
+                  onClick={() => navigate('/dashboard/inventories')}
+                >
+                  Map Dashboard
+                </Button>
+                
+                <Button 
+                  variant='contained' 
+                  size='large'
+                  startIcon={<AddIcon />}
+                  sx={{ 
+                    background: 'linear-gradient(45deg, #1976d2, #42a5f5)',
+                    px: 4,
+                    py: 1.5,
+                    fontSize: '1.1rem',
+                    fontWeight: 600,
+                    boxShadow: '0 4px 12px rgba(25, 118, 210, 0.4)',
+                    '&:hover': {
+                      background: 'linear-gradient(45deg, #1565c0, #1976d2)',
+                      transform: 'translateY(-2px)',
+                      boxShadow: '0 6px 16px rgba(25, 118, 210, 0.5)',
+                    }
+                  }}  
+                  onClick={() => navigate('/dashboard/inventories/new')}
+                >
+                  Assessment Form
+                </Button>
+              </Box>
+            </Box>
+          </Grid>
+          
+          {/* Right Side - Summary Data in White Container */}
+          <Grid item xs={12} md={5}>
+            <Paper elevation={8} sx={{ 
+              height: '100%',
+              background: 'rgba(255, 255, 255, 0.95)',
+              backdropFilter: 'blur(10px)',
+              borderRadius: 4,
+              overflow: 'hidden'
+            }}>
+              {/* Header */}
+              <Box sx={{ 
+                background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
+                p: 3,
+                color: 'white'
+              }}>
+                <Typography  variant="h4" 
+             sx={{ 
+               fontWeight: 'bold',
+               textShadow: '0 1px 2px rgba(0,0,0,0.3)',
+               color: 'white !important'
+             }}>
+                  📊 System Overview
+                </Typography>
+                <Typography variant="body1" sx={{ opacity: 0.9, color: 'white !important' }}>
+                  Real-time summary of ARECGIS data
+                </Typography>
+              </Box>
+              
+              <Box sx={{ p: 3 }}>
+                {isOverviewLoading ? (
+                  <>
+                    {/* Skeleton: Key Metrics */}
+                    <Grid container spacing={2} sx={{ mb: 3 }}>
+                      <Grid item xs={6}>
+                        <Card>
+                          <CardContent sx={{ p: 2 }}>
+                            <Skeleton variant="text" width={80} height={36} sx={{ mb: 1 }} />
+                            <Skeleton variant="text" width={100} height={18} />
+                          </CardContent>
+                        </Card>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Card>
+                          <CardContent sx={{ p: 2 }}>
+                            <Skeleton variant="text" width={120} height={36} sx={{ mb: 1 }} />
+                            <Skeleton variant="text" width={120} height={18} />
+                          </CardContent>
+                        </Card>
+                      </Grid>
+                    </Grid>
+
+                    {/* Skeleton: Systems by Category */}
+                    <Skeleton variant="text" width={200} height={28} sx={{ mb: 2 }} />
+                    <Box sx={{ mb: 3 }}>
+                      {[...Array(3)].map((_, i) => (
+                        <Box key={i} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1, p: 1.5 }}>
+                          <Skeleton variant="text" width={140} height={20} />
+                          <Skeleton variant="rounded" width={32} height={24} />
+                        </Box>
+                      ))}
+                    </Box>
+
+                    {/* Skeleton: System Status */}
+                    <Skeleton variant="text" width={180} height={28} sx={{ mb: 2 }} />
+                    <Card>
+                      <CardContent sx={{ p: 2 }}>
+                        <Skeleton variant="rounded" height={48} />
+                      </CardContent>
+                    </Card>
+                  </>
+                ) : (
+                  <>
+                    {/* Key Metrics */}
+                    <Grid container spacing={2} sx={{ mb: 3 }}>
+                      <Grid item xs={6}>
+                        <Card sx={{ 
+                          background: `linear-gradient(135deg, ${theme.palette.primary.light}, ${theme.palette.primary.main})`,
+                          border: `1px solid ${theme.palette.primary.main}`,
+                          color: 'white'
+                        }}>
+                          <CardContent sx={{ textAlign: 'center', p: 2 }}>
+                            <Tooltip 
+                              title={`${totalSystems.toLocaleString()} total systems`}
+                              placement="top"
+                              arrow
+                            >
+                              <Typography variant="h4" sx={{ fontWeight: 700, mb: 1, color: 'white !important', cursor: 'help' }}>
+                                {totalSystems}
+                              </Typography>
+                            </Tooltip>
+                            <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.9)' }}>
+                              Total Systems
+                            </Typography>
+                          </CardContent>
+                        </Card>
+                      </Grid>
+                      
+                      <Grid item xs={6}>
+                        <Card sx={{ 
+                          background: `linear-gradient(135deg, ${theme.palette.secondary.light}, ${theme.palette.secondary.main})`,
+                          border: `1px solid ${theme.palette.secondary.main}`,
+                          color: 'white'
+                        }}>
+                          <CardContent sx={{ textAlign: 'center', p: 2 }}>
+                            <Tooltip 
+                              title={totalCapacity ? `${totalCapacity.toLocaleString()} kW (full value)` : '0 kW'}
+                              placement="top"
+                              arrow
+                            >
+                              <Typography variant="h4" sx={{ fontWeight: 700, mb: 1, color: 'white !important', cursor: 'help' }}>
+                                {formatCapacity(totalCapacity)}
+                              </Typography>
+                            </Tooltip>
+                            <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.9)' }}>
+                              Total Capacity
+                            </Typography>
+                          </CardContent>
+                        </Card>
+                      </Grid>
+                    </Grid>
+                    
+                    {/* Systems by Category */}
+                    <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: 'black' }}>
+                      🌱 Systems by Category
+                    </Typography>
+                    <Box sx={{ mb: 3 }}>
+                      {Object.entries(systemsByCategory).map(([category, count]) => (
+                        <Box key={category} sx={{ 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          justifyContent: 'space-between',
+                          mb: 1,
+                          p: 1.5,
+                          borderRadius: 2,
+                          background: `rgba(${theme.palette.primary.main}, 0.05)`,
+                          border: `1px solid rgba(${theme.palette.primary.main}, 0.1)`
+                        }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            {getCategoryIcon(category)}
+                            <Typography variant="body2" sx={{ fontWeight: 500, color: 'black' }}>
+                              {category}
+                            </Typography>
+                          </Box>
+                          <Chip 
+                            label={count} 
+                            size="small" 
+                            sx={{ 
+                              backgroundColor: theme.palette.primary.main,
+                              color: 'white !important',
+                              fontWeight: 600
+                            }} 
+                          />
+                        </Box>
+                      ))}
+                    </Box>
+                    
+                    {/* System Status */}
+                    <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: 'black' }}>
+                      ⚡ System Status
+                    </Typography>
+                    <Box sx={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: 2,
+                      mb: 3,
+                      p: 2,
+                      borderRadius: 2,
+                      background: `rgba(${theme.palette.success.main}, 0.05)`,
+                      border: `1px solid rgba(${theme.palette.success.main}, 0.1)`
+                    }}>
+                      <OperationalIcon color="success" />
+                      <Typography variant="body2" sx={{ flex: 1, color: 'black' }}>
+                        Operational Systems
+                      </Typography>
+                      <Chip 
+                        label={operationalSystems} 
+                        size="small" 
+                        sx={{ 
+                          backgroundColor: theme.palette.success.main,
+                          color: 'white !important',
+                          fontWeight: 600
+                        }} 
+                      />
+                    </Box>
+                  </>
+                )}
+              </Box>
+            </Paper>
+          </Grid>
+        </Grid>
+      </Container>
+    </Box>
+  )
+  
+  return content
 }
+
 export default Welcome

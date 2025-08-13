@@ -1,13 +1,23 @@
 import { useGetUsersQuery } from "./usersApiSlice"
 import User from './User'
-import { Container, CssBaseline, Box, IconButton, Typography, Grid, Paper } from "@mui/material"
+import { 
+    Container, 
+    CssBaseline, 
+    Box, 
+    IconButton, 
+    Typography, 
+    Grid, 
+    Paper,
+    Button,
+    Alert,
+    CircularProgress
+} from "@mui/material"
 import {
     ArrowBack as ArrowBackIcon,
-}
-    from '@mui/icons-material/'
+    Add as AddIcon,
+    Refresh as RefreshIcon
+} from '@mui/icons-material'
 import { useNavigate } from "react-router-dom"
-import { MoonLoader } from 'react-spinners'
-import { boxmain, boxpaper } from '../../config/style'
 import useTitle from '../../hooks/useTitle'
 const UsersList = () => {
     useTitle('ArecGIS | Users list')
@@ -26,43 +36,30 @@ const UsersList = () => {
     const navigate = useNavigate()
     let content
 
-    if (isLoading) content = 
-    (
-        <>
-            <CssBaseline/>
-            <Grid
-                container
-                spacing={0}
-                direction="row"
-                alignItems="center"
-                justifyContent="center"
-                style={{ minHeight: '100vh' }}
-            >
-                <Grid item >
-                    <MoonLoader color={"#fffdd0"} />
-                </Grid>
-            </Grid>
-        </>
+    if (isLoading) content = (
+        <Container maxWidth="lg">
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+                <CircularProgress size={60} />
+            </Box>
+        </Container>
     )
 
     if (isError) {
-        content =     
-        (
-            <>
-                <CssBaseline/>
-                <Grid
-                    container
-                    spacing={0}
-                    direction="row"
-                    alignItems="center"
-                    justifyContent="center"
-                    style={{ minHeight: '100vh' }}
-                >
-                    <Grid item >
-                        <p>{error?.data?.message}</p>
-                    </Grid>
-                </Grid>
-            </>
+        content = (
+            <Container maxWidth="lg">
+                <Box sx={{ mt: 4 }}>
+                    <Alert severity="error" sx={{ mb: 2 }}>
+                        Error loading users: {error?.data?.message || 'Unknown error'}
+                    </Alert>
+                    <Button 
+                        variant="outlined" 
+                        onClick={() => navigate(-1)}
+                        startIcon={<ArrowBackIcon />}
+                    >
+                        Go Back
+                    </Button>
+                </Box>
+            </Container>
         )
     }
 
@@ -75,29 +72,62 @@ const UsersList = () => {
             : null
 
         content = (
-            <Container maxWidth="sm">
-                <Box sx={boxmain}>
-                    <Box
-                        sx={boxpaper}
-                    >
-                        <Paper elevation={3}  >
-                            <Grid container>
-                                <Grid item xs>
-                                    <Typography component="h1" variant="h5">
-                                        Users list
-                                    </Typography>
-                                </Grid>
-                                <Grid item>
-                                    <IconButton onClick={() => navigate(-1)}>
-                                        <ArrowBackIcon />
-                                    </IconButton>
-                                </Grid>
+            <Container maxWidth="lg">
+                <Box sx={{ mt: 4, mb: 4 }}>
+                    <Paper elevation={3} sx={{ p: 3 }}>
+                        <Grid container spacing={2} alignItems="center" sx={{ mb: 3 }}>
+                            <Grid item xs>
+                                <Typography component="h1" variant="h4" gutterBottom>
+                                    Users Management
+                                </Typography>
+                                <Typography variant="body1" color="text.secondary">
+                                    Manage system users, roles, and affiliations
+                                </Typography>
                             </Grid>
-                            <Box sx={{ mt: 1 }}>
+                            <Grid item>
+                                <Button
+                                    variant="outlined"
+                                    startIcon={<ArrowBackIcon />}
+                                    onClick={() => navigate(-1)}
+                                    sx={{ mr: 2 }}
+                                >
+                                    Back
+                                </Button>
+                                <Button
+                                    variant="contained"
+                                    startIcon={<AddIcon />}
+                                    onClick={() => navigate('/dashboard/users/new')}
+                                    sx={{ mr: 1 }}
+                                >
+                                    Add User
+                                </Button>
+                                <IconButton 
+                                    onClick={() => window.location.reload()}
+                                    title="Refresh"
+                                >
+                                    <RefreshIcon />
+                                </IconButton>
+                            </Grid>
+                        </Grid>
+                        
+                        {ids?.length === 0 ? (
+                            <Alert severity="info" sx={{ mb: 2 }}>
+                                No users found. 
+                                <Button 
+                                    variant="outlined" 
+                                    size="small" 
+                                    sx={{ ml: 2 }}
+                                    onClick={() => navigate('/dashboard/users/new')}
+                                >
+                                    Create First User
+                                </Button>
+                            </Alert>
+                        ) : (
+                            <Box sx={{ mt: 2 }}>
                                 {tableContent}
                             </Box>
-                        </Paper>
-                    </Box>
+                        )}
+                    </Paper>
                 </Box>
             </Container>
         )

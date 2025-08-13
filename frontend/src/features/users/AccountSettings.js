@@ -2,7 +2,7 @@ import { useParams } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { selectUserById } from './usersApiSlice'
 import AccountSettingsForm from './AccountSettingsForm'
-import MoonLoader from 'react-spinners/MoonLoader'
+import SectionLoading from '../../components/SectionLoading'
 import { CssBaseline, Grid } from '@mui/material'
 import useTitle from '../../hooks/useTitle'
 
@@ -16,23 +16,7 @@ const AccountSettings = () => {
 
     // const content = user ? <EditUserForm user={user} /> : <p>Loading...</p>
 
-    if (!user) return (
-        <>
-            <CssBaseline />
-            <Grid
-                container
-                spacing={0}
-                direction="row"
-                alignItems="center"
-                justifyContent="center"
-                style={{ minHeight: '100vh' }}
-            >
-                <Grid item >
-                    <MoonLoader color={"#fffdd0"} />
-                </Grid>
-            </Grid>
-        </>
-    )
+    if (!user) return <SectionLoading label="Loading account settings…" />
 
     const content = <AccountSettingsForm user={user} />
 

@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
+import { useLocation } from 'react-router-dom'
 import {
   Box,
   Button,
@@ -27,12 +28,18 @@ import {
   ListItem,
   ListItemText,
   Alert,
+  Paper,
+  Divider,
 } from '@mui/material'
 import {
   Upload as UploadFileIcon,
   MyLocation as MyLocationIcon,
   DeleteOutline as DeleteOutlineIcon,
   ArrowBack as ArrowBackIcon,
+  LockOutlined as LockIcon,
+  AccessTime as AccessTimeIcon,
+  Person as PersonIcon,
+  Help as HelpIcon,
 } from '@mui/icons-material'
 import { boxstyle } from '../../config/style'
 import { reCats } from '../../config/reCats'
@@ -46,11 +53,100 @@ import { baseUrl } from '../../config/baseUrl'
 import { Classification, mannerOfAcquisition } from '../../config/techAssesment'
 import { Coordinates } from '../../components/Coordinates'
 import { EditHydropower } from '../categories/EditHydropower'
+import InventoryHelpModal from '../../components/InventoryHelpModal'
+
+// Helper function to normalize MongoDB ObjectIDs for consistent comparison
+const normalizeId = (id) => {
+  if (!id) return null;
+  // Extract the ID string from MongoDB ObjectID format if needed
+  if (typeof id === 'object' && id.$oid) return id.$oid;
+  if (typeof id === 'object' && id._id) return id._id;
+  return String(id); // Convert to string for consistent comparison
+};
 
 const EditInventoryForm = ({ reItems, allUsers }) => {
-  const { username, isManager, isAdmin } = useAuth()
+  const { username, isManager, isAdmin, userId } = useAuth()
   const GEOCODE_URL = 'https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=pjson&langCode=EN&location='
-
+  
+  // Get location state to check if we're in read-only mode
+  const location = useLocation()
+  
+  // Use ownership flags from location state if available
+  const isPreviousOwnerFromState = location.state?.isPreviousOwner === true
+  
+  // Current date and time in UTC (hardcoded as requested)
+  const [currentDateTime, setCurrentDateTime] = useState('2025-08-07 05:33:22');
+  
+  // If it's a previous owner, we'll show a read-only notice banner
+  const isPreviousOwner = useMemo(() => {
+    // First check the flag from navigation state
+    if (isPreviousOwnerFromState === true) {
+      return true;
+    }
+    
+    // Check in previousUsers array if it exists
+    if (reItems.previousUsers && Array.isArray(reItems.previousUsers)) {
+      // Normalize the current user ID for comparison
+      const normalizedUserId = normalizeId(userId);
+      
+      // Check for the user ID in previousUsers array with normalized comparison
+      const isInPreviousUsers = reItems.previousUsers.some(prevUser => {
+        const prevUserId = normalizeId(prevUser);
+        return prevUserId === normalizedUserId;
+      });
+      
+      if (isInPreviousUsers) return true;
+      
+      // For populated objects with username property
+      const hasUserObject = reItems.previousUsers.some(user => {
+        if (typeof user === 'object' && user?.username) {
+          return user.username === username;
+        }
+        return false;
+      });
+      
+      if (hasUserObject) return true;
+    }
+    
+    // Check direct previousUser field if it exists
+    if (reItems.previousUser) {
+      const prevUserId = normalizeId(reItems.previousUser);
+      const normalizedUserId = normalizeId(userId);
+      if (prevUserId === normalizedUserId) {
+        return true;
+      }
+      
+      if (typeof reItems.previousUser === 'object' && reItems.previousUser.username) {
+        if (reItems.previousUser.username === username) {
+          return true;
+        }
+      }
+    }
+    
+    // Direct check in previousUsernames array if available
+    if (reItems.previousUsernames && Array.isArray(reItems.previousUsernames)) {
+      if (reItems.previousUsernames.includes(username)) {
+        return true;
+      }
+    }
+    
+    // Add debugging with normalized IDs
+    console.log('Previous owner check details:', {
+      isPreviousOwnerFromState,
+      username,
+      userId,
+      normalizedUserId: normalizeId(userId),
+      previousUsers: reItems.previousUsers?.map(u => normalizeId(u)),
+      previousUser: normalizeId(reItems.previousUser),
+      previousUsernames: reItems.previousUsernames
+    });
+    
+    return false;
+  }, [reItems, username, userId, isPreviousOwnerFromState]);
+  
+  // IMPORTANT: Previous owners should have edit access, not read-only access
+  const isReadOnly = location.state?.readOnly === true && !isPreviousOwner;
+  
   const [updateInventory, {
     isLoading,
     isSuccess,
@@ -131,7 +227,8 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
 
   const [myUploads, setmyUploads] = useState('')
   const [filesCount, setFilesCount] = useState(null)
-  const [userId, setUserId] = useState(reItems?.user)
+  // FIXED: Renamed userId to assignedUserId to avoid conflict with userId from useAuth
+  const [assignedUserId, setAssignedUserId] = useState(reItems?.user)
   const [solar, setEditSolar] = useState([])
   const [wind, setEditWind] = useState([])
   const [biomass, setEditBiomass] = useState([])
@@ -153,6 +250,9 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
   const [showDuplicateModal, setShowDuplicateModal] = useState(false)
   const [forceUpdate, setForceUpdate] = useState(false)
   const [lastFormData, setLastFormData] = useState(null)
+
+  // HELP MODAL STATE
+  const [openHelpModal, setOpenHelpModal] = useState(false)
 
   // Sync lat/lng/coordinates when reItems changes
   useEffect(() => {
@@ -222,7 +322,7 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
       setCoordinates([])
       setType("Point") // Reset to default GeoJSON type
       setReCat("")
-      setUserId("")
+      setAssignedUserId("") // FIXED: Updated variable name
       navigate(0)
     }
   }, [isSuccess, navigate])
@@ -246,7 +346,7 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
       setCoordinates([])
       setType("Point")
       setReCat("")
-      setUserId("")
+      setAssignedUserId("") // FIXED: Updated variable name
       navigate(-1)
     }
   }, [isDelSuccess, navigate])
@@ -282,7 +382,8 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
     setLng(e.target.value)
     setCoordinates([parseFloat(e.target.value), parseFloat(lat)])
   }
-  const onUserIdChanged = (e) => setUserId(e.target.value)
+  // FIXED: Updated function to use new variable name
+  const onUserIdChanged = (e) => setAssignedUserId(e.target.value)
   const onReClassChanged = (e) => {
     setReClass(e.target.value);
     
@@ -304,6 +405,8 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
   const onYearEstChanged = (e) => setYearEst(e.target.value)
 
   const reverseGeoCoding = async (coordinates) => {
+    if (isReadOnly) return; // Don't allow in read-only mode
+    
     const data = await (
       await fetch(GEOCODE_URL + `${coordinates.lng},${coordinates.lat}`)
     ).json()
@@ -319,12 +422,15 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
     }
   }
 
-  // Fixed: Removed type from canSave since it's not needed for validation
-  const canSave = [ownerName, userId].every(Boolean) && !isLoading
+  // FIXED: Updated to use new assignedUserId variable
+  const canSave = [ownerName, assignedUserId].every(Boolean) && !isLoading && !isReadOnly
 
   // -- EDIT INVENTORY SUBMIT HANDLER --
   const onSaveInventoryClicked = async (e, isForce = false) => {
     e.preventDefault();
+    
+    // Don't allow saving in read-only mode
+    if (isReadOnly) return;
 
     // Build properties object for correct backend parsing!
     const propertiesObj = {
@@ -403,7 +509,8 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
 
     const data = new FormData();
     data.append('id', reItems.id)
-    data.append('user', userId)
+    // FIXED: Updated to use assignedUserId
+    data.append('user', assignedUserId)
     data.append('type', 'Point');
     // Send coordinates as GeoJSON object
     data.append('coordinates', JSON.stringify(coordinatesObj));
@@ -438,6 +545,8 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
 
   // When user chooses to "Proceed Anyway"
   const handleProceedAnyway = async () => {
+    if (isReadOnly) return; // Don't allow in read-only mode
+    
     setShowDuplicateModal(false)
     setForceUpdate(true)
     if (lastFormData) {
@@ -458,12 +567,24 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
   }
 
   const onDeleteInventoryClicked = async () => {
+    if (isReadOnly) return; // Don't allow in read-only mode
     await deleteInventory({ id: [reItems.id] })
   }
 
   const deleteImage = async (index) => {
+    if (isReadOnly) return; // Don't allow in read-only mode
     await deleteImageInventory({ id: reItems.id, images: index })
   }
+
+  // Add logging for debugging
+  useEffect(() => {
+    console.log('Access control debug:');
+    console.log('Username:', username);
+    console.log('Is Previous Owner:', isPreviousOwner);
+    console.log('Is Read Only:', isReadOnly);
+    console.log('Previous Users array:', reItems.previousUsers);
+    console.log('Previous Usernames array:', reItems.previousUsernames);
+  }, [username, isPreviousOwner, isReadOnly, reItems]);
 
   const content = (
     <>
@@ -482,6 +603,10 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
               '& .MuiTextField-root': { my: 1 },
             }}
           >
+
+            
+
+            
             <Box sx={boxstyle}>
               {errContent !== null ?
                 <Snackbar open={true} autoHideDuration={6000} onClose={() => setErrContent(null)} >
@@ -493,11 +618,20 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
 
               <Grid container>
                 <Grid item xs>
-                  <Typography component='h1' variant='h5'>
-                    Edit Inventory
+                  <Typography component='h1' variant='h5' sx={{ color: 'white' }}>
+                    {isReadOnly ? "View Inventory" : "Edit Inventory"}
                   </Typography>
                 </Grid>
                 <Grid item>
+                  <Tooltip title="Help & Guide" placement="top">
+                    <IconButton 
+                      onClick={() => setOpenHelpModal(true)}
+                      sx={{ mr: 1 }}
+                      color="primary"
+                    >
+                      <HelpIcon />
+                    </IconButton>
+                  </Tooltip>
                   <IconButton onClick={() => navigate(-1)}>
                     <ArrowBackIcon />
                   </IconButton>
@@ -528,6 +662,7 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
                 label="Select RE Classification:"
                 value={reClass || ""}
                 onChange={onReClassChanged}
+                disabled={isReadOnly}
               >
                 {Classification.map((type, index) => (
                   <MenuItem key={index} value={type.name}>
@@ -543,6 +678,7 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
                 label="Manner of Acquisition:"
                 value={acquisition || ""}
                 onChange={onAquisitionChanged}
+                disabled={isReadOnly}
               >
                 {mannerOfAcquisition.map((type, index) => (
                   <MenuItem key={index} value={type.name}>
@@ -559,6 +695,7 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
                 type="text"
                 value={ownerName}
                 onChange={onOwnerNameChanged}
+                disabled={isReadOnly}
               />
               <TextField
                 fullWidth
@@ -569,6 +706,7 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
                 type="number"
                 value={yearEst}
                 onChange={onYearEstChanged}
+                disabled={isReadOnly}
               />
               {isManager || isAdmin ?
                 <TextField
@@ -576,8 +714,9 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
                   id='user'
                   select
                   label='Assigned to:'
-                  value={userId || ''}
+                  value={assignedUserId || ''}  // FIXED: Updated variable name
                   onChange={onUserIdChanged}
+                  disabled={isReadOnly}
                 >
                   {allUsers.map((users) => (
                     <MenuItem key={users.id} value={users.id}>
@@ -604,6 +743,7 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
                         <Checkbox
                           checked={isFitEligible === true}
                           onChange={() => {
+                            if (isReadOnly) return;
                             setIsFitEligible(true);
                             // Auto-select FIT1 when eligible (since Non-FIT is no longer valid)
                             if (fitPhase === "Non-FIT") {
@@ -611,6 +751,7 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
                             }
                           }}
                           color="primary"
+                          disabled={isReadOnly}
                         />
                       }
                       label="Yes"
@@ -621,11 +762,13 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
                         <Checkbox
                           checked={isFitEligible === false}
                           onChange={() => {
+                            if (isReadOnly) return;
                             setIsFitEligible(false);
                             // Auto-select Non-FIT when not eligible
                             setFitPhase("Non-FIT");
                           }}
                           color="primary"
+                          disabled={isReadOnly}
                         />
                       }
                       label="No"
@@ -642,7 +785,7 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
                       label="FIT Phase"
                       value={fitPhase}
                       onChange={(e) => setFitPhase(e.target.value)}
-                      disabled={isFitEligible === false}
+                      disabled={isFitEligible === false || isReadOnly}
                       sx={{ mb: 2 }}
                     >
                       <MenuItem value="FIT1">FIT1</MenuItem>
@@ -661,7 +804,7 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
                     type="number"
                     value={fitRate}
                     onChange={(e) => setFitRate(e.target.value)}
-                    disabled={isFitEligible === false}
+                    disabled={isFitEligible === false || isReadOnly}
                     sx={{ mb: 2 }}
                   />
                   
@@ -674,7 +817,7 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
                     name="fitRef"
                     value={fitRef}
                     onChange={(e) => setFitRef(e.target.value)}
-                    disabled={isFitEligible === false}
+                    disabled={isFitEligible === false || isReadOnly}
                     sx={{ mb: 2 }}
                   />
                   
@@ -687,7 +830,7 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
                     name="fitStatus"
                     value={fitStatus}
                     onChange={(e) => setFitStatus(e.target.value)}
-                    disabled={isFitEligible === false}
+                    disabled={isFitEligible === false || isReadOnly}
                     sx={{ mb: 1 }}
                   />
                 </Box>
@@ -703,9 +846,12 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
                     control={
                       <Checkbox
                         checked={isNetMetered === "Yes"}
-                        onChange={() => setIsNetMetered("Yes")}
+                        onChange={() => {
+                          if (isReadOnly) return;
+                          setIsNetMetered("Yes");
+                        }}
                         color="primary"
-                        disabled={reClass === "Commercial"} // Disable when Commercial
+                        disabled={reClass === "Commercial" || isReadOnly} // Disable when Commercial or read-only
                       />
                     }
                     label="Yes"
@@ -715,9 +861,12 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
                     control={
                       <Checkbox
                         checked={isNetMetered === "No"}
-                        onChange={() => setIsNetMetered("No")}
+                        onChange={() => {
+                          if (isReadOnly) return;
+                          setIsNetMetered("No");
+                        }}
                         color="primary"
-                        disabled={reClass === "Commercial"} // Disable when Commercial
+                        disabled={reClass === "Commercial" || isReadOnly} // Disable when Commercial or read-only
                       />
                     }
                     label="No"
@@ -737,9 +886,12 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
                     control={
                       <Checkbox
                         checked={isOwnUse === "Yes"}
-                        onChange={() => setIsOwnUse("Yes")}
+                        onChange={() => {
+                          if (isReadOnly) return;
+                          setIsOwnUse("Yes");
+                        }}
                         color="primary"
-                        disabled={reClass === "Commercial"} // Disable when Commercial
+                        disabled={reClass === "Commercial" || isReadOnly} // Disable when Commercial or read-only
                       />
                     }
                     label="Yes"
@@ -749,9 +901,12 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
                     control={
                       <Checkbox
                         checked={isOwnUse === "No"}
-                        onChange={() => setIsOwnUse("No")}
+                        onChange={() => {
+                          if (isReadOnly) return;
+                          setIsOwnUse("No");
+                        }}
                         color="primary"
-                        disabled={reClass === "Commercial"} // Disable when Commercial
+                        disabled={reClass === "Commercial" || isReadOnly} // Disable when Commercial or read-only
                       />
                     }
                     label="No"
@@ -770,7 +925,8 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
               {reItems.images.map((image, index) => (
                 <ImageListItem key={index}>
                   <img
-                    src={`${baseUrl + image}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
+                    src={`${baseUrl + image}?w=164&h=164&fit=crop&auto=format`}
+                    srcSet={`${baseUrl + image}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
                     loading='lazy'
                     alt={reItems.properties.reCat}
                   />
@@ -782,9 +938,11 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
                     }}
                     position='top'
                     actionIcon={
-                      <IconButton onClick={() => openDelAlert(index)}>
-                        <DeleteOutlineIcon sx={{ color: 'white.main' }} />
-                      </IconButton>
+                      !isReadOnly && (
+                        <IconButton onClick={() => openDelAlert(index)}>
+                          <DeleteOutlineIcon sx={{ color: 'white.main' }} />
+                        </IconButton>
+                      )
                     }
                     actionPosition='left'
                   />
@@ -829,6 +987,7 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
                   type='tel'
                   value={lng}
                   onChange={onLngChanged}
+                  disabled={isReadOnly}
                 />
                 <TextField
                   fullWidth
@@ -838,6 +997,7 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
                   type='tel'
                   value={lat}
                   onChange={onLatChanged}
+                  disabled={isReadOnly}
                 />
                 <Button
                   component='label'
@@ -846,6 +1006,7 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
                   sx={{ my: 1 }}
                   size='small'
                   onClick={handleOpenModal}
+                  disabled={isReadOnly}
                 >
                   Select on Map
                 </Button>
@@ -864,6 +1025,7 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
                 type='text'
                 value={country}
                 onChange={onCountryChanged}
+                disabled={isReadOnly}
               />
               <TextField
                 fullWidth
@@ -873,6 +1035,7 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
                 type='text'
                 value={region}
                 onChange={onRegionChanged}
+                disabled={isReadOnly}
               />
               <TextField
                 fullWidth
@@ -882,6 +1045,7 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
                 type='text'
                 value={province}
                 onChange={onProvinceChanged}
+                disabled={isReadOnly}
               />
               <TextField
                 fullWidth
@@ -891,6 +1055,7 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
                 type='text'
                 value={city}
                 onChange={onCityChanged}
+                disabled={isReadOnly}
               />
               <TextField
                 fullWidth
@@ -900,13 +1065,14 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
                 type='text'
                 value={brgy}
                 onChange={onBrgyChanged}
+                disabled={isReadOnly}
               />
             </Box>
             {reCat === null ? null :
-              reCat === 'Solar Energy' ? <EditSolar setEditSolar={setEditSolar} reItems={reItems} allUsers={allUsers} reClass={reClass} /> :
-                reCat === 'Wind Energy' ? <EditWind setEditWind={setEditWind} reItems={reItems} allUsers={allUsers} reClass={reClass} /> :
-                  reCat === 'Biomass' ? <EditBiomass setEditBiomass={setEditBiomass} reItems={reItems} allUsers={allUsers} /> :
-                    reCat === 'Hydropower' ? <EditHydropower setEditHydropower={setEditHydropower} reItems={reItems} allUsers={allUsers} /> : ''}
+              reCat === 'Solar Energy' ? <EditSolar setEditSolar={setEditSolar} reItems={reItems} allUsers={allUsers} reClass={reClass} readOnly={isReadOnly} /> :
+                reCat === 'Wind Energy' ? <EditWind setEditWind={setEditWind} reItems={reItems} allUsers={allUsers} reClass={reClass} readOnly={isReadOnly} /> :
+                  reCat === 'Biomass' ? <EditBiomass setEditBiomass={setEditBiomass} reItems={reItems} allUsers={allUsers} readOnly={isReadOnly} /> :
+                    reCat === 'Hydropower' ? <EditHydropower setEditHydropower={setEditHydropower} reItems={reItems} allUsers={allUsers} readOnly={isReadOnly} /> : ''}
             <Box
               sx={{
                 display: 'flex',
@@ -926,6 +1092,7 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
                 variant='contained'
                 sx={{ m: 1, backgroundColor: 'custom.error' }}
                 onClick={() => openDelAlert()}
+                disabled={isReadOnly}
               >
                 Delete
               </Button>
@@ -935,6 +1102,7 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
                   variant='contained'
                   startIcon={<UploadFileIcon />}
                   sx={{ my: 1, backgroundColor: 'primary.main' }}
+                  disabled={isReadOnly}
                 >
                   Add Images {filesCount >= 4 ? "| no. of file exceeded" : filesCount ? "| " + filesCount + " selected" : null}
                   <input
@@ -945,6 +1113,7 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
                     multiple
                     hidden
                     onChange={onmyUploadsChanged}
+                    disabled={isReadOnly}
                   />
                 </Button>
               </Tooltip>}
@@ -1010,6 +1179,13 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
           </Dialog>
         </form>
       </Container>
+
+      {/* Help Modal */}
+      <InventoryHelpModal
+        open={openHelpModal}
+        onClose={() => setOpenHelpModal(false)}
+        formType="edit"
+      />
     </>
   )
   return content

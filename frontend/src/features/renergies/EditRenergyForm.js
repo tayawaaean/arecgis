@@ -331,7 +331,7 @@ const EditRenergyForm = ({ reItems, users }) => {
             <Box sx={boxwrapstyle}>
               <Grid container>
                 <Grid item xs>
-                  <Typography component="h1" variant="h5">
+                  <Typography component="h1" variant="h5" sx={{ color: 'white' }}>
                     Edit Inventory
                   </Typography>
                 </Grid>

@@ -136,7 +136,7 @@ const NewRenergyForm = ({ allUsers }) => {
     })
     return (
       <>
-        <Button variant="contained" color="white" sx={{ color: 'primary.main' }} onClick={fly}>
+          <Button variant="contained" color="primary" onClick={fly}>
           <NearMeIcon />
         </Button>
       </>
@@ -341,7 +341,7 @@ const NewRenergyForm = ({ allUsers }) => {
             <Box sx={boxwrapstyle}>
               <Grid container>
                 <Grid item xs>
-                  <Typography component="h1" variant="h5">
+                  <Typography component="h1" variant="h5" sx={{ color: 'white' }}>
                     Technical Assessment
                   </Typography>
                 </Grid>

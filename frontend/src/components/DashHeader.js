@@ -28,17 +28,16 @@ import {
   Button,
   Link,
 } from "@mui/material"
-import { MoonLoader } from 'react-spinners'
+import SectionLoading from './SectionLoading'
 import {
   Home as HomeIcon,
   MyLocation as MyLocationIcon,
   Menu as MenuIcon,
-  Settings as SettingsIcon,
+
   AccountCircle as AccountCircle,
   HelpOutline as HelpOutlineIcon,
   Logout as LogoutIcon,
   MoreVert as MoreIcon,
-  Language as LanguageIcon,
   ManageAccounts as ManageAccountsIcon,
   Info as InfoIcon,
   Group as GroupIcon,
@@ -47,6 +46,9 @@ import {
   ListAlt as ListAltIcon,
   Download as DownloadIcon,
   KeyboardArrowDown as KeyboardArrowDownIcon,
+  Person as PersonIcon,
+  Business as BusinessIcon,
+
 } from "@mui/icons-material/"
 import { baseUrl } from '../config/baseUrl'
 
@@ -167,23 +169,14 @@ const DashHeader = () => {
 
   }, [isSuccess, navigate])
 
-  if (isLoading) return (
-    <>
-      <CssBaseline />
-      <Grid
-        container
-        spacing={0}
-        direction="row"
-        alignItems="center"
-        justifyContent="center"
-        style={{ minHeight: '100vh' }}
-      >
-        <Grid item >
-          <MoonLoader color={"#fffdd0"} />
-        </Grid>
-      </Grid>
-    </>
-  )
+  // Close any open overlays when route changes
+  useEffect(() => {
+    setOpen(false)
+    setAnchorElNav(null)
+    setMobileMoreAnchorEl(null)
+  }, [pathname])
+
+  if (isLoading) return <SectionLoading label="Signing out…" />
 
 
   if (isError) return <p>Error: {error?.data?.message}</p>
@@ -209,47 +202,26 @@ const DashHeader = () => {
     handleMobileMenuClose()
   }
 
-  const accSettings = () => {
+
+
+  const goToProfile = () => {
     setAnchorElNav(null)
-    navigate(`/dashboard/settings/${id}`)
+    navigate('/dashboard/profile')
   }
+
+  const goToAffiliations = () => {
+    setAnchorElNav(null)
+    navigate('/dashboard/affiliations')
+  }
+
+
 
   const handleMobileMenuOpen = (event) => {
     setMobileMoreAnchorEl(event.currentTarget)
   }
 
   const menuId = "primary-search-account-menu"
-  const renderMenu = (
-    <Menu
-      anchorEl={anchorElNav}
-      anchorOrigin={{
-        vertical: "top",
-        horizontal: "right",
-      }}
-      id={menuId}
-      keepMounted
-      transformOrigin={{
-        vertical: "top",
-        horizontal: "right",
-      }}
-      open={isMenuOpen}
-      onClose={handleMenuClose}
-    >
-      <MenuItem onClick={accSettings} >
-        <ListItemIcon>
-          <SettingsIcon color="primary" fontSize="small" />
-        </ListItemIcon>
-        Account Settings
-      </MenuItem>
-      <MenuItem onClick={sendLogout}>
-        <ListItemIcon>
-          <LogoutIcon color="primary" fontSize="small" />
-        </ListItemIcon>
-        Log out
-      </MenuItem>
 
-    </Menu>
-  )
 
   const mobileMenuId = "primary-search-account-menu-mobile"
   const renderMobileMenu = (
@@ -267,31 +239,113 @@ const DashHeader = () => {
       }}
       open={isMobileMenuOpen}
       onClose={handleMobileMenuClose}
+      PaperProps={{
+        sx: {
+          mt: 1,
+          minWidth: 200,
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
+          borderRadius: 2,
+          border: '1px solid rgba(0, 0, 0, 0.08)',
+        }
+      }}
     >
-      <MenuItem onClick={accSettings}>
+      {/* Profile Section */}
+      <MenuItem 
+        onClick={goToProfile}
+        sx={{
+          py: 1.5,
+          px: 2,
+          '&:hover': {
+            backgroundColor: 'rgba(25, 118, 210, 0.08)',
+          }
+        }}
+      >
         <IconButton
-          aria-label="account of current user"
-          aria-controls="primary-search-account-menu"
-          aria-haspopup="true"
-          color="inherit"
+          aria-label="user profile"
+          color="primary"
+          size="small"
         >
-          <AccountCircle color="primary" fontSize="small" />
+          <PersonIcon fontSize="small" />
         </IconButton>
-        <p>Account Settings</p>
+        <Box sx={{ ml: 1 }}>
+          <Typography variant="body1" sx={{ fontWeight: 500 }}>
+            My Profile
+          </Typography>
+          <Typography variant="caption" color="text.secondary">
+            View and edit your profile
+          </Typography>
+        </Box>
       </MenuItem>
-      <MenuItem onClick={sendLogout}>
-        <IconButton aria-label="logout" color="inherit">
-          <LogoutIcon color="primary" fontSize="small" />
-        </IconButton >
-        <p>Log out</p>
+      
+      {/* Admin/Manager Section */}
+      {(isAdmin || isManager) && (
+        <>
+          <Divider sx={{ my: 1 }} />
+          <Box sx={{ px: 2, py: 1 }}>
+            <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
+              ADMINISTRATION
+            </Typography>
+          </Box>
+          <MenuItem 
+            onClick={goToAffiliations}
+            sx={{
+              py: 1.5,
+              px: 2,
+              '&:hover': {
+                backgroundColor: 'rgba(25, 118, 210, 0.08)',
+              }
+            }}
+          >
+            <IconButton
+              aria-label="manage affiliations"
+              color="primary"
+              size="small"
+            >
+              <BusinessIcon fontSize="small" />
+            </IconButton>
+            <Box sx={{ ml: 1 }}>
+              <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                Manage Affiliations
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                Manage user affiliations
+              </Typography>
+            </Box>
+          </MenuItem>
+        </>
+      )}
+
+      {/* Logout Section */}
+      <Divider sx={{ my: 1 }} />
+      <MenuItem 
+        onClick={sendLogout}
+        sx={{
+          py: 1.5,
+          px: 2,
+          '&:hover': {
+            backgroundColor: 'rgba(211, 47, 47, 0.08)',
+          }
+        }}
+      >
+        <IconButton aria-label="logout" color="error" size="small">
+          <LogoutIcon fontSize="small" />
+        </IconButton>
+        <Box sx={{ ml: 1 }}>
+          <Typography variant="body1" sx={{ fontWeight: 500, color: 'error.main' }}>
+            Log out
+          </Typography>
+          <Typography variant="caption" color="text.secondary">
+            Sign out of your account
+          </Typography>
+        </Box>
       </MenuItem>
     </Menu>
   )
   //drawer start
 
 
-  const handleDrawerOpen = () => {
-    setOpen(true)
+  const handleDrawerToggle = () => {
+    setOpen(prev => !prev)
   }
   const handleDrawerClose = () => {
     setOpen(false)
@@ -316,7 +370,7 @@ const DashHeader = () => {
   };
 
   const GoToTransactions = () => {
-  navigate('/dashboard/transfers');
+  navigate('/dashboard/requests');
   setOpen(false);
 };
 
@@ -347,10 +401,7 @@ const DashHeader = () => {
     navigate('/dashboard/about')
     setOpen(false)
   }
-  const GoToHelp = () => {
-    alert('Sorry, this feature is currently in ongoing development.')
-    setOpen(false)
-  }
+
 
   //drawer end
   const errClass = isError ? "errmsg" : "offscreen"
@@ -365,150 +416,326 @@ const DashHeader = () => {
             color="inherit"
             aria-label="open drawer"
             sx={{ mr: 1 }}
-            onClick={handleDrawerOpen}
+            onClick={handleDrawerToggle}
           >
             <MenuIcon />
           </IconButton>
-          <Drawer anchor="left" open={open} onClose={handleDrawerClose}>
-            <Box sx={{ width: 250 }} role="presentation">
-              <List>
-                <ListItem>
-                  <ListItemIcon>
-                    <IconButton sx={{ padding: 0 }} onClick={handleDrawerClose}>
-                      <MenuIcon />
-                    </IconButton>
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={
-                      <Typography
-                        sx={{ display: "inline", fontWeight: "bold" }}
-                        component="span"
-                        variant="h6"
-                        color="text.primary"
-                      >
-                        A<small>REC</small>GIS
-                      </Typography>
-                    }
-                  />
-                </ListItem>
-              </List>
+          <Drawer anchor="left" open={open} onClose={handleDrawerClose} ModalProps={{ keepMounted: false }}>
+            <Box sx={{ width: 250 }} role="presentation" onClick={handleDrawerClose} onKeyDown={(e) => { if (e.key === 'Escape' || e.key === 'Tab' || e.key === 'Shift') handleDrawerClose() }}>
+              {/* Drawer Header */}
+              <Box sx={{ 
+                p: 2, 
+                borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
+                backgroundColor: 'rgba(25, 118, 210, 0.04)'
+              }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <Typography
+                    variant="h6"
+                    sx={{ 
+                      fontWeight: "bold",
+                      color: 'primary.main',
+                      fontSize: '1.25rem'
+                    }}
+                  >
+                    A<small style={{ fontSize: '0.8em' }}>REC</small>GIS
+                  </Typography>
+                  <IconButton 
+                    onClick={handleDrawerClose}
+                    size="small"
+                    sx={{ 
+                      color: 'text.secondary',
+                      '&:hover': {
+                        backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                      }
+                    }}
+                  >
+                    <MenuIcon />
+                  </IconButton>
+                </Box>
+                <Typography 
+                  variant="caption" 
+                  color="text.secondary" 
+                  sx={{ 
+                    display: 'block',
+                    mt: 0.5,
+                    fontStyle: 'italic'
+                  }}
+                >
+                  Navigation Menu
+                </Typography>
+              </Box>
+              {/* Main Navigation Section */}
               <List>
                 <ListItem key="1" disablePadding>
-                  <ListItemButton onClick={GoHomeButton}>
+                  <ListItemButton 
+                    onClick={GoHomeButton}
+                    sx={{
+                      borderRadius: 1,
+                      mx: 1,
+                      '&:hover': {
+                        backgroundColor: 'rgba(25, 118, 210, 0.08)',
+                      }
+                    }}
+                  >
                     <ListItemIcon>
                       <HomeIcon color="primary" />
                     </ListItemIcon>
-                    <ListItemText primary="Home" />
+                    <ListItemText 
+                      primary="Home" 
+                      primaryTypographyProps={{ fontWeight: 500 }}
+                    />
                   </ListItemButton>
                 </ListItem>
+                
                 <ListItem key="3" disablePadding>
-                  <ListItemButton onClick={GoToInventories}>
+                  <ListItemButton 
+                    onClick={GoToInventories}
+                    sx={{
+                      borderRadius: 1,
+                      mx: 1,
+                      '&:hover': {
+                        backgroundColor: 'rgba(25, 118, 210, 0.08)',
+                      }
+                    }}
+                  >
                     <ListItemIcon>
                       <MapIcon color="primary" />
                     </ListItemIcon>
-                    <ListItemText primary="Map Dashboard" />
+                    <ListItemText 
+                      primary="Map Dashboard" 
+                      primaryTypographyProps={{ fontWeight: 500 }}
+                    />
                   </ListItemButton>
                 </ListItem>
+                
                 <ListItem key="4" disablePadding>
-                  <ListItemButton onClick={GoToInventoryList}>
+                  <ListItemButton 
+                    onClick={GoToInventoryList}
+                    sx={{
+                      borderRadius: 1,
+                      mx: 1,
+                      '&:hover': {
+                        backgroundColor: 'rgba(25, 118, 210, 0.08)',
+                      }
+                    }}
+                  >
                     <ListItemIcon>
                       <ListAltIcon color="primary" />
                     </ListItemIcon>
-                    <ListItemText primary="My Inventory" />
+                    <ListItemText 
+                      primary="My Inventory" 
+                      primaryTypographyProps={{ fontWeight: 500 }}
+                    />
                   </ListItemButton>
                 </ListItem>
+                
                 <ListItem key="transfers" disablePadding>
-                  <ListItemButton onClick={GoToTransactions}>
+                  <ListItemButton 
+                    onClick={GoToTransactions}
+                    sx={{
+                      borderRadius: 1,
+                      mx: 1,
+                      '&:hover': {
+                        backgroundColor: 'rgba(25, 118, 210, 0.08)',
+                      }
+                    }}
+                  >
                     <ListItemIcon>
                       <SwapHorizIcon color="primary" />
                     </ListItemIcon>
-                    <ListItemText primary="Transfer Requests" />
-                  </ListItemButton>
-                </ListItem>
-                {/* --- NEW: Public Charts/Statistics, accessible by all users --- */}
-                <ListItem key="charts" disablePadding>
-                  <ListItemButton onClick={GoToPublicCharts}>
-                    <ListItemIcon>
-                      <BarChartIcon  color="primary" /> {/* You can change to a chart icon if you wish */}
-                    </ListItemIcon>
-                    <ListItemText primary="Charts & Statistics" />
-                  </ListItemButton>
-                </ListItem>
-                {/* --- End NEW --- */}
-                {(isManager || isAdmin) &&
-                  <ListItem key="6" disablePadding>
-                    <ListItemButton onClick={GoToUserSettings}>
-                      <ListItemIcon>
-                        <GroupIcon color="primary" />
-                      </ListItemIcon>
-                      <ListItemText primary="User Settings" />
-                    </ListItemButton>
-                  </ListItem>}
-                {(isManager || isAdmin) &&
-                  <ListItem key="7" disablePadding>
-                    <ListItemButton onClick={GoToAddUser}>
-                      <ListItemIcon>
-                        <PersonAddIcon color="primary" />
-                      </ListItemIcon>
-                      <ListItemText primary="Create New User" />
-                    </ListItemButton>
-                  </ListItem>}
-                <ListItem key="8" disablePadding>
-                  <ListItemButton disabled onClick={GoToServices}>
-                    <ListItemIcon>
-                      <LanguageIcon color="primary" />
-                    </ListItemIcon>
-                    <ListItemText primary="Services" />
-                  </ListItemButton>
-                </ListItem>
-                <ListItem key="9" disablePadding>
-                  <ListItemButton onClick={handleClick}>
-                    <ListItemIcon>
-                      <DownloadIcon color="primary" />
-                    </ListItemIcon>
-                    <ListItemText primary="Downloads" />
+                    <ListItemText 
+                      primary="Requests & Transfers" 
+                      primaryTypographyProps={{ fontWeight: 500 }}
+                    />
                   </ListItemButton>
                 </ListItem>
               </List>
-              <Divider />
-              <StyledMenu
-                id="demo-customized-menu"
-                MenuListProps={{
-                  'aria-labelledby': 'demo-customized-button',
-                }}
-                anchorEl={anchorEl}
-                open={openDownload}
-                onClose={handleClose}
-              >
-                <MenuItem onClick={handleClose} disableRipple>
-                  <DownloadIcon />
-                  <a href={baseUrl+"mobile/"+"6535d746400c288fd3201c6f"} target="_blank">A<small>REC</small>GIS_v1.0.0.apk</a>
-                </MenuItem>
-              </StyledMenu>
+
+              {/* Analytics Section */}
+              <Divider sx={{ my: 1 }} />
+              <Box sx={{ px: 2, py: 1 }}>
+                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
+                  ANALYTICS & DATA
+                </Typography>
+              </Box>
+              <List>
+                <ListItem key="charts" disablePadding>
+                  <ListItemButton 
+                    onClick={GoToPublicCharts}
+                    sx={{
+                      borderRadius: 1,
+                      mx: 1,
+                      '&:hover': {
+                        backgroundColor: 'rgba(25, 118, 210, 0.08)',
+                      }
+                    }}
+                  >
+                    <ListItemIcon>
+                      <BarChartIcon color="primary" />
+                    </ListItemIcon>
+                    <ListItemText 
+                      primary="Charts & Statistics" 
+                      primaryTypographyProps={{ fontWeight: 500 }}
+                    />
+                  </ListItemButton>
+                </ListItem>
+              </List>
+
+
+
+              {/* User & Account Section */}
+              <Divider sx={{ my: 1 }} />
+              <Box sx={{ px: 2, py: 1 }}>
+                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
+                  USER & ACCOUNT
+                </Typography>
+              </Box>
+              <List>
+                <ListItem key="profile" disablePadding>
+                  <ListItemButton 
+                    onClick={goToProfile}
+                    sx={{
+                      borderRadius: 1,
+                      mx: 1,
+                      '&:hover': {
+                        backgroundColor: 'rgba(25, 118, 210, 0.08)',
+                      }
+                    }}
+                  >
+                    <ListItemIcon>
+                      <PersonIcon color="primary" />
+                    </ListItemIcon>
+                    <ListItemText 
+                      primary="My Profile" 
+                      primaryTypographyProps={{ fontWeight: 500 }}
+                    />
+                  </ListItemButton>
+                </ListItem>
+                
+
+              </List>
+
+              {/* Administration Section */}
+              {(isManager || isAdmin) && (
+                <>
+                  <Divider sx={{ my: 1 }} />
+                  <Box sx={{ px: 2, py: 1 }}>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
+                      ADMINISTRATION
+                    </Typography>
+                  </Box>
+                  <List>
+                    <ListItem key="6" disablePadding>
+                      <ListItemButton 
+                        onClick={GoToUserSettings}
+                        sx={{
+                          borderRadius: 1,
+                          mx: 1,
+                          '&:hover': {
+                            backgroundColor: 'rgba(25, 118, 210, 0.08)',
+                          }
+                        }}
+                      >
+                        <ListItemIcon>
+                          <GroupIcon color="primary" />
+                        </ListItemIcon>
+                        <ListItemText 
+                          primary="User Settings" 
+                          primaryTypographyProps={{ fontWeight: 500 }}
+                        />
+                      </ListItemButton>
+                    </ListItem>
+                    
+                    <ListItem key="affiliations" disablePadding>
+                      <ListItemButton 
+                        onClick={goToAffiliations}
+                        sx={{
+                          borderRadius: 1,
+                          mx: 1,
+                          '&:hover': {
+                            backgroundColor: 'rgba(25, 118, 210, 0.08)',
+                          }
+                        }}
+                      >
+                        <ListItemIcon>
+                          <BusinessIcon color="primary" />
+                        </ListItemIcon>
+                        <ListItemText 
+                          primary="Manage Affiliations" 
+                          primaryTypographyProps={{ fontWeight: 500 }}
+                        />
+                      </ListItemButton>
+                    </ListItem>
+                  </List>
+                </>
+              )}
+
+              {/* Tools & Downloads Section removed as requested */}
+              {/* About & Help Section */}
+              <Divider sx={{ my: 1 }} />
+              <Box sx={{ px: 2, py: 1 }}>
+                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
+                  SUPPORT & INFO
+                </Typography>
+              </Box>
               <List>
                 <ListItem key="9" disablePadding>
-                  <ListItemButton onClick={GoToAbout}>
+                  <ListItemButton 
+                    onClick={GoToAbout}
+                    sx={{
+                      borderRadius: 1,
+                      mx: 1,
+                      '&:hover': {
+                        backgroundColor: 'rgba(25, 118, 210, 0.08)',
+                      }
+                    }}
+                  >
                     <ListItemIcon>
                       <InfoIcon color="primary" />
                     </ListItemIcon>
-                    <ListItemText primary="About" />
+                    <ListItemText 
+                      primary="About" 
+                      primaryTypographyProps={{ fontWeight: 500 }}
+                    />
                   </ListItemButton>
                 </ListItem>
-                <ListItem key="10" disablePadding>
-                  <ListItemButton disabled onClick={GoToHelp}>
+                
+
+              </List>
+
+              {/* Logout Section */}
+              <Divider sx={{ my: 1 }} />
+              <Box sx={{ px: 2, py: 1 }}>
+                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
+                  ACCOUNT
+                </Typography>
+              </Box>
+              <List>
+                <ListItem key="logout" disablePadding>
+                  <ListItemButton 
+                    onClick={sendLogout}
+                    sx={{
+                      borderRadius: 1,
+                      mx: 1,
+                      '&:hover': {
+                        backgroundColor: 'rgba(211, 47, 47, 0.08)',
+                      }
+                    }}
+                  >
                     <ListItemIcon>
-                      <HelpOutlineIcon color="primary" />
+                      <LogoutIcon color="error" />
                     </ListItemIcon>
-                    <ListItemText primary="Help" />
-                  </ListItemButton>
-                </ListItem>
-                <Divider />
-                <ListItem key="11" disablePadding>
-                  <ListItemButton >
-                    <Chip icon={<ManageAccountsIcon />} label={status} size="small" color="error" />
+                    <ListItemText 
+                      primary="Log out" 
+                      primaryTypographyProps={{ 
+                        fontWeight: 500,
+                        color: 'error.main'
+                      }}
+                    />
                   </ListItemButton>
                 </ListItem>
               </List>
+
             </Box>
           </Drawer>
             <Box
@@ -593,36 +820,90 @@ const DashHeader = () => {
               
 
               <Stack direction="row" alignItems="center" gap={1}>
-                <IconButton
-                  size="large"
-                  edge="end"
-                  aria-label="account of current user"
-                  aria-controls={menuId}
-                  aria-haspopup="true"
-                  onClick={handleProfileMenuOpen}
-                  color="inherit"
-                >
-                  <AccountCircle />
-                </IconButton>
-                <Typography variant="body1">{username}</Typography>
+                {/* Role indicator chip for admin/manager */}
+                {(isAdmin || isManager) && (
+                  <Chip
+                    label={isAdmin ? "ADMIN" : "MANAGER"}
+                    size="small"
+                    color="warning"
+                    variant="filled"
+                    sx={{
+                      fontWeight: 'bold',
+                      fontSize: '0.7rem',
+                      height: 24,
+                      '& .MuiChip-label': {
+                        px: 1,
+                      }
+                    }}
+                  />
+                )}
+                
+                {/* Username display only */}
+                <Box sx={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: 1,
+                  color: 'white',
+                  px: 2,
+                  py: 0.5,
+                  borderRadius: 2,
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)'
+                }}>
+                  <AccountCircle sx={{ color: 'white' }} />
+                  <Typography 
+                    variant="body1" 
+                    sx={{ 
+                      fontWeight: 600,
+                      color: 'white !important',
+                      textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)'
+                    }}
+                  >
+                    {username}
+                  </Typography>
+                </Box>
               </Stack>
             </Box>
             <Box sx={{ display: { xs: "flex", md: "none" } }}>
-              <IconButton
-                size="large"
-                aria-label="show more"
-                aria-controls={mobileMenuId}
-                aria-haspopup="true"
+              <Button
+                variant="outlined"
                 onClick={handleMobileMenuOpen}
-                color="inherit"
+                startIcon={<MoreIcon sx={{ color: 'white' }} />}
+                sx={{
+                  color: 'white !important',
+                  borderColor: 'rgba(255, 255, 255, 0.3)',
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  transition: 'all 0.2s ease-in-out',
+                  '&:hover': {
+                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                    borderColor: 'rgba(255, 255, 255, 0.5)',
+                    transform: 'translateY(-1px)',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                  },
+                  '&:active': {
+                    transform: 'translateY(0px)',
+                  },
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  px: 2,
+                  py: 0.5,
+                  borderRadius: 2,
+                  minWidth: 'auto',
+                  '& .MuiButton-startIcon': {
+                    color: 'white !important',
+                  },
+                  '& .MuiTypography-root': {
+                    color: 'white !important',
+                  },
+                  textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)',
+                }}
               >
-                <MoreIcon />
-              </IconButton>
+                Menu
+              </Button>
             </Box>
           </Toolbar>
         </AppBar>
-        {renderMobileMenu}
-        {renderMenu}
+
 
     </>
   )

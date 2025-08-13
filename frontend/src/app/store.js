@@ -10,7 +10,7 @@ export const store = configureStore({
     },
     middleware: getDefaultMiddleware =>
         getDefaultMiddleware().concat(apiSlice.middleware),
-    devTools: false
+    devTools: process.env.NODE_ENV !== 'production'
 })
 
 setupListeners(store.dispatch)
