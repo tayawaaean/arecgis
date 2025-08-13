@@ -1,25 +1,26 @@
 // Simple role checker middleware
+const { baseLogger } = require('./logger')
+
 const checkRoles = (...allowedRoles) => {
     return (req, res, next) => {
-        if (!req?.roles) return res.status(403).json({ message: 'Forbidden' });
+        if (!req?.roles) {
+            return res.status(403).json({ message: 'Forbidden - No roles found' });
+        }
 
-        const rolesArray = [...allowedRoles];
-        
-        // Check if req.roles is an array or object
+        const rolesArray = allowedRoles.flat();
         let authorized = false;
-        
+
         if (Array.isArray(req.roles)) {
-            // Check if any of the user's roles match any allowed roles
-            authorized = rolesArray.some(role => req.roles.includes(role));
+            authorized = rolesArray.some(allowedRole => req.roles.includes(allowedRole));
         } else if (typeof req.roles === 'object') {
-            // Check if any of the user's roles (as object properties) match any allowed roles
             authorized = rolesArray.some(role => req.roles[role]);
         }
-        
+
         if (!authorized) {
+            baseLogger.warn({ requestId: req.id, user: req.user, roles: req.roles, required: rolesArray }, 'Access denied - insufficient permissions')
             return res.status(403).json({ message: 'Forbidden - Insufficient role permissions' });
         }
-        
+
         next();
     }
 }

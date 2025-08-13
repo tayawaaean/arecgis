@@ -1,24 +1,20 @@
 const Inventory = require('../models/Inventory');
 const User = require('../models/User');
-const GridFsStorage = require('multer-gridfs-storage').GridFsStorage;
 const mongoose = require('mongoose');
-const mongoURI = process.env.DATABASE_URI;
 const { Readable } = require("stream");
 const sharp = require("sharp");
 const crypto = require('crypto');
 var CryptoJS = require("crypto-js");
 
-let gfsi;
-(async () => {
-    try {
-        await mongoose.connect(process.env.DATABASE_URI, { useNewUrlParser: true });
-        const { db } = mongoose.connection;
-        gfsi = new mongoose.mongo.GridFSBucket(db, { bucketName: 'uploads' });
+function getBucket() {
+    const db = mongoose.connection && mongoose.connection.db
+    if (!db) {
+        const err = new Error('Storage not ready')
+        err.status = 503
+        throw err
     }
-    catch (err) {
-        console.log(err);
-    }
-})();
+    return new mongoose.mongo.GridFSBucket(db, { bucketName: 'uploads' })
+}
 
 const DUPLICATE_RADIUS_METERS = 100;
 
@@ -98,6 +94,9 @@ const getAllInventories = async (req, res) => {
         const user = await User.findById(inventory.user).lean().exec();
         return { ...inventory, username: user?.username };
     }));
+    if (!process.env.RETURN_PLAINTEXT_JSON || process.env.RETURN_PLAINTEXT_JSON === 'true') {
+        return res.json(inventoriesWithUser)
+    }
     const encrypted = CryptoJS.AES.encrypt(JSON.stringify(inventoriesWithUser), process.env.SECRET_KEY).toString();
     res.json(encrypted);
 };
@@ -221,26 +220,41 @@ const createNewInventory = async (req, res) => {
         }
     }
 
-    // Handle files/images
-    const images = req.files?.map((file) => {
-        const randombytes = crypto.randomBytes(16);
-        const filename = randombytes.toString('hex') + '.webp';
-        const gridFsStorage = new GridFsStorage({
-            url: mongoURI,
-            options: { useUnifiedTopology: true },
-            file: () => ({ bucketName: "uploads", filename: filename, contentType: 'image/webp' }),
-        });
-        sharp(file.buffer)
-            .rotate()
-            .toFormat('webp')
-            .resize(1080)
-            .webp({ quality: 70 })
-            .toBuffer((err, data, info) => {
-                const fileStream = Readable.from(data);
-                gridFsStorage.fromStream(fileStream);
-            });
-        return filename;
-    }) || [];
+    // Handle files/images - Process them properly with GridFS
+    const images = [];
+    if (req.files && req.files.length > 0) {
+        for (const file of req.files) {
+            try {
+                const randombytes = crypto.randomBytes(16);
+                const filename = randombytes.toString('hex') + '.webp';
+                
+                // Process image with sharp
+                const processedBuffer = await sharp(file.buffer)
+                    .rotate()
+                    .toFormat('webp')
+                    .resize(1080)
+                    .webp({ quality: 70 })
+                    .toBuffer();
+                
+                // Upload to GridFS
+                const uploadStream = getBucket().openUploadStream(filename, {
+                    contentType: 'image/webp'
+                });
+                
+                const fileStream = Readable.from(processedBuffer);
+                await new Promise((resolve, reject) => {
+                    fileStream.pipe(uploadStream)
+                        .on('error', reject)
+                        .on('finish', resolve);
+                });
+                
+                images.push(filename);
+            } catch (err) {
+                console.error('Error processing image:', err);
+                // Continue with other images
+            }
+        }
+    }
 
     // Set default Yes/No for net metered and own use if not present
     properties.isNetMetered = properties.isNetMetered || "No";
@@ -403,25 +417,41 @@ const updateInventory = async (req, res) => {
         }
     }
 
-    const images = req.files?.map((file) => {
-        const randombytes = crypto.randomBytes(5);
-        const filename = randombytes.toString('hex') + '.webp';
-        const gridFsStorage = new GridFsStorage({
-            url: mongoURI,
-            options: { useUnifiedTopology: true },
-            file: () => ({ bucketName: "uploads", filename: filename, contentType: 'image/webp' }),
-        });
-        sharp(file.buffer)
-            .rotate()
-            .toFormat('webp')
-            .resize(1080)
-            .webp({ quality: 70 })
-            .toBuffer((err, data, info) => {
-                const fileStream = Readable.from(data);
-                gridFsStorage.fromStream(fileStream);
-            });
-        return filename;
-    }) || [];
+    // Handle files/images - Process them properly with GridFS
+    const images = [];
+    if (req.files && req.files.length > 0) {
+        for (const file of req.files) {
+            try {
+                const randombytes = crypto.randomBytes(16);
+                const filename = randombytes.toString('hex') + '.webp';
+                
+                // Process image with sharp
+                const processedBuffer = await sharp(file.buffer)
+                    .rotate()
+                    .toFormat('webp')
+                    .resize(1080)
+                    .webp({ quality: 70 })
+                    .toBuffer();
+                
+                // Upload to GridFS
+                const uploadStream = gfsi.openUploadStream(filename, {
+                    contentType: 'image/webp'
+                });
+                
+                const fileStream = Readable.from(processedBuffer);
+                await new Promise((resolve, reject) => {
+                    fileStream.pipe(uploadStream)
+                        .on('error', reject)
+                        .on('finish', resolve);
+                });
+                
+                images.push(filename);
+            } catch (err) {
+                console.error('Error processing image:', err);
+                // Continue with other images
+            }
+        }
+    }
 
     if (!forceUpdate) {
         const possibleDuplicates = await Inventory.find({
@@ -491,10 +521,10 @@ const deleteImageInventory = async (req, res) => {
     inventory.images = prevImages;
     const item = newImages[0];
 
-    const file = await gfsi.find({ filename: item }).toArray();
+        const file = await getBucket().find({ filename: item }).toArray();
 
-    if (file.length > 0) {
-        await gfsi.delete(file[0]._id);
+        if (file.length > 0) {
+            await getBucket().delete(file[0]._id);
         const updatedInventory = await inventory.save();
         res.json(`'${updatedInventory.type}' updated`);
     } else {
@@ -516,15 +546,15 @@ const deleteInventory = async (req, res) => {
             return res.status(400).json({ message: 'Inventory not found' });
         }
         const prevImages = singleInventory.images;
-        prevImages.map(async file => {
-            const documents = await gfsi.find({ filename: file }).toArray();
+        await Promise.all(prevImages.map(async file => {
+            const documents = await getBucket().find({ filename: file }).toArray();
             if (documents.length > 0) {
-                await gfsi.delete(documents[0]._id);
+                await getBucket().delete(documents[0]._id);
             } else {
                 console.log('Image file not found.');
             }
-        });
-        singleInventory.deleteOne();
+        }));
+        await singleInventory.deleteOne();
     });
     const reply = `Inventory deleted`;
     res.json(reply);

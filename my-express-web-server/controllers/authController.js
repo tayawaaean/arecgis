@@ -44,12 +44,13 @@ const login = async (req, res) => {
         { expiresIn: '7d' }
     )
 
-    // Create secure cookie with refresh token 
+    // Create cookie with refresh token (secure in production, dev-friendly locally)
+    const isProduction = process.env.NODE_ENV === 'production'
     res.cookie('jwt', refreshToken, {
-        httpOnly: true, //accessible only by web server 
-        secure: true, //https
-        sameSite: 'None', //cross-site cookie 
-        maxAge: 7 * 24 * 60 * 60 * 1000 //cookie expiry: set to match rT
+        httpOnly: true, // accessible only by web server
+        secure: isProduction, // https only in production
+        sameSite: isProduction ? 'None' : 'Lax', // cross-site in prod; dev-friendly locally
+        maxAge: 7 * 24 * 60 * 60 * 1000 // cookie expiry: set to match rT
     })
 
     // Send accessToken containing username and roles 
@@ -100,7 +101,8 @@ const logout = (req, res) => {
 
     const cookies = req.cookies
     if (!cookies?.jwt) return res.sendStatus(204) //No content
-    res.clearCookie('jwt', { httpOnly: true, sameSite: 'None', secure: true })
+    const isProduction = process.env.NODE_ENV === 'production'
+    res.clearCookie('jwt', { httpOnly: true, sameSite: isProduction ? 'None' : 'Lax', secure: isProduction })
     res.json({ message: 'Cookie cleared' })
 }
 

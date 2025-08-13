@@ -4,6 +4,8 @@ const userSchema = new mongoose.Schema({
     username: {
         type: String,
         required: true,
+        unique: true,
+        trim: true,
     },
     password: {
         type: String,
@@ -16,6 +18,30 @@ const userSchema = new mongoose.Schema({
     active: {
         type: Boolean,
         default: true
+    },
+    fullName: {
+        type: String,
+        default: ''
+    },
+    address: {
+        type: String,
+        default: ''
+    },
+    contactNumber: {
+        type: String,
+        default: ''
+    },
+    affiliation: {
+        type: String,
+        default: ''
+    },
+    companyName: {
+        type: String,
+        default: ''
+    },
+    companyContactNumber: {
+        type: String,
+        default: ''
     }
 })
 

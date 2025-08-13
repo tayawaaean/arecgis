@@ -11,11 +11,11 @@ const getAllUsers = async (req, res) => {
     if (!users?.length) {
         return res.status(400).json({ message: '404 not found' })
     }
+    // Prefer plain JSON over custom encryption for authenticated endpoints; rely on HTTPS + auth
+    if (!process.env.RETURN_PLAINTEXT_JSON || process.env.RETURN_PLAINTEXT_JSON === 'true') {
+        return res.json(users)
+    }
     const encrypted = CryptoJS.AES.encrypt(JSON.stringify(users), process.env.SECRET_KEY).toString();
-
-
-    // const encryptedString = cryptr.encrypt(jsonToString);
-    // console.log(encryptedString)
     res.json(encrypted)
 }
 
@@ -23,11 +23,11 @@ const getAllUsers = async (req, res) => {
 // @route POST /users
 // @access Private
 const createNewUser = async (req, res) => {
-    const { username, password, roles } = req.body
+    const { username, password, roles, fullName, address, contactNumber, affiliation, companyName, companyContactNumber } = req.body
 
     //confirm data
     if (!username || !password) {
-        return res.status(400).json({ message: 'All fields are required' })
+        return res.status(400).json({ message: 'Username and password are required' })
     }
 
     //check for duplicates
@@ -40,11 +40,17 @@ const createNewUser = async (req, res) => {
     // Hash password 
     const hashedPwd = await bcrypt.hash(password, 10) // salt rounds
 
-    const userObject = (!Array.isArray(roles) || !roles.length)
-        ? { username, "password": hashedPwd }
-        : { username, "password": hashedPwd, roles }
-
-    // const userObject = { username, "password": hashedPwd, roles }
+    const userObject = {
+        username,
+        password: hashedPwd,
+        roles: (!Array.isArray(roles) || !roles.length) ? ['Employee'] : roles,
+        fullName: fullName || '',
+        address: address || '',
+        contactNumber: contactNumber || '',
+        affiliation: affiliation || '',
+        companyName: companyName || '',
+        companyContactNumber: companyContactNumber || ''
+    }
 
     // Create and store new user 
     const user = await User.create(userObject)
@@ -61,7 +67,7 @@ const createNewUser = async (req, res) => {
 // @route PATCH /users
 // @access Private
 const updateUser = async (req, res) => {
-    const { id, username, roles, active, password, currPW, isAdmin, isManager } = req.body
+    const { id, username, roles, active, password, currPW, isAdmin, isManager, fullName, address, contactNumber, affiliation, companyName, companyContactNumber } = req.body
 
     // Confirm data 
     if (!id || !username || !Array.isArray(roles) || !roles.length || typeof active !== 'boolean') {
@@ -86,6 +92,14 @@ const updateUser = async (req, res) => {
     user.username = username
     user.roles = roles
     user.active = active
+    
+    // Update profile fields if provided
+    if (fullName !== undefined) user.fullName = fullName
+    if (address !== undefined) user.address = address
+    if (contactNumber !== undefined) user.contactNumber = contactNumber
+    if (affiliation !== undefined) user.affiliation = affiliation
+    if (companyName !== undefined) user.companyName = companyName
+    if (companyContactNumber !== undefined) user.companyContactNumber = companyContactNumber
     
     if (password&&isAdmin ||password&&isManager) {
         // Hash password 

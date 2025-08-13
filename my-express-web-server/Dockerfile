@@ -9,7 +9,8 @@ WORKDIR /usr/src/app
 # Install Dependencies
 COPY package*.json ./
 
-RUN npm install
+ENV NODE_ENV=production
+RUN npm ci --omit=dev
 
 # Copy app source code
 COPY . .
@@ -17,4 +18,10 @@ COPY . .
 # Exports
 EXPOSE 3001
 
-CMD ["npm","start"]
+# Run as non-root
+USER node
+
+CMD ["node","server.js"]
+
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s \
+  CMD wget -qO- http://localhost:3001/livez | grep -q "" || exit 1

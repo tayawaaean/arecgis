@@ -19,18 +19,20 @@ export const usersApiSlice = apiSlice.injectEndpoints({
                     return response.status === 200 && !result.isError
                 },
             }),
-            // transformResponse: responseData => {
-            //     const loadedUsers = responseData.map(user => {
-            //         user.id = user._id
-            //         return user
-            //     })
-            //     return usersAdapter.setAll(initialState, loadedUsers)
-            // },
             transformResponse: responseData => {
-                // const decrypted = key.decrypt(responseData, 'utf8')
-                var bytes  = CryptoJS.AES.decrypt(responseData, "2023@REcMMSU");
-                var decryptedData = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
-                const loadedUsers = decryptedData.map(user => {
+                let data = responseData
+                // Backward compatibility: decrypt if server returned an encrypted string
+                if (typeof responseData === 'string') {
+                    try {
+                        const secret = process.env.REACT_APP_SECRET_KEY || '2023@REcMMSU'
+                        const bytes = CryptoJS.AES.decrypt(responseData, secret)
+                        const decoded = bytes.toString(CryptoJS.enc.Utf8)
+                        data = JSON.parse(decoded)
+                    } catch (e) {
+                        data = []
+                    }
+                }
+                const loadedUsers = (Array.isArray(data) ? data : []).map(user => {
                     user.id = user._id  
                     return user
                 })

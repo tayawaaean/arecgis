@@ -228,7 +228,43 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
   const [myUploads, setmyUploads] = useState('')
   const [filesCount, setFilesCount] = useState(null)
   // FIXED: Renamed userId to assignedUserId to avoid conflict with userId from useAuth
-  const [assignedUserId, setAssignedUserId] = useState(reItems?.user)
+  const [assignedUserId, setAssignedUserId] = useState(() => normalizeId(reItems?.user))
+
+  // Build installer and affiliation groupings similar to MapFilter
+  const installersGroup = useMemo(() => {
+    if (!allUsers || allUsers.length === 0) return [];
+    return allUsers
+      .filter(user => Array.isArray(user.roles) && user.roles.includes('Installer'))
+      .map(user => ({
+        id: user.id,
+        username: user.username,
+        fullName: user.fullName || user.username,
+        companyName: user.companyName || '',
+        displayName: user.companyName || user.fullName || user.username,
+        displaySecondary: user.companyName ? `${user.fullName || user.username} (${user.username})` : user.username
+      }))
+      .sort((a, b) => a.displayName.localeCompare(b.displayName));
+  }, [allUsers]);
+
+  const usersByAffiliation = useMemo(() => {
+    if (!allUsers || allUsers.length === 0) return {};
+    const grouped = {};
+    allUsers.forEach(user => {
+      const affiliation = user.affiliation || 'Not Affiliated';
+      if (!grouped[affiliation]) grouped[affiliation] = [];
+      grouped[affiliation].push({
+        id: user.id,
+        username: user.username,
+        fullName: user.fullName || user.username,
+        displayName: user.fullName || user.username,
+        displaySecondary: user.username
+      });
+    });
+    Object.keys(grouped).forEach(key => grouped[key].sort((a,b) => a.displayName.localeCompare(b.displayName)));
+    return grouped;
+  }, [allUsers]);
+
+  const availableAffiliations = useMemo(() => Object.keys(usersByAffiliation).sort(), [usersByAffiliation]);
   const [solar, setEditSolar] = useState([])
   const [wind, setEditWind] = useState([])
   const [biomass, setEditBiomass] = useState([])
@@ -256,6 +292,12 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
 
   // Sync lat/lng/coordinates when reItems changes
   useEffect(() => {
+    // Ensure "Assigned to" reflects current uploader on load/when reItems changes
+    const normalized = normalizeId(reItems?.user)
+    if (normalized && normalized !== assignedUserId) {
+      setAssignedUserId(normalized)
+    }
+
     let coords = [];
     if (reItems?.coordinates?.coordinates) {
       coords = reItems.coordinates.coordinates;
@@ -714,14 +756,40 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
                   id='user'
                   select
                   label='Assigned to:'
-                  value={assignedUserId || ''}  // FIXED: Updated variable name
+                  value={assignedUserId || ''}
                   onChange={onUserIdChanged}
                   disabled={isReadOnly}
                 >
-                  {allUsers.map((users) => (
-                    <MenuItem key={users.id} value={users.id}>
-                      {users.username}
-                    </MenuItem>
+                  {installersGroup.length > 0 && (
+                    <>
+                      <MenuItem disabled key='installers-header' sx={{ backgroundColor: '#e3f2fd', fontWeight: 'bold', borderBottom: '1px solid #2196f3', color: '#1976d2' }}>
+                        🏗️ Installers ({installersGroup.length} companies)
+                      </MenuItem>
+                      {installersGroup.map(u => (
+                        <MenuItem key={`installer-${u.id}`} value={u.id} sx={{ pl: 3 }}>
+                          <div>
+                            <Typography variant="body2">{u.displayName}</Typography>
+                            <Typography variant="caption" color="text.secondary">{u.displaySecondary}</Typography>
+                          </div>
+                        </MenuItem>
+                      ))}
+                      <Divider sx={{ my: 1 }} />
+                    </>
+                  )}
+                  {availableAffiliations.map(aff => (
+                    <React.Fragment key={`aff-${aff}`}>
+                      <MenuItem disabled sx={{ backgroundColor: '#f5f5f5', fontWeight: 'bold', borderBottom: '1px solid #e0e0e0', color: '#1976d2' }}>
+                        {aff} ({usersByAffiliation[aff]?.length || 0} users)
+                      </MenuItem>
+                      {(usersByAffiliation[aff] || []).map(u => (
+                        <MenuItem key={`aff-${aff}-${u.id}`} value={u.id} sx={{ pl: 3 }}>
+                          <div>
+                            <Typography variant="body2">{u.displayName}</Typography>
+                            <Typography variant="caption" color="text.secondary">{u.displaySecondary}</Typography>
+                          </div>
+                        </MenuItem>
+                      ))}
+                    </React.Fragment>
                   ))}
                 </TextField> : ''
               }

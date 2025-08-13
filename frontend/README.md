@@ -1,94 +1,144 @@
-# ARECGIS Frontend
+# AREC‑GIS Frontend (React + MUI)
 
-A comprehensive Geographic Information System (GIS) application for managing and analyzing Renewable Energy Systems data.
+A production‑ready frontend for the Affiliated Renewable Energy Center (AREC) Geographic Information System. It powers the public experience and the authenticated dashboard (inventories, requests/transfers, renergies, blogs, users), with maps, tables, and charts.
 
-## 🚀 New Features - Enhanced Home Page
+## Highlights
 
-The home page has been completely redesigned with comprehensive analytics and data visualization:
+- React 18, React Router v6
+- MUI 5 (Material UI) with custom theme (Poppins), CssBaseline
+- Redux Toolkit + RTK Query for data fetching/cache
+- Leaflet + react‑leaflet for maps, MUI X DataGrid/Charts for tables and charts
+- Robust error boundaries, unified loaders, and accessibility baked in
 
-### 📊 Analytics Dashboard
-- **Key Performance Indicators (KPIs)**: Total capacity, units installed, CO₂ emissions avoided, and environmental impact metrics
-- **System Status Overview**: Real-time operational status with visual progress indicators
-- **Regional Distribution**: Interactive pie chart showing RE system distribution across Philippine regions
-- **Energy Type Breakdown**: Visual representation of solar, wind, biomass, and hydropower installations
-- **Environmental Impact Summary**: CO₂ avoided, coal saved, and equivalent trees planted calculations
-- **Recent Activity Feed**: Latest installations and system updates
+## Quick start
 
-### 🎨 Visual Enhancements
-- **Modern UI Design**: Gradient backgrounds, hover effects, and responsive layouts
-- **Interactive Charts**: MUI X Charts integration for data visualization
-- **Loading States**: Smooth loading animations and error handling
-- **Responsive Grid**: Mobile-friendly layout that adapts to different screen sizes
+Prerequisites
+- Node 18+ and npm 9+
 
-### 🔍 Data Integration
-- **Real-time Data**: Connected to public inventories API for live data
-- **Smart Calculations**: Automatic computation of environmental impact metrics
-- **Regional Analytics**: Geographic distribution analysis of RE systems
-- **Performance Metrics**: System operational rates and capacity statistics
+Install and run (development)
+```bash
+npm install
+npm start
+```
+App runs on http://localhost:3000
 
-## 🛠️ Technical Implementation
+Build (production)
+```bash
+npm run build
+```
+The optimized build is generated under `build/`.
 
-### Dependencies
-- `@mui/x-charts` - Advanced charting components
-- `@mui/material` - Material-UI components
-- `@mui/icons-material` - Icon library
-- `react-redux` - State management
-- `@reduxjs/toolkit` - Redux toolkit for API calls
+Run with Docker (optional)
+```bash
+docker build -t arec-frontend .
+docker run -p 8080:80 arec-frontend
+# open http://localhost:8080
+```
 
-### Key Components
-- `MetricCard` - Reusable metric display cards with loading states
-- `StatusOverviewCard` - System status visualization
-- `RegionalDistributionCard` - Geographic data charts
-- `EnvironmentalImpactCard` - Environmental metrics display
-- `RecentActivityCard` - Activity feed with status indicators
+## Configuration
 
-### Data Processing
-- Real-time inventory data processing
-- Environmental impact calculations
-- Regional distribution analysis
-- Energy type categorization
-- Performance metrics computation
+Environment variables
+- `REACT_APP_OWM_KEY` (optional) – OpenWeatherMap API key for weather overlays in map views.
 
-## 📱 Responsive Design
+API base URL
+- Configured in `src/config/baseUrl.js`. Update it to point at your backend (Express) service.
 
-The enhanced home page is fully responsive and provides an optimal viewing experience across:
-- Desktop computers
-- Tablets
-- Mobile devices
-- Different screen orientations
+Fonts
+- Poppins is loaded in `public/index.html`.
 
-## 🎯 User Experience Improvements
+Tile performance
+- Preconnects for OSM and ArcGIS tile servers are added in `public/index.html`.
 
-- **Engaging Visuals**: Charts and graphs make data easy to understand
-- **Quick Insights**: Key metrics are prominently displayed
-- **Interactive Elements**: Hover effects and responsive interactions
-- **Clear Navigation**: Call-to-action buttons guide users to explore more
-- **Educational Content**: Quick facts about renewable energy technologies
+## Project structure
 
-## 🔧 Configuration
+```
+src/
+  app/                # Redux store
+  components/         # Shared UI (layouts, error boundaries, loaders, dialogs)
+  config/             # Appbar, theme helpers, constants
+  features/           # Domain features (auth, inventories, renergies, blogs, requests, users, charts)
+  hooks/              # Custom hooks
+  lib/                # Monitoring hooks (reportError)
+  index.js, App.js    # Entrypoints and routing
+```
 
-The analytics dashboard automatically adapts to your data:
-- No configuration required
-- Real-time data updates
-- Automatic chart generation
-- Responsive to data availability
+Key files
+- `src/App.js`: Routes, theme, Suspense fallback (GlobalLoading), 404/403 routes
+- `src/components/ErrorBoundary.js`: Global error UI and reporting
+- `src/components/FeatureErrorBoundary.js`: Per‑feature error containment
+- `src/components/GlobalLoading.js` / `src/components/SectionLoading.js`: Unified loaders
+- `src/features/auth/RequireAuth.js`: Role‑gated routes
+- `src/components/PublicDashLayout.js` / `src/components/DashLayout.js`: Public/admin layouts
 
-## 🚀 Getting Started
+## UI/UX standards (what’s enforced)
 
-1. Ensure all dependencies are installed
-2. The enhanced home page will automatically load with your inventory data
-3. Charts and metrics will populate based on available data
-4. Loading states provide feedback during data fetching
+Loading
+- Route‑level Suspense fallback with branded Backdrop
+- Section‑level loaders for lists/forms/maps
 
-## 📈 Future Enhancements
+Errors
+- Global error boundary with retry/report actions
+- Feature error boundary for localized failures
+- Friendly 404 NotFound and 403 Forbidden pages with contextual CTAs (Go Home, Go to Dashboard/Login)
 
-Potential improvements for the analytics dashboard:
-- Time-series charts for historical data
-- Export functionality for reports
-- Customizable dashboard layouts
-- Advanced filtering options
-- Comparative analysis tools
+Accessibility (AA targets)
+- Skip‑to‑content link and `<main id="main-content">` landmarks
+- Focus visible on custom controls; 44×44 touch targets for map buttons
+- Specific `aria-label`s for custom buttons and `aria-live` for async errors
+- DataGrid: accessible labels and `noRowsOverlay`
+- Respects `prefers-reduced-motion` for map flyTo animations
 
----
+Theming
+- MUI theme with proper `palette.primary/secondary` keys, Poppins typography via `public/index.html`
+- Global `CssBaseline` in `App.js`
 
-*This enhanced home page transforms ARECGIS from a simple information display into a comprehensive analytics platform that showcases the real impact of renewable energy systems across the Philippines.*
+Maps
+- Leaflet layers with optional OWM overlays (requires `REACT_APP_OWM_KEY`)
+- Preconnects for tile servers
+
+## Scripts
+
+```json
+{
+  "start": "react-scripts start",
+  "build": "react-scripts build",
+  "test": "react-scripts test"
+}
+```
+
+## Development notes
+
+- Routing
+  - Public routes under `/public/*`
+  - Authenticated routes under `/dashboard/*`
+  - Role guard: `RequireAuth`
+  - Persistent session: `PersistLogin`
+
+- Data
+  - RTK Query slices per feature (e.g., `inventoriesApiSlice`, `requestsApiSlice`)
+  - Server‑side pagination in large tables (DataGrid) with loading and error states
+
+- Error monitoring
+  - Wire `lib/monitoring.reportError()` to your error backend (e.g., Sentry) in production
+
+## Deployment
+
+As static assets served by NGINX
+- Use the provided `Dockerfile` and `nginx.conf` (in this folder) for production container image.
+
+Behind another web server
+- Ensure single‑page application fallback to `index.html` for client‑side routing.
+
+## Troubleshooting
+
+- “Cannot read properties of undefined (reading 'main')”
+  - Ensure MUI Button `color` is a valid palette key (`primary`, `secondary`, `inherit`, etc.).
+  - This codebase uses only valid palette keys; custom colors should be applied via `sx`.
+
+- Map tiles don’t load
+  - Check network access to OSM/ArcGIS hosts; OWM overlays require `REACT_APP_OWM_KEY`.
+
+## License
+
+Internal/Project use. Update this section with your organization’s license policy as needed.
+

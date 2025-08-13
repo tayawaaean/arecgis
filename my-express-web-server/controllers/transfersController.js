@@ -95,6 +95,14 @@ const createTransfer = async (req, res) => {
 // @route GET /transfers
 // @access Private (Admin/Manager only)
 const getAllTransfers = async (req, res) => {
+    // Ensure the user has Admin or Manager role
+    const isAdmin = hasRole(req.roles, 'Admin');
+    const isManager = hasRole(req.roles, 'Manager');
+    
+    if (!isAdmin && !isManager) {
+        return res.status(403).json({ message: 'Access denied. Admin or Manager role required.' });
+    }
+
     const page = parseInt(req.query.page) || 1
     const limit = parseInt(req.query.limit) || 10
     const skip = (page - 1) * limit
@@ -160,16 +168,34 @@ const getUserTransfers = async (req, res) => {
             return res.status(401).json({ message: 'User not found' })
         }
 
-        const transfers = await Transfer.find({
+        // Add pagination parameters
+        const page = parseInt(req.query.page) || 1
+        const limit = parseInt(req.query.limit) || 10
+        const skip = (page - 1) * limit
+
+        // Add status filter if provided
+        const filter = {
             $or: [
                 { previousInstallerId: currentUser._id },
                 { newInstallerId: currentUser._id }
             ]
-        })
+        }
+
+        if (req.query.status && ['pending', 'approved', 'rejected'].includes(req.query.status)) {
+            filter.status = req.query.status
+        }
+
+        // Count total without pagination
+        const total = await Transfer.countDocuments(filter)
+
+        const transfers = await Transfer.find(filter)
             .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit)
             .populate('inventoryId', 'properties.ownerName properties.reCat properties.address')
             .populate('previousInstallerId', 'username')
             .populate('newInstallerId', 'username')
+            .populate('approvedBy', 'username')
             .lean()
 
         const sanitizedTransfers = transfers.map(transfer => {
@@ -189,10 +215,10 @@ const getUserTransfers = async (req, res) => {
         res.json({
             data: sanitizedTransfers,
             meta: {
-                total: sanitizedTransfers.length,
-                page: 1,
-                limit: sanitizedTransfers.length,
-                totalPages: 1
+                total,
+                page,
+                limit,
+                totalPages: Math.ceil(total / limit)
             }
         })
     } catch (error) {
@@ -225,12 +251,8 @@ const getTransferById = async (req, res) => {
             return res.status(401).json({ message: 'User not found' })
         }
 
-        const isAdmin = req.roles && (Array.isArray(req.roles)
-            ? req.roles.includes('Admin')
-            : req.roles.Admin)
-        const isManager = req.roles && (Array.isArray(req.roles)
-            ? req.roles.includes('Manager')
-            : req.roles.Manager)
+        const isAdmin = hasRole(req.roles, 'Admin');
+        const isManager = hasRole(req.roles, 'Manager');
 
         if (!isAdmin && !isManager) {
             const isInvolved =
@@ -262,6 +284,14 @@ const getTransferById = async (req, res) => {
 // @route GET /transfers/user/:userId
 // @access Private (Admin only)
 const getUserTransfersById = async (req, res) => {
+    // Ensure the user has Admin role
+    const isAdmin = hasRole(req.roles, 'Admin');
+    const isManager = hasRole(req.roles, 'Manager');
+    
+    if (!isAdmin && !isManager) {
+        return res.status(403).json({ message: 'Access denied. Admin role required.' });
+    }
+
     const { userId } = req.params
 
     try {
@@ -366,6 +396,14 @@ const getTransferDocument = async (req, res) => {
 // @route PATCH /transfers/:id/approve
 // @access Private (Admin/Manager only)
 const approveTransfer = async (req, res) => {
+    // Verify the user has Admin or Manager role
+    const isAdmin = hasRole(req.roles, 'Admin');
+    const isManager = hasRole(req.roles, 'Manager');
+    
+    if (!isAdmin && !isManager) {
+        return res.status(403).json({ message: 'Access denied. Admin or Manager role required.' });
+    }
+
     const { id } = req.params
     const { notes } = req.body
 
@@ -422,6 +460,14 @@ const approveTransfer = async (req, res) => {
 // @route PATCH /transfers/:id/reject
 // @access Private (Admin/Manager only)
 const rejectTransfer = async (req, res) => {
+    // Verify the user has Admin or Manager role
+    const isAdmin = hasRole(req.roles, 'Admin');
+    const isManager = hasRole(req.roles, 'Manager');
+    
+    if (!isAdmin && !isManager) {
+        return res.status(403).json({ message: 'Access denied. Admin or Manager role required.' });
+    }
+
     const { id } = req.params
     const { notes } = req.body
 
@@ -467,6 +513,13 @@ const rejectTransfer = async (req, res) => {
 // @route DELETE /transfers/:id
 // @access Private (Admin only)
 const deleteTransfer = async (req, res) => {
+    // Verify the user has Admin role
+    const isAdmin = hasRole(req.roles, 'Admin');
+    
+    if (!isAdmin) {
+        return res.status(403).json({ message: 'Access denied. Admin role required.' });
+    }
+
     const { id } = req.params
 
     try {

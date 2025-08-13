@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAddNewInventoryMutation } from "./inventoriesApiSlice";
 import {
@@ -19,6 +19,7 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  Divider,
   List,
   ListItem,
   ListItemText,
@@ -44,7 +45,7 @@ const NewInventoryForm = ({ allUsers }) => {
 
   // USER
   const getUserId = allUsers.filter((user) => user.username === username);
-  const getFilteredID = Object.values(getUserId).map((user) => user.id).toString();
+  const getFilteredID = useMemo(() => Object.values(getUserId).map((user) => user.id).toString(), [getUserId]);
 
   // FORM STATES
   const year = new Date().getFullYear();
@@ -94,8 +95,46 @@ const NewInventoryForm = ({ allUsers }) => {
   // HELP MODAL STATE
   const [openHelpModal, setOpenHelpModal] = useState(false);
 
+  // Group installers and users by affiliation for sectioned Assigned To select
+  const installersGroup = useMemo(() => {
+    if (!allUsers || allUsers.length === 0) return [];
+    return allUsers
+      .filter(user => Array.isArray(user.roles) && user.roles.includes('Installer'))
+      .map(user => ({
+        id: user.id,
+        username: user.username,
+        fullName: user.fullName || user.username,
+        companyName: user.companyName || '',
+        displayName: user.companyName || user.fullName || user.username,
+        displaySecondary: user.companyName ? `${user.fullName || user.username} (${user.username})` : user.username
+      }))
+      .sort((a, b) => a.displayName.localeCompare(b.displayName));
+  }, [allUsers]);
+
+  const usersByAffiliation = useMemo(() => {
+    if (!allUsers || allUsers.length === 0) return {};
+    const grouped = {};
+    allUsers.forEach(user => {
+      const affiliation = user.affiliation || 'Not Affiliated';
+      if (!grouped[affiliation]) grouped[affiliation] = [];
+      grouped[affiliation].push({
+        id: user.id,
+        username: user.username,
+        fullName: user.fullName || user.username,
+        displayName: user.fullName || user.username,
+        displaySecondary: user.username
+      });
+    });
+    // sort each group by displayName
+    Object.keys(grouped).forEach(key => grouped[key].sort((a,b) => a.displayName.localeCompare(b.displayName)));
+    return grouped;
+  }, [allUsers]);
+
+  const availableAffiliations = useMemo(() => Object.keys(usersByAffiliation).sort(), [usersByAffiliation]);
+
   useEffect(() => {
-    if (!isManager || !isAdmin) {
+    // For non-admin/manager, default Assigned to to current user (uploader)
+    if (!isManager && !isAdmin) {
       setUserId(getFilteredID);
     }
   }, [getFilteredID, isAdmin, isManager]);
@@ -474,10 +513,32 @@ const NewInventoryForm = ({ allUsers }) => {
                 value={userId || ""}
                 onChange={onUserIdChanged}
               >
-                {allUsers.map((users) => (
-                  <MenuItem key={users.id} value={users.id}>
-                    {users.username}
-                  </MenuItem>
+                {/* Installers section */}
+                {installersGroup.length > 0 && (
+                  <>
+                    <MenuItem disabled key="installers-header" sx={{ backgroundColor: '#e3f2fd', fontWeight: 'bold', borderBottom: '1px solid #2196f3', color: '#1976d2' }}>
+                      🏗️ Installers ({installersGroup.length} companies)
+                    </MenuItem>
+                    {installersGroup.map(u => (
+                      <MenuItem key={`installer-${u.id}`} value={u.id} sx={{ pl: 3 }}>
+                        <ListItemText primary={u.displayName} secondary={u.displaySecondary} />
+                      </MenuItem>
+                    ))}
+                    <Divider sx={{ my: 1 }} />
+                  </>
+                )}
+                {/* Affiliations sections */}
+                {availableAffiliations.map(aff => (
+                  <React.Fragment key={`aff-${aff}`}>
+                    <MenuItem disabled sx={{ backgroundColor: '#f5f5f5', fontWeight: 'bold', borderBottom: '1px solid #e0e0e0', color: '#1976d2' }}>
+                      {aff} ({usersByAffiliation[aff]?.length || 0} users)
+                    </MenuItem>
+                    {(usersByAffiliation[aff] || []).map(u => (
+                      <MenuItem key={`aff-${aff}-${u.id}`} value={u.id} sx={{ pl: 3 }}>
+                        <ListItemText primary={u.displayName} secondary={u.displaySecondary} />
+                      </MenuItem>
+                    ))}
+                  </React.Fragment>
                 ))}
               </TextField>
             ) : (

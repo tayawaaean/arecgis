@@ -13,7 +13,14 @@ const verifyJWT = (req, res, next) => {
         token,
         process.env.ACCESS_TOKEN_SECRET,
         (err, decoded) => {
-            if (err) return res.status(403).json({ message: 'Forbidden' })
+            if (err) {
+                if (process.env.NODE_ENV !== 'production') {
+                    // eslint-disable-next-line no-console
+                    console.log('JWT verification error:', err.message);
+                }
+                return res.status(403).json({ message: 'Forbidden - JWT invalid' });
+            }
+            
             req.user = decoded.UserInfo.username
             req.roles = decoded.UserInfo.roles
             next()

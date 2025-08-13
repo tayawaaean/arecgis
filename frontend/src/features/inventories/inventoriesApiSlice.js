@@ -20,10 +20,18 @@ export const inventoriesApiSlice = apiSlice.injectEndpoints({
                 },
             }),
             transformResponse: responseData => {
-                // const decrypted = key.decrypt(responseData, 'utf8')
-                var bytes  = CryptoJS.AES.decrypt(responseData, "2023@REcMMSU");
-                var decryptedData = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
-                const loadedInventories = decryptedData.map(inventory => {
+                let data = responseData
+                if (typeof responseData === 'string') {
+                    try {
+                        const secret = process.env.REACT_APP_SECRET_KEY || '2023@REcMMSU'
+                        const bytes  = CryptoJS.AES.decrypt(responseData, secret)
+                        const decoded = bytes.toString(CryptoJS.enc.Utf8)
+                        data = JSON.parse(decoded)
+                    } catch (e) {
+                        data = []
+                    }
+                }
+                const loadedInventories = (Array.isArray(data) ? data : []).map(inventory => {
                     inventory.id = inventory._id
                     return inventory
                 })
