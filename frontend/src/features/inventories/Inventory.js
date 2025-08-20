@@ -1,7 +1,7 @@
 import React, { useState, memo, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { MapContainer, TileLayer, GeoJSON, ZoomControl, LayersControl, Marker, useMap, LayerGroup, useMapEvents } from 'react-leaflet';
-import Control from 'react-leaflet-custom-control';
+import Control from '../../components/CustomControl';
 import { Box, Tooltip } from '@mui/material';
 import { Add as AddIcon, ListAlt as ListAltIcon } from '@mui/icons-material';
 import { useSelector } from 'react-redux';
@@ -12,6 +12,7 @@ import { SnackBar } from '../../components/SnackBar';
 import { InventoryFilterProvider, useInventoryFilter } from './inventoryFilterContext';
 import InventoryMapFilter from './InventoryMapFilter';
 import InventoryTable from './InventoryTable';
+ 
 
 // Helper function to convert inventory to GeoJSON feature
 function toGeoJSONFeature(inventory) {
@@ -49,13 +50,15 @@ const MapContent = () => {
   const [loadingOv, setLoadingOv] = useState(false);
   const navigate = useNavigate();
   
-  // Monitor position changes (no console output in production)
+  // Map caching removed; using local state/defaults instead
   
   // Access the filter context to get filtered inventories
   const { filterInventories } = useInventoryFilter();
   
   // Apply filters to get the filtered inventory items
   const filteredInventories = filterInventories(inventories);
+
+  // No-op: cache restore removed
 
   const onAddClicked = () => navigate("/dashboard/inventories/new");
 
@@ -237,19 +240,24 @@ const MapContent = () => {
       })}
       
       <SnackBar setActive={setActive} active={active} project={project} />
+      
+      {/* Map Cache Manager */}
+      
     </>
   );
 };
 
 // Main Inventory component
 const Inventory = () => {
+  // Removed MapCacheProvider usage; set static defaults
+  const mapCache = { center: [12.512797, 122.395164], zoom: 5 };
   return (
     <InventoryFilterProvider>
       <Box style={{ height: "91vh" }}>
         <MapContainer
           style={{ height: "100%" }}
-          center={[12.512797, 122.395164]}
-          zoom={5}
+          center={mapCache.center}
+          zoom={mapCache.zoom}
           scrollWheelZoom={true}
           zoomControl={false}
           doubleClickZoom={false}

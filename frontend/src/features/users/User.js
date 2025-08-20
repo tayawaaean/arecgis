@@ -144,7 +144,7 @@ const User = ({ userId }) => {
                     initialState={{
                         pagination: {
                             paginationModel: {
-                                pageSize: 15,
+                                pageSize: 20,
                             },
                         },
                         sorting: {

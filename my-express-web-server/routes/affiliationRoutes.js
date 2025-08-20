@@ -9,7 +9,6 @@ router.route('/')
     .get(affiliationsController.getAllAffiliations)
     .post(affiliationsController.createNewAffiliation)
     .patch(affiliationsController.updateAffiliation)
-    .delete(affiliationsController.deleteAffiliation)
 
 module.exports = router;
 

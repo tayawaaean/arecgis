@@ -1,6 +1,6 @@
 import 'leaflet-geosearch/dist/geosearch.css';
 import { GeoSearchControl, OpenStreetMapProvider } from 'leaflet-geosearch';
-import Control from "react-leaflet-custom-control"
+import Control from "./CustomControl"
 import { FadeLoader } from "react-spinners"
 import PropTypes from "prop-types"
 import L from 'leaflet'
@@ -105,7 +105,8 @@ const SearchField = (props) => {
       return () => map.removeControl(searchControl);
     }, []);
     map.on('geosearch/showlocation', (e) => {
-        props.setPosition(e.marker._latlng)
+        // Convert to array format for consistency
+        props.setPosition([e.marker._latlng.lat, e.marker._latlng.lng])
         props.reverseGeoCoding(e.marker._latlng)
     })
 
@@ -124,11 +125,29 @@ export const Coordinates = (props) => {
         const map = useMapEvents({
             locationfound(e) {
                 props.setLoading(false)
-                map.flyTo(e.latlng, 18)
-                props.setPosition(e.latlng)
-                props.reverseGeoCoding(e.latlng)
-
+                
+                // Validate coordinates before using them
+                if (e.latlng && typeof e.latlng.lat === 'number' && typeof e.latlng.lng === 'number' && 
+                    !isNaN(e.latlng.lat) && !isNaN(e.latlng.lng)) {
+                    
+                    console.log('Location found with valid coordinates:', e.latlng);
+                    map.flyTo(e.latlng, 18)
+                    
+                    // Convert to array format for consistency
+                    const newPosition = [e.latlng.lat, e.latlng.lng];
+                    safeSetPosition(newPosition)
+                    
+                    // Call reverseGeoCoding with validated coordinates
+                    props.reverseGeoCoding(e.latlng)
+                } else {
+                    console.error('Invalid coordinates received from location:', e.latlng);
+                    props.setLoading(false);
+                }
             },
+            locationerror(e) {
+                console.error('Location error:', e);
+                props.setLoading(false);
+            }
         })
         return (
             <>
@@ -142,15 +161,40 @@ export const Coordinates = (props) => {
     const ClickLocation = (props) => {
 
         const tap = () => {
-            setPosition(map.getCenter())
+            const center = map.getCenter()
+            
+            // Validate center coordinates before using them
+            if (center && typeof center.lat === 'number' && typeof center.lng === 'number' && 
+                !isNaN(center.lat) && !isNaN(center.lng)) {
+                
+                console.log('Setting position at map center:', center);
+                // Convert to array format for consistency
+                const newPosition = [center.lat, center.lng];
+                safeSetPosition(newPosition)
+                props.reverseGeoCoding(center)
+            } else {
+                console.error('Invalid center coordinates:', center);
+            }
         }
+        
         const map = useMapEvents({
-            locationfound(e) {
-                props.setLoading(false)
-                map.flyTo(e.latlng, 18)
-                props.setPosition(e.latlng)
-                props.reverseGeoCoding(e.latlng)
-
+            click(e) {
+                console.log('Map clicked at:', e.latlng);
+                
+                // Validate clicked coordinates
+                if (e.latlng && typeof e.latlng.lat === 'number' && typeof e.latlng.lng === 'number' && 
+                    !isNaN(e.latlng.lat) && !isNaN(e.latlng.lng)) {
+                    
+                    console.log('Setting position from map click:', e.latlng);
+                    // Convert to array format for consistency
+                    const newPosition = [e.latlng.lat, e.latlng.lng];
+                    safeSetPosition(newPosition)
+                    
+                    // Call reverseGeoCoding with clicked coordinates
+                    props.reverseGeoCoding(e.latlng)
+                } else {
+                    console.error('Invalid coordinates from map click:', e.latlng);
+                }
             }
         })
 
@@ -164,10 +208,87 @@ export const Coordinates = (props) => {
         )
     }
     
-    const handleCloseModal = () => props.setOpenModal(false)
-    const [position, setPosition] = useState(props.coordinates ? [props?.coordinates[1], props?.coordinates[0]] : null)
+    const handleCloseModal = () => {
+        // Ensure parent state updates with current position before close
+        if (position && Array.isArray(position) && position.length === 2) {
+            let latlng;
+            if (Array.isArray(position)) {
+                // If position is an array [lat, lng], convert to {lat, lng} object
+                latlng = { lat: position[0], lng: position[1] };
+            } else if (position.lat !== undefined && position.lng !== undefined) {
+                // If position is already a {lat, lng} object
+                latlng = position;
+            } else {
+                // Fallback: try to extract from position object
+                latlng = { lat: position.lat || position[1], lng: position.lng || position[0] };
+            }
+            
+            // Ensure we have valid coordinates before calling reverseGeoCoding
+            if (latlng.lat !== undefined && latlng.lng !== undefined && 
+                typeof latlng.lat === 'number' && typeof latlng.lng === 'number' &&
+                !isNaN(latlng.lat) && !isNaN(latlng.lng)) {
+                console.log('Calling reverseGeoCoding with valid coordinates:', latlng);
+                props.reverseGeoCoding(latlng);
+            } else {
+                console.error('Invalid coordinates in handleCloseModal:', latlng);
+            }
+        } else {
+            console.log('No valid position to save in handleCloseModal:', position);
+        }
+        props.setOpenModal(false)
+    }
+    const [position, setPosition] = useState(() => {
+        let initialPos = null;
+        if (props.coordinates && Array.isArray(props.coordinates) && props.coordinates.length === 2) {
+            const lat = props.coordinates[1];
+            const lng = props.coordinates[0];
+            if (typeof lat === 'number' && typeof lng === 'number' && !isNaN(lat) && !isNaN(lng)) {
+                initialPos = [lat, lng];
+            }
+        }
+        console.log('Initial position state:', initialPos);
+        return initialPos;
+    })
+
+    // Safe setPosition function that validates coordinates
+    const safeSetPosition = (newPosition) => {
+        console.log('safeSetPosition called with:', newPosition);
+        if (newPosition && Array.isArray(newPosition) && newPosition.length === 2) {
+            const lat = newPosition[0];
+            const lng = newPosition[1];
+            if (typeof lat === 'number' && typeof lng === 'number' && !isNaN(lat) && !isNaN(lng)) {
+                console.log('Setting valid position:', newPosition);
+                setPosition(newPosition);
+            } else {
+                console.error('Invalid position coordinates:', newPosition);
+            }
+        } else {
+            console.error('Invalid position format:', newPosition);
+        }
+    }
     const [loading, setLoading] = useState(false)
     const [open, setOpen] = useState(false)
+    const [isDragging, setIsDragging] = useState(false)
+
+    // Sync position state with updated coordinates from props, but only when not dragging
+    useEffect(() => {
+        console.log('Coordinates prop changed:', props.coordinates);
+        console.log('reverseGeoCoding function available:', !!props.reverseGeoCoding);
+        console.log('Is currently dragging:', isDragging);
+        
+        // Don't override position if user is currently dragging or if modal is open
+        if (isDragging || props.openModal) {
+            console.log('Skipping position update - user is dragging or modal is open');
+            return;
+        }
+        
+        if (props.coordinates && Array.isArray(props.coordinates) && props.coordinates.length === 2) {
+            const newPosition = [props.coordinates[1], props.coordinates[0]];
+            console.log('Updating position from props:', newPosition);
+            console.log('Setting position state to:', newPosition);
+            setPosition(newPosition);
+        }
+    }, [props.coordinates, props.reverseGeoCoding, isDragging]);
     //conversion state----start
     const [showConvert, setShowConvert] = useState('none')
     const [labelConvert, setLabelConvert] = useState('Other Format')
@@ -205,23 +326,72 @@ export const Coordinates = (props) => {
     }
 
     const convert = (e) => {
-        props.setLat(ddmLatValue?.pos === 'N' ? parseFloat(ddmLatValue?.deg + (ddmLatValue?.decmin / 60)) : parseFloat(-(ddmLatValue?.deg + (ddmLatValue?.decmin / 60))))
-        props.setLng(ddmLngValue?.pos === 'E' ? parseFloat(ddmLngValue?.deg + (ddmLngValue?.decmin / 60)) : parseFloat(-(ddmLngValue?.deg + (ddmLngValue?.decmin / 60))))
-        setPosition({ lat: parseFloat(ddmLatValue?.deg + (ddmLatValue?.decmin / 60)), lng: parseFloat(ddmLngValue?.deg + (ddmLngValue?.decmin / 60)) })
-        props.reverseGeoCoding({ lat: parseFloat(ddmLatValue?.deg + (ddmLatValue?.decmin / 60)), lng: parseFloat(ddmLngValue?.deg + (ddmLngValue?.decmin / 60)) })
+        const lat = ddmLatValue?.pos === 'N' ? parseFloat(ddmLatValue?.deg + (ddmLatValue?.decmin / 60)) : parseFloat(-(ddmLatValue?.deg + (ddmLatValue?.decmin / 60)));
+        const lng = ddmLngValue?.pos === 'E' ? parseFloat(ddmLngValue?.deg + (ddmLngValue?.decmin / 60)) : parseFloat(-(ddmLngValue?.deg + (ddmLngValue?.decmin / 60)));
+        
+        // Validate coordinates before setting them
+        if (!isNaN(lat) && !isNaN(lng)) {
+            props.setLat(lat);
+            props.setLng(lng);
+            
+            // Keep position as array format for consistency
+            const newPosition = [lng, lat];
+            safeSetPosition(newPosition);
+            
+            props.reverseGeoCoding({ lat, lng });
+        } else {
+            console.error('Invalid coordinates from conversion:', { lat, lng });
+        }
     } 
 
     //conversion state----end
 
     const markerEventHandler = useMemo(
         () => ({
+            dragstart(e) {
+                console.log('Marker drag started');
+                setIsDragging(true);
+            },
+            drag(e) {
+                console.log('Marker dragging...');
+            },
             dragend(e) {
-                setPosition(e.target.getLatLng())
-                props.reverseGeoCoding(e.target.getLatLng())
+                const newPosition = e.target.getLatLng();
+                console.log('Marker dragged to:', newPosition);
+                // Keep position as array format for consistency
+                safeSetPosition([newPosition.lat, newPosition.lng]);
+                if (props.reverseGeoCoding) {
+                    props.reverseGeoCoding(newPosition);
+                } else {
+                    console.error('reverseGeoCoding function is not available');
+                }
+                // Keep dragging state true for a short time to prevent immediate override
+                setTimeout(() => setIsDragging(false), 100);
             },
         }),
-        []
+        [props.reverseGeoCoding]
     )
+
+    // Alternative event handler without useMemo to ensure it's always available
+    const simpleMarkerEventHandler = {
+        dragstart(e) {
+            console.log('Simple marker drag started');
+            setIsDragging(true);
+        },
+        drag(e) {
+            console.log('Simple marker dragging...');
+        },
+        dragend(e) {
+            const newPosition = e.target.getLatLng();
+            console.log('Simple marker dragged to:', newPosition);
+            safeSetPosition([newPosition.lat, newPosition.lng]);
+            if (props.reverseGeoCoding) {
+                props.reverseGeoCoding(newPosition);
+            }
+            // Keep dragging state true for a short time to prevent immediate override
+            setTimeout(() => setIsDragging(false), 100);
+        },
+    };
 
     useEffect(() => {
         if (loading) {
@@ -231,6 +401,8 @@ export const Coordinates = (props) => {
             }, 10000);
         }
     }, [loading]);
+
+    // Do not resync to external coordinates while editing to avoid reverting
     // const Eme = () => {
     //     const varss = 
     //     console.log(varss)
@@ -355,8 +527,10 @@ export const Coordinates = (props) => {
                     </Collapse>
                     <MapContainer
                         style={{ height: "50vh", width: "100%" }}
-                        center={position === null ? [12.512797, 122.395164] : position}
-                        zoom={position === null ? 5 : 13}
+                        center={position && Array.isArray(position) && position.length === 2 && 
+                                typeof position[0] === 'number' && typeof position[1] === 'number' && 
+                                !isNaN(position[0]) && !isNaN(position[1]) ? position : [12.512797, 122.395164]}
+                        zoom={position && Array.isArray(position) && position.length === 2 ? 13 : 5}
                         scrollWheelZoom={true}
                         zoomControl={false}
                     >
@@ -383,12 +557,12 @@ export const Coordinates = (props) => {
                             </BaseLayer>
                         </LayersControl>
                         <ZoomControl position="topleft" />
-                        <SearchField position="topright" reverseGeoCoding={props.reverseGeoCoding} setPosition={setPosition}/>
+                        <SearchField position="topright" reverseGeoCoding={props.reverseGeoCoding} setPosition={safeSetPosition}/>
                         <Control position="topright">
-                            <MarkLocation setLoading={setLoading} setPosition={setPosition} reverseGeoCoding={props.reverseGeoCoding} />
+                            <MarkLocation setLoading={setLoading} setPosition={(latlng)=>{ safeSetPosition([latlng.lat, latlng.lng]); props.reverseGeoCoding(latlng); }} reverseGeoCoding={props.reverseGeoCoding} />
                         </Control>
                         <Control position="topright">
-                            <ClickLocation setLoading={setLoading} setPosition={setPosition} reverseGeoCoding={props.reverseGeoCoding} />
+                            <ClickLocation setLoading={setLoading} setPosition={(latlng)=>{ safeSetPosition([latlng.lat, latlng.lng]); props.reverseGeoCoding(latlng); }} reverseGeoCoding={props.reverseGeoCoding} />
                         </Control>
                         <Control position="topright">
                             {loading === true ?
@@ -401,7 +575,21 @@ export const Coordinates = (props) => {
                                 /> : null
                             }
                         </Control>
-                        {position === null ? null : <Marker draggable={true} eventHandlers={markerEventHandler} position={position}></Marker>}
+                        {position && Array.isArray(position) && position.length === 2 && 
+                         typeof position[0] === 'number' && typeof position[1] === 'number' && 
+                         !isNaN(position[0]) && !isNaN(position[1]) ? (
+                          <>
+                            {console.log('Rendering marker with position:', position, 'type:', typeof position, 'isArray:', Array.isArray(position))}
+                            {console.log('Marker should be draggable:', true)}
+                            <Marker 
+                              draggable={true} 
+                              eventHandlers={simpleMarkerEventHandler} 
+                              position={{ lat: position[0], lng: position[1] }}
+                            />
+                          </>
+                        ) : (
+                          console.log('Skipping marker render - invalid position:', position)
+                        )}
                     </MapContainer>
                     {/* <Typography>
                         Location: {province == "" ? null : province + ", "}{city == "" ? null : city}{brgy == "" ? null : ", " + brgy}

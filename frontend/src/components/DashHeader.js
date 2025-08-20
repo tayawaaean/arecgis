@@ -29,6 +29,7 @@ import {
   Link,
 } from "@mui/material"
 import SectionLoading from './SectionLoading'
+import NotificationBell from './NotificationBell'
 import {
   Home as HomeIcon,
   MyLocation as MyLocationIcon,
@@ -48,6 +49,7 @@ import {
   KeyboardArrowDown as KeyboardArrowDownIcon,
   Person as PersonIcon,
   Business as BusinessIcon,
+  Notifications as NotificationsIcon,
 
 } from "@mui/icons-material/"
 import { baseUrl } from '../config/baseUrl'
@@ -146,8 +148,6 @@ const DashHeader = () => {
     setAnchorEl(null);
   }
   const { id, username, status, isManager, isAdmin } = useAuth()
-  const [anchorElNav, setAnchorElNav] = useState(null)
-  const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null)
   const [open, setOpen] = useState(false)
   const navigate = useNavigate()
   const { pathname } = useLocation()
@@ -162,8 +162,7 @@ const DashHeader = () => {
   useEffect(() => {
     if (isSuccess) {
       // setAnchorEl(null)
-      setAnchorElNav(null)
-      handleMobileMenuClose()
+      setAnchorEl(null)
       navigate('/')
     }
 
@@ -172,8 +171,6 @@ const DashHeader = () => {
   // Close any open overlays when route changes
   useEffect(() => {
     setOpen(false)
-    setAnchorElNav(null)
-    setMobileMoreAnchorEl(null)
   }, [pathname])
 
   if (isLoading) return <SectionLoading label="Signing out…" />
@@ -186,161 +183,34 @@ const DashHeader = () => {
     dashClass = "dash-header__container--small"
   }
 
-  const isMenuOpen = Boolean(anchorElNav)
-  const isMobileMenuOpen = Boolean(mobileMoreAnchorEl)
+  const isMenuOpen = Boolean(anchorEl)
+
 
   const handleProfileMenuOpen = (event) => {
-    setAnchorElNav(event.currentTarget)
-  }
-
-  const handleMobileMenuClose = () => {
-    setMobileMoreAnchorEl(null)
+    setAnchorEl(event.currentTarget)
   }
 
   const handleMenuClose = () => {
-    setAnchorElNav(null)
-    handleMobileMenuClose()
+    setAnchorEl(null)
   }
 
 
 
   const goToProfile = () => {
-    setAnchorElNav(null)
+    setAnchorEl(null)
     navigate('/dashboard/profile')
   }
 
   const goToAffiliations = () => {
-    setAnchorElNav(null)
+    setAnchorEl(null)
     navigate('/dashboard/affiliations')
   }
 
 
 
-  const handleMobileMenuOpen = (event) => {
-    setMobileMoreAnchorEl(event.currentTarget)
-  }
-
   const menuId = "primary-search-account-menu"
 
 
-  const mobileMenuId = "primary-search-account-menu-mobile"
-  const renderMobileMenu = (
-    <Menu
-      anchorEl={mobileMoreAnchorEl}
-      anchorOrigin={{
-        vertical: "top",
-        horizontal: "right",
-      }}
-      id={mobileMenuId}
-      keepMounted
-      transformOrigin={{
-        vertical: "top",
-        horizontal: "right",
-      }}
-      open={isMobileMenuOpen}
-      onClose={handleMobileMenuClose}
-      PaperProps={{
-        sx: {
-          mt: 1,
-          minWidth: 200,
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
-          borderRadius: 2,
-          border: '1px solid rgba(0, 0, 0, 0.08)',
-        }
-      }}
-    >
-      {/* Profile Section */}
-      <MenuItem 
-        onClick={goToProfile}
-        sx={{
-          py: 1.5,
-          px: 2,
-          '&:hover': {
-            backgroundColor: 'rgba(25, 118, 210, 0.08)',
-          }
-        }}
-      >
-        <IconButton
-          aria-label="user profile"
-          color="primary"
-          size="small"
-        >
-          <PersonIcon fontSize="small" />
-        </IconButton>
-        <Box sx={{ ml: 1 }}>
-          <Typography variant="body1" sx={{ fontWeight: 500 }}>
-            My Profile
-          </Typography>
-          <Typography variant="caption" color="text.secondary">
-            View and edit your profile
-          </Typography>
-        </Box>
-      </MenuItem>
-      
-      {/* Admin/Manager Section */}
-      {(isAdmin || isManager) && (
-        <>
-          <Divider sx={{ my: 1 }} />
-          <Box sx={{ px: 2, py: 1 }}>
-            <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
-              ADMINISTRATION
-            </Typography>
-          </Box>
-          <MenuItem 
-            onClick={goToAffiliations}
-            sx={{
-              py: 1.5,
-              px: 2,
-              '&:hover': {
-                backgroundColor: 'rgba(25, 118, 210, 0.08)',
-              }
-            }}
-          >
-            <IconButton
-              aria-label="manage affiliations"
-              color="primary"
-              size="small"
-            >
-              <BusinessIcon fontSize="small" />
-            </IconButton>
-            <Box sx={{ ml: 1 }}>
-              <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                Manage Affiliations
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                Manage user affiliations
-              </Typography>
-            </Box>
-          </MenuItem>
-        </>
-      )}
-
-      {/* Logout Section */}
-      <Divider sx={{ my: 1 }} />
-      <MenuItem 
-        onClick={sendLogout}
-        sx={{
-          py: 1.5,
-          px: 2,
-          '&:hover': {
-            backgroundColor: 'rgba(211, 47, 47, 0.08)',
-          }
-        }}
-      >
-        <IconButton aria-label="logout" color="error" size="small">
-          <LogoutIcon fontSize="small" />
-        </IconButton>
-        <Box sx={{ ml: 1 }}>
-          <Typography variant="body1" sx={{ fontWeight: 500, color: 'error.main' }}>
-            Log out
-          </Typography>
-          <Typography variant="caption" color="text.secondary">
-            Sign out of your account
-          </Typography>
-        </Box>
-      </MenuItem>
-    </Menu>
-  )
   //drawer start
 
 
@@ -420,8 +290,14 @@ const DashHeader = () => {
           >
             <MenuIcon />
           </IconButton>
-          <Drawer anchor="left" open={open} onClose={handleDrawerClose} ModalProps={{ keepMounted: false }}>
-            <Box sx={{ width: 250 }} role="presentation" onClick={handleDrawerClose} onKeyDown={(e) => { if (e.key === 'Escape' || e.key === 'Tab' || e.key === 'Shift') handleDrawerClose() }}>
+          <Drawer 
+            anchor="left" 
+            variant="temporary"
+            open={open} 
+            onClose={() => handleDrawerClose()} 
+            ModalProps={{ keepMounted: false, disableRestoreFocus: true, disableScrollLock: true }}
+          >
+            <Box sx={{ width: 250 }} role="presentation">
               {/* Drawer Header */}
               <Box sx={{ 
                 p: 2, 
@@ -704,37 +580,39 @@ const DashHeader = () => {
               </List>
 
               {/* Logout Section */}
-              <Divider sx={{ my: 1 }} />
-              <Box sx={{ px: 2, py: 1 }}>
-                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
-                  ACCOUNT
-                </Typography>
-              </Box>
-              <List>
-                <ListItem key="logout" disablePadding>
-                  <ListItemButton 
-                    onClick={sendLogout}
-                    sx={{
-                      borderRadius: 1,
-                      mx: 1,
-                      '&:hover': {
-                        backgroundColor: 'rgba(211, 47, 47, 0.08)',
-                      }
-                    }}
-                  >
-                    <ListItemIcon>
-                      <LogoutIcon color="error" />
-                    </ListItemIcon>
-                    <ListItemText 
-                      primary="Log out" 
-                      primaryTypographyProps={{ 
-                        fontWeight: 500,
-                        color: 'error.main'
+              <Box sx={{ position: 'sticky', bottom: 0, backgroundColor: 'background.paper', borderTop: '1px solid rgba(0,0,0,0.12)' }}>
+                <Divider sx={{ mb: 1 }} />
+                <Box sx={{ px: 2, py: 1 }}>
+                  <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
+                    ACCOUNT
+                  </Typography>
+                </Box>
+                <List sx={{ pb: 1 }}>
+                  <ListItem key="logout" disablePadding>
+                    <ListItemButton 
+                      onClick={sendLogout}
+                      sx={{
+                        borderRadius: 1,
+                        mx: 1,
+                        '&:hover': {
+                          backgroundColor: 'rgba(211, 47, 47, 0.08)',
+                        }
                       }}
-                    />
-                  </ListItemButton>
-                </ListItem>
-              </List>
+                    >
+                      <ListItemIcon>
+                        <LogoutIcon color="error" />
+                      </ListItemIcon>
+                      <ListItemText 
+                        primary="Log out" 
+                        primaryTypographyProps={{ 
+                          fontWeight: 500,
+                          color: 'error.main'
+                        }}
+                      />
+                    </ListItemButton>
+                  </ListItem>
+                </List>
+              </Box>
 
             </Box>
           </Drawer>
@@ -820,6 +698,9 @@ const DashHeader = () => {
               
 
               <Stack direction="row" alignItems="center" gap={1}>
+                {/* Notification Bell */}
+                <NotificationBell />
+                
                 {/* Role indicator chip for admin/manager */}
                 {(isAdmin || isManager) && (
                   <Chip
@@ -852,7 +733,7 @@ const DashHeader = () => {
                 }}>
                   <AccountCircle sx={{ color: 'white' }} />
                   <Typography 
-                    variant="body1" 
+                    variant="body2" 
                     sx={{ 
                       fontWeight: 600,
                       color: 'white !important',
@@ -863,43 +744,6 @@ const DashHeader = () => {
                   </Typography>
                 </Box>
               </Stack>
-            </Box>
-            <Box sx={{ display: { xs: "flex", md: "none" } }}>
-              <Button
-                variant="outlined"
-                onClick={handleMobileMenuOpen}
-                startIcon={<MoreIcon sx={{ color: 'white' }} />}
-                sx={{
-                  color: 'white !important',
-                  borderColor: 'rgba(255, 255, 255, 0.3)',
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                  transition: 'all 0.2s ease-in-out',
-                  '&:hover': {
-                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                    borderColor: 'rgba(255, 255, 255, 0.5)',
-                    transform: 'translateY(-1px)',
-                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-                  },
-                  '&:active': {
-                    transform: 'translateY(0px)',
-                  },
-                  textTransform: 'none',
-                  fontWeight: 600,
-                  px: 2,
-                  py: 0.5,
-                  borderRadius: 2,
-                  minWidth: 'auto',
-                  '& .MuiButton-startIcon': {
-                    color: 'white !important',
-                  },
-                  '& .MuiTypography-root': {
-                    color: 'white !important',
-                  },
-                  textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)',
-                }}
-              >
-                Menu
-              </Button>
             </Box>
           </Toolbar>
         </AppBar>

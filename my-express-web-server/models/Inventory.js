@@ -73,10 +73,20 @@ const inventorySchema = new mongoose.Schema({
       enum: ["Yes", "No"],
       default: "No"
     },
+    isDer: {
+      type: String,
+      enum: ["Yes", "No"],
+      default: "No"
+    },
     ownUse: {
       type: String,
       enum: ["Yes", "No"],
       default: "No"
+    },
+    establishmentType: {
+      type: String,
+      enum: ["Residential Establishment", "Commercial Establishment", "Industrial Establishment"],
+      default: undefined
     },
     address: {
       country: {

@@ -40,6 +40,8 @@ import {
   AccessTime as AccessTimeIcon,
   Person as PersonIcon,
   Help as HelpIcon,
+  Info as InfoIcon,
+  CheckCircle as CheckCircleIcon,
 } from '@mui/icons-material'
 import { boxstyle } from '../../config/style'
 import { reCats } from '../../config/reCats'
@@ -54,6 +56,7 @@ import { Classification, mannerOfAcquisition } from '../../config/techAssesment'
 import { Coordinates } from '../../components/Coordinates'
 import { EditHydropower } from '../categories/EditHydropower'
 import InventoryHelpModal from '../../components/InventoryHelpModal'
+import { getAllRegionNames, getProvincesForRegion } from '../../config/regions'
 
 // Helper function to normalize MongoDB ObjectIDs for consistent comparison
 const normalizeId = (id) => {
@@ -66,7 +69,7 @@ const normalizeId = (id) => {
 
 const EditInventoryForm = ({ reItems, allUsers }) => {
   const { username, isManager, isAdmin, userId } = useAuth()
-  const GEOCODE_URL = 'https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=pjson&langCode=EN&location='
+  const GEOCODE_URL = 'https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=pjson&langCode=EN&outFields=*&returnIntersection=false&location='
   
   // Get location state to check if we're in read-only mode
   const location = useLocation()
@@ -172,6 +175,7 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
 
   const navigate = useNavigate()
   const [errContent, setErrContent] = useState(null)
+  const [successContent, setSuccessContent] = useState(null)
   const [ownerName, setOwnerName] = useState(reItems?.properties.ownerName)
   const [country, setCountry] = useState(reItems?.properties?.address?.country)
   const [region, setRegion] = useState(reItems?.properties?.address?.region)
@@ -228,43 +232,9 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
   const [myUploads, setmyUploads] = useState('')
   const [filesCount, setFilesCount] = useState(null)
   // FIXED: Renamed userId to assignedUserId to avoid conflict with userId from useAuth
-  const [assignedUserId, setAssignedUserId] = useState(() => normalizeId(reItems?.user))
+  const [assignedUserId, setAssignedUserId] = useState("")
 
-  // Build installer and affiliation groupings similar to MapFilter
-  const installersGroup = useMemo(() => {
-    if (!allUsers || allUsers.length === 0) return [];
-    return allUsers
-      .filter(user => Array.isArray(user.roles) && user.roles.includes('Installer'))
-      .map(user => ({
-        id: user.id,
-        username: user.username,
-        fullName: user.fullName || user.username,
-        companyName: user.companyName || '',
-        displayName: user.companyName || user.fullName || user.username,
-        displaySecondary: user.companyName ? `${user.fullName || user.username} (${user.username})` : user.username
-      }))
-      .sort((a, b) => a.displayName.localeCompare(b.displayName));
-  }, [allUsers]);
-
-  const usersByAffiliation = useMemo(() => {
-    if (!allUsers || allUsers.length === 0) return {};
-    const grouped = {};
-    allUsers.forEach(user => {
-      const affiliation = user.affiliation || 'Not Affiliated';
-      if (!grouped[affiliation]) grouped[affiliation] = [];
-      grouped[affiliation].push({
-        id: user.id,
-        username: user.username,
-        fullName: user.fullName || user.username,
-        displayName: user.fullName || user.username,
-        displaySecondary: user.username
-      });
-    });
-    Object.keys(grouped).forEach(key => grouped[key].sort((a,b) => a.displayName.localeCompare(b.displayName)));
-    return grouped;
-  }, [allUsers]);
-
-  const availableAffiliations = useMemo(() => Object.keys(usersByAffiliation).sort(), [usersByAffiliation]);
+  // Simple user selection - same as NewInventoryForm
   const [solar, setEditSolar] = useState([])
   const [wind, setEditWind] = useState([])
   const [biomass, setEditBiomass] = useState([])
@@ -280,30 +250,78 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
   const [isOwnUse, setIsOwnUse] = useState(
     reItems?.properties?.ownUse === "Yes" ? "Yes" : "No"
   )
+  const [isDer, setIsDer] = useState(
+    reItems?.properties?.isDer === "Yes" ? "Yes" : "No"
+  )
+  const [establishmentType, setEstablishmentType] = useState(
+    reItems?.properties?.establishmentType || ""
+  )
 
   // --- Duplicate detection states ---
   const [potentialDuplicates, setPotentialDuplicates] = useState([])
   const [showDuplicateModal, setShowDuplicateModal] = useState(false)
   const [forceUpdate, setForceUpdate] = useState(false)
   const [lastFormData, setLastFormData] = useState(null)
+  const [originalCoordinates, setOriginalCoordinates] = useState(null)
 
   // HELP MODAL STATE
   const [openHelpModal, setOpenHelpModal] = useState(false)
 
+  // Helper function to check if coordinates have changed
+  const haveCoordinatesChanged = () => {
+    if (!originalCoordinates) return false;
+    
+    // Ensure we have valid numbers
+    const currentLng = parseFloat(lng);
+    const currentLat = parseFloat(lat);
+    
+    if (isNaN(currentLng) || isNaN(currentLat)) {
+      return false;
+    }
+    
+    const currentCoords = [currentLng, currentLat];
+    return (
+      Math.abs(currentCoords[0] - originalCoordinates[0]) > 0.000001 || // ~1 meter precision
+      Math.abs(currentCoords[1] - originalCoordinates[1]) > 0.000001
+    );
+  };
+
+
+
+  // Handle assignedUserId initialization and updates
+  useEffect(() => {
+    // First, try to get the user from reItems if available
+    if (reItems?.user && !assignedUserId) {
+      const normalized = normalizeId(reItems.user);
+      setAssignedUserId(normalized);
+    }
+    
+    // For non-admin/manager, default to current user if not already set
+    if (!isManager && !isAdmin && !assignedUserId) {
+      setAssignedUserId(userId);
+    }
+  }, [reItems?.user, isManager, isAdmin, assignedUserId, userId]);
+
+
+
   // Sync lat/lng/coordinates when reItems changes
   useEffect(() => {
-    // Ensure "Assigned to" reflects current uploader on load/when reItems changes
-    const normalized = normalizeId(reItems?.user)
-    if (normalized && normalized !== assignedUserId) {
-      setAssignedUserId(normalized)
-    }
-
+    // Only initialize once on mount, not on every reItems change
+    // This prevents overriding user edits when the cache updates
+    if (reItems?.coordinates && !coordinates.length) {
     let coords = [];
-    if (reItems?.coordinates?.coordinates) {
+      if (reItems.coordinates.coordinates) {
       coords = reItems.coordinates.coordinates;
-    } else if (reItems?.coordinates) {
+      } else if (reItems.coordinates) {
       coords = reItems.coordinates;
     }
+      
+      console.log('Initializing coordinates from reItems:', {
+        reItemsCoords: reItems?.coordinates,
+        extractedCoords: coords,
+        hasValidCoords: coords && coords[0] !== undefined && coords[1] !== undefined
+      });
+      
     if (
       coords &&
       coords[0] !== undefined &&
@@ -312,8 +330,102 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
       setLng(String(coords[0]));
       setLat(String(coords[1]));
       setCoordinates([coords[0], coords[1]]);
+      
+      // Store original coordinates for duplicate detection comparison
+      if (!originalCoordinates) {
+        setOriginalCoordinates([coords[0], coords[1]]);
+          console.log('Set original coordinates:', [coords[0], coords[1]]);
+      }
     }
-  }, [reItems]);
+    }
+  }, [reItems, coordinates.length, originalCoordinates]);
+
+  // Auto-reset original coordinates when user manually changes back to original values
+  useEffect(() => {
+    if (originalCoordinates) {
+      // Only reset if coordinates are exactly the same (not just close)
+      const currentLng = parseFloat(lng);
+      const currentLat = parseFloat(lat);
+      
+      if (!isNaN(currentLng) && !isNaN(currentLat)) {
+        const exactMatch = (
+          Math.abs(currentLng - originalCoordinates[0]) < 0.0000001 && // Very precise match
+          Math.abs(currentLat - originalCoordinates[1]) < 0.0000001
+        );
+        
+        if (exactMatch) {
+          setOriginalCoordinates([currentLng, currentLat]);
+        }
+      }
+    }
+  }, [lng, lat, originalCoordinates]);
+
+  // Debug: Monitor coordinate state changes
+  useEffect(() => {
+    console.log('Coordinate state changed:', {
+      lng: lng,
+      lat: lat,
+      coordinates: coordinates,
+      originalCoordinates: originalCoordinates
+    });
+  }, [lng, lat, coordinates, originalCoordinates]);
+  
+  // Reset province when region changes
+  useEffect(() => {
+    if (region) {
+      setProvince(''); // Reset province when region changes
+    }
+  }, [region]);
+
+  // Sync form state with reItems changes (e.g., after successful update)
+  useEffect(() => {
+    // Only sync on initial mount, not on every reItems.coordinates change
+    // This prevents overriding user edits when the cache updates
+    if (reItems?.coordinates && !originalCoordinates) {
+      let coords = [];
+      if (reItems.coordinates.coordinates) {
+        coords = reItems.coordinates.coordinates;
+      } else if (reItems.coordinates) {
+        coords = reItems.coordinates;
+      }
+      
+      if (coords && coords[0] !== undefined && coords[1] !== undefined) {
+        console.log('Initial sync of form state with reItems coordinates:', coords);
+        setLng(String(coords[0]));
+        setLat(String(coords[1]));
+        setCoordinates([coords[0], coords[1]]);
+        
+        // Update original coordinates to new values after successful update
+        setOriginalCoordinates([coords[0], coords[1]]);
+      }
+    }
+  }, [reItems?.coordinates, originalCoordinates]);
+
+  // Conditional logic for DER and Own Use based on net metering
+  useEffect(() => {
+    if (reClass === "Non-Commercial") {
+      if (isNetMetered === "Yes") {
+        // If net metered is Yes, disable DER and Own Use, set them to No
+        setIsDer("No");
+        setIsOwnUse("No");
+        setEstablishmentType("");
+      }
+      // If net metered is No, DER will be enabled
+    }
+  }, [isNetMetered, reClass]);
+
+  // Handle DER selection effect on Own Use
+  useEffect(() => {
+    if (reClass === "Non-Commercial" && isNetMetered === "No") {
+      if (isDer === "Yes") {
+        // If DER is Yes, disable Own Use and set to No
+        setIsOwnUse("No");
+        setEstablishmentType("");
+      }
+      // If DER is No, Own Use will be enabled
+    }
+  }, [isDer, reClass, isNetMetered]);
+
 
   useEffect(() => {
     if (reItems?.properties) {
@@ -433,6 +545,7 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
       // Auto-select "No" for Net Metering and Own Use when Commercial is selected
       setIsNetMetered("No");
       setIsOwnUse("No");
+      setIsDer("No");
     } else {
       // Reset FIT fields if changing away from Commercial
       setIsFitEligible(false);
@@ -449,18 +562,201 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
   const reverseGeoCoding = async (coordinates) => {
     if (isReadOnly) return; // Don't allow in read-only mode
     
-    const data = await (
-      await fetch(GEOCODE_URL + `${coordinates.lng},${coordinates.lat}`)
-    ).json()
-    if (data.address !== undefined) {
-      setBrgy(data.address.Neighborhood)
-      setCity(data.address.City)
-      setProvince(data.address.Subregion)
-      setRegion(data.address.Region)
-      setCountry(data.address.CntryName)
-      setLat(coordinates?.lat)
-      setLng(coordinates?.lng)
-      setCoordinates([coordinates?.lng, coordinates?.lat])
+    console.log('=== REVERSE GEOCODING STARTED ===');
+    console.log('reverseGeoCoding called with:', coordinates);
+    console.log('GEOCODE_URL:', GEOCODE_URL);
+    
+    // Ensure we have valid coordinates
+    if (!coordinates || (coordinates.lat === undefined && coordinates.lng === undefined)) {
+      console.error('Invalid coordinates received:', coordinates);
+      return;
+    }
+    
+    // Always update lat/lng/coordinates even if geocoding fails
+    const newLat = coordinates.lat;
+    const newLng = coordinates.lng;
+    
+    console.log('Setting new coordinates:', { lat: newLat, lng: newLng });
+    
+    setLat(String(newLat));
+    setLng(String(newLng));
+    setCoordinates([newLng, newLat]);
+    
+    try {
+      const fullUrl = GEOCODE_URL + `${newLng},${newLat}`;
+      console.log('Making geocoding request to:', fullUrl);
+      console.log('Coordinates being sent - Longitude:', newLng, 'Latitude:', newLat);
+      console.log('Coordinate format check - newLng type:', typeof newLng, 'newLat type:', typeof newLat);
+      
+      const resp = await fetch(fullUrl);
+      console.log('Geocoding response status:', resp.status);
+      console.log('Geocoding response headers:', resp.headers);
+      
+      if (!resp.ok) {
+        console.error('Geocoding request failed:', resp.status, resp.statusText);
+        console.log('Trying fallback geocoding service...');
+        
+        // Try OpenStreetMap Nominatim as fallback
+        const fallbackUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${newLat}&lon=${newLng}&zoom=18&addressdetails=1`;
+        console.log('Trying fallback URL:', fallbackUrl);
+        
+        try {
+          const fallbackResp = await fetch(fallbackUrl);
+          if (fallbackResp.ok) {
+            const fallbackData = await fallbackResp.json();
+            console.log('Fallback geocoding response:', fallbackData);
+            
+            if (fallbackData && fallbackData.address) {
+              // Map OpenStreetMap fields to our expected format
+              const fallbackCity = fallbackData.address.city || 
+                                  fallbackData.address.town || 
+                                  fallbackData.address.municipality ||
+                                  fallbackData.address.village ||
+                                  '';
+              
+              const fallbackBarangay = fallbackData.address.suburb || 
+                                      fallbackData.address.neighbourhood ||
+                                      fallbackData.address.district ||
+                                      '';
+              
+              const fallbackRegion = fallbackData.address.state || 
+                                    fallbackData.address.province ||
+                                    '';
+              
+              if (fallbackCity) {
+                setCity(fallbackCity);
+                console.log('City set from fallback service:', fallbackCity);
+              }
+              if (fallbackBarangay) {
+                setBrgy(fallbackBarangay);
+                console.log('Barangay set from fallback service:', fallbackBarangay);
+              }
+              if (fallbackRegion) {
+                // Try to match with our predefined regions
+                const allRegions = getAllRegionNames();
+                const matchedRegion = allRegions.find(region => 
+                  region.toLowerCase().includes(fallbackRegion.toLowerCase()) ||
+                  fallbackRegion.toLowerCase().includes(region.toLowerCase())
+                );
+                
+                if (matchedRegion) {
+                  setRegion(matchedRegion);
+                  console.log('Region set from fallback service:', matchedRegion);
+                  setProvince('');
+                }
+              }
+              
+              setCountry(fallbackData.address.country || 'Philippines');
+              console.log('Country set from fallback service:', fallbackData.address.country || 'Philippines');
+              
+              console.log('=== FALLBACK GEOCODING COMPLETED SUCCESSFULLY ===');
+              return; // Exit early since we got data from fallback
+            }
+          }
+        } catch (fallbackError) {
+          console.error('Fallback geocoding also failed:', fallbackError);
+        }
+        
+        return;
+      }
+      
+      const data = await resp.json();
+      console.log('Geocoding response data:', data);
+      
+      if (data && data.address) {
+        console.log('Address data received:', data.address);
+        console.log('All available address fields:', Object.keys(data.address));
+        console.log('Full address object:', JSON.stringify(data.address, null, 2));
+        
+        // Try multiple possible field names for barangay/neighborhood
+        const barangay = data.address.Neighborhood || 
+                        data.address.SubNeighborhood || 
+                        data.address.District || 
+                        data.address.Area || 
+                        data.address.Locality ||
+                        data.address.Barangay ||
+                        data.address.Community ||
+                        '';
+        
+        // Try multiple possible field names for city/municipality
+        const city = data.address.City || 
+                    data.address.Municipality || 
+                    data.address.Locality || 
+                    data.address.PlaceName ||
+                    data.address.MetroArea ||
+                    data.address.UrbanArea ||
+                    '';
+        
+        // Additional fallback: try to extract from other fields
+        if (!city && data.address.LongLabel) {
+          // Sometimes the full address is in LongLabel
+          const longLabel = data.address.LongLabel;
+          console.log('Trying to extract city from LongLabel:', longLabel);
+          
+          // Look for common city indicators in the long label
+          if (longLabel.includes(', ')) {
+            const parts = longLabel.split(', ');
+            // Usually city is the second or third part
+            if (parts.length >= 2) {
+              const potentialCity = parts[1] || parts[0];
+              if (potentialCity && !potentialCity.includes('Region') && !potentialCity.includes('Province')) {
+                console.log('Extracted city from LongLabel:', potentialCity);
+                setCity(potentialCity);
+              }
+            }
+          }
+        }
+        
+        console.log('Extracted barangay:', barangay);
+        console.log('Extracted city:', city);
+        
+        // Set barangay and city if we found them
+        if (barangay) {
+          setBrgy(barangay);
+          console.log('Barangay set to:', barangay);
+        }
+        if (city) {
+          setCity(city);
+          console.log('City set to:', city);
+        }
+        
+        // Map geocoded region to our predefined regions
+        const geocodedRegion = data.address.Subregion;
+        if (geocodedRegion) {
+          const allRegions = getAllRegionNames();
+          const matchedRegion = allRegions.find(region => 
+            region.toLowerCase().includes(geocodedRegion.toLowerCase()) ||
+            geocodedRegion.toLowerCase().includes(region.toLowerCase())
+          );
+          
+          if (matchedRegion) {
+            setRegion(matchedRegion);
+            console.log('Region set to:', matchedRegion);
+            // Reset province when region changes
+            setProvince('');
+          } else {
+            // If no match found, try to set a default based on coordinates
+            // For now, we'll leave it as is and let user select manually
+            console.log('No region match found for:', geocodedRegion);
+          }
+        }
+        
+        setCountry(data.address.CntryName);
+        console.log('Country set to:', data.address.CntryName);
+        
+        console.log('=== REVERSE GEOCODING COMPLETED SUCCESSFULLY ===');
+      } else {
+        console.log('No address data in response:', data);
+      }
+    } catch (e) {
+      console.error('=== REVERSE GEOCODING FAILED ===');
+      console.error('Geocoding error:', e);
+      console.error('Error details:', {
+        message: e.message,
+        stack: e.stack,
+        name: e.name
+      });
+      // ignore geocode errors; coords already set
     }
   }
 
@@ -482,6 +778,7 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
       yearEst,
       acquisition,
       isNetMetered,
+      isDer,
       ownUse: isOwnUse,
       address: {
         country,
@@ -491,6 +788,11 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
         brgy,
       }
     };
+
+    // Add establishment type if available
+    if (establishmentType) {
+      propertiesObj.establishmentType = establishmentType;
+    }
 
     // Add FIT information when Commercial
     if (reClass === "Commercial") {
@@ -543,19 +845,29 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
       assessmentObj.annualEnergyProduction = Number(assessmentObj.annualEnergyProduction);
     }
 
-    // Build coordinates object in GeoJSON format
-    const coordinatesObj = {
-      type: "Point",
-      coordinates: [parseFloat(lng), parseFloat(lat)]
-    };
-
     const data = new FormData();
     data.append('id', reItems.id)
     // FIXED: Updated to use assignedUserId
     data.append('user', assignedUserId)
     data.append('type', 'Point');
-    // Send coordinates as GeoJSON object
-    data.append('coordinates', JSON.stringify(coordinatesObj));
+    
+    // Debug: Log the coordinates being sent
+    const coordsToSend = [parseFloat(lng), parseFloat(lat)];
+    console.log('Saving coordinates:', {
+      lng: lng,
+      lat: lat,
+      parsed: coordsToSend,
+      isValid: !isNaN(coordsToSend[0]) && !isNaN(coordsToSend[1])
+    });
+    
+    // Validate coordinates before sending
+    if (isNaN(coordsToSend[0]) || isNaN(coordsToSend[1])) {
+      setErrContent("Invalid coordinates. Please select a valid location on the map.");
+      return;
+    }
+    
+    // Send coordinates as a simple array string for backend extraction
+    data.append('coordinates', JSON.stringify(coordsToSend));
     data.append('properties', JSON.stringify(propertiesObj));
     data.append('assessment', JSON.stringify(assessmentObj));
 
@@ -569,19 +881,61 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
 
     setLastFormData(data) // Save for retry
 
+    // Check if coordinates have changed from original values
+    const coordsChanged = haveCoordinatesChanged();
+    console.log('Duplicate detection debug:', {
+      coordsChanged,
+      currentCoords: [parseFloat(lng), parseFloat(lat)],
+      originalCoords: originalCoordinates,
+      forceUpdate
+    });
+    
+    if (!coordsChanged && !forceUpdate) {
+      console.log('Coordinates unchanged, duplicate detection will be skipped');
+    }
+
     if (canSave) {
       try {
-        await updateInventory(data).unwrap();
+        const result = await updateInventory(data).unwrap();
         setForceUpdate(false)
         setShowDuplicateModal(false)
-      } catch (err) {
-        if (err?.status === 409 && err?.data?.duplicates) {
-          setPotentialDuplicates(err.data.duplicates)
-          setShowDuplicateModal(true)
+        
+        // Check if coordinates were actually changed
+        const coordsChanged = haveCoordinatesChanged();
+        if (coordsChanged) {
+          setSuccessContent("Inventory updated successfully! Coordinates and all changes have been saved.");
         } else {
-          setErrContent(err?.data?.message || "Unknown error");
+          setSuccessContent("Inventory updated successfully! (No coordinate changes detected)");
         }
-      }
+              setTimeout(() => setSuccessContent(null), 3000);
+        
+        // Update local coordinate state with the saved values
+        if (result?.updatedInventory?.coordinates) {
+          const savedCoords = result.updatedInventory.coordinates;
+          console.log('Updating local state with saved coordinates:', savedCoords);
+          setLng(String(savedCoords[0]));
+          setLat(String(savedCoords[1]));
+          setCoordinates([savedCoords[0], savedCoords[1]]);
+          setOriginalCoordinates([savedCoords[0], savedCoords[1]]);
+        }
+      } catch (err) {
+        console.log('Update error received:', {
+          status: err?.status,
+          message: err?.data?.message,
+          duplicates: err?.data?.duplicates,
+          error: err
+        });
+        
+        // Handle duplicate detection by showing the modal
+        if (err?.status === 409 && err?.data?.duplicates) {
+          console.log('Duplicate detected, showing modal with:', err.data.duplicates);
+          setPotentialDuplicates(err.data.duplicates);
+          setShowDuplicateModal(true);
+          setErrContent(null); // Clear any previous error
+          } else {
+            setErrContent(err?.data?.message || "Unknown error");
+          }
+        }
     }
   }
 
@@ -591,11 +945,32 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
     
     setShowDuplicateModal(false)
     setForceUpdate(true)
+    setErrContent(null) // Clear any error messages
+    
     if (lastFormData) {
       lastFormData.append("forceUpdate", true)
       try {
-        await updateInventory(lastFormData).unwrap()
+        const result = await updateInventory(lastFormData).unwrap()
         setForceUpdate(false)
+        
+        // Check if coordinates were actually changed
+        const coordsChanged = haveCoordinatesChanged();
+        if (coordsChanged) {
+          setSuccessContent("Inventory updated successfully! Coordinates and all changes have been saved.");
+        } else {
+          setSuccessContent("Inventory updated successfully! (No coordinate changes detected)");
+        }
+        setTimeout(() => setSuccessContent(null), 3000);
+        
+        // Update local coordinate state with the saved values
+        if (result?.updatedInventory?.coordinates) {
+          const savedCoords = result.updatedInventory.coordinates;
+          console.log('Updating local state with saved coordinates (proceed anyway):', savedCoords);
+          setLng(String(savedCoords[0]));
+          setLat(String(savedCoords[1]));
+          setCoordinates([savedCoords[0], savedCoords[1]]);
+          setOriginalCoordinates([savedCoords[0], savedCoords[1]]);
+        }
       } catch (err) {
         setErrContent(err?.data?.message || "Unknown error")
       }
@@ -654,6 +1029,13 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
                 <Snackbar open={true} autoHideDuration={6000} onClose={() => setErrContent(null)} >
                   <Alert onClose={() => setErrContent(null)} severity='warning' sx={{ width: '100%' }}>
                     {errContent}
+                  </Alert>
+                </Snackbar>
+                : null}
+              {successContent !== null ?
+                <Snackbar open={true} autoHideDuration={3000} onClose={() => setSuccessContent(null)} >
+                  <Alert onClose={() => setSuccessContent(null)} severity='success' sx={{ width: '100%' }}>
+                    {successContent}
                   </Alert>
                 </Snackbar>
                 : null}
@@ -750,49 +1132,43 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
                 onChange={onYearEstChanged}
                 disabled={isReadOnly}
               />
-              {isManager || isAdmin ?
+              {isManager || isAdmin ? (
                 <TextField
                   fullWidth
-                  id='user'
+                  size="small"
+                  id="user"
                   select
-                  label='Assigned to:'
-                  value={assignedUserId || ''}
+                  label="Assigned to:"
+                  value={assignedUserId || ""}
                   onChange={onUserIdChanged}
                   disabled={isReadOnly}
+                  helperText="Select the user assigned to this inventory"
                 >
-                  {installersGroup.length > 0 && (
-                    <>
-                      <MenuItem disabled key='installers-header' sx={{ backgroundColor: '#e3f2fd', fontWeight: 'bold', borderBottom: '1px solid #2196f3', color: '#1976d2' }}>
-                        🏗️ Installers ({installersGroup.length} companies)
+                  {allUsers?.map((user) => {
+                    console.log('User in dropdown:', user);
+                    return (
+                      <MenuItem key={user.id} value={user.id}>
+                        {user.fullName || user.username} ({user.username})
                       </MenuItem>
-                      {installersGroup.map(u => (
-                        <MenuItem key={`installer-${u.id}`} value={u.id} sx={{ pl: 3 }}>
-                          <div>
-                            <Typography variant="body2">{u.displayName}</Typography>
-                            <Typography variant="caption" color="text.secondary">{u.displaySecondary}</Typography>
-                          </div>
-                        </MenuItem>
-                      ))}
-                      <Divider sx={{ my: 1 }} />
-                    </>
+                    );
+                  })}
+                  {/* Fallback if assignedUserId is not in allUsers */}
+                  {assignedUserId && !allUsers?.find(u => u.id === assignedUserId) && (
+                    <MenuItem value={assignedUserId} disabled>
+                      Current: {assignedUserId} (User not found in list)
+                    </MenuItem>
                   )}
-                  {availableAffiliations.map(aff => (
-                    <React.Fragment key={`aff-${aff}`}>
-                      <MenuItem disabled sx={{ backgroundColor: '#f5f5f5', fontWeight: 'bold', borderBottom: '1px solid #e0e0e0', color: '#1976d2' }}>
-                        {aff} ({usersByAffiliation[aff]?.length || 0} users)
-                      </MenuItem>
-                      {(usersByAffiliation[aff] || []).map(u => (
-                        <MenuItem key={`aff-${aff}-${u.id}`} value={u.id} sx={{ pl: 3 }}>
-                          <div>
-                            <Typography variant="body2">{u.displayName}</Typography>
-                            <Typography variant="caption" color="text.secondary">{u.displaySecondary}</Typography>
-                          </div>
-                        </MenuItem>
-                      ))}
-                    </React.Fragment>
-                  ))}
-                </TextField> : ''
-              }
+
+                  {/* Show current user if no assignedUserId */}
+                  {!assignedUserId && userId && (
+                    <MenuItem value={userId} disabled>
+                      Current User: {userId}
+                    </MenuItem>
+                  )}
+                </TextField>
+              ) : (
+                ""
+              )}
 
               {/* FIT Information Section - Only when Commercial */}
               {reClass === "Commercial" && (
@@ -946,6 +1322,53 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
                     Commercial RE systems are automatically set as not net-metered.
                   </Alert>
                 )}
+
+                {/* DER Field - Only for Non-Commercial, appears after Net Metered */}
+                {reClass === "Non-Commercial" && (
+                  <>
+                    <Typography sx={{ fontWeight: 700, mb: 1 }} component="label">
+                      Is DER (Distributed Energy Resource)?
+                    </Typography>
+                    <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', mb: 2 }}>
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={isDer === "Yes"}
+                            onChange={() => {
+                              if (isReadOnly) return;
+                              setIsDer("Yes");
+                            }}
+                            color="primary"
+                            disabled={isNetMetered === "Yes" || isReadOnly} // Disable when net metered is Yes or read-only
+                          />
+                        }
+                        label="Yes"
+                        sx={{ mr: 2, ml: 1 }}
+                      />
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={isDer === "No"}
+                            onChange={() => {
+                              if (isReadOnly) return;
+                              setIsDer("No");
+                            }}
+                            color="primary"
+                            disabled={isNetMetered === "Yes" || isReadOnly} // Disable when net metered is Yes or read-only
+                          />
+                        }
+                        label="No"
+                        sx={{ ml: 2 }}
+                      />
+                    </Box>
+                    {isNetMetered === "Yes" && (
+                      <Alert severity="info" sx={{ mb: 2 }}>
+                        DER is automatically set to "No" when net metered is "Yes".
+                      </Alert>
+                    )}
+                  </>
+                )}
+
                 <Typography sx={{ fontWeight: 700, mb: 1 }} component="label">
                   Own use?
                 </Typography>
@@ -959,7 +1382,7 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
                           setIsOwnUse("Yes");
                         }}
                         color="primary"
-                        disabled={reClass === "Commercial" || isReadOnly} // Disable when Commercial or read-only
+                        disabled={reClass === "Commercial" || isReadOnly || (reClass === "Non-Commercial" && isNetMetered === "Yes") || (reClass === "Non-Commercial" && isDer === "Yes")} // Disable when Commercial, read-only, or when net metered is Yes, or when DER is Yes
                       />
                     }
                     label="Yes"
@@ -974,7 +1397,7 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
                           setIsOwnUse("No");
                         }}
                         color="primary"
-                        disabled={reClass === "Commercial" || isReadOnly} // Disable when Commercial or read-only
+                        disabled={reClass === "Commercial" || isReadOnly || (reClass === "Non-Commercial" && isNetMetered === "Yes") || (reClass === "Non-Commercial" && isDer === "Yes")} // Disable when Commercial, read-only, or when net metered is Yes, or when DER is Yes
                       />
                     }
                     label="No"
@@ -985,6 +1408,44 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
                   <Alert severity="info" sx={{ mb: 2 }}>
                     Commercial RE systems are automatically set as not for own use.
                   </Alert>
+                )}
+                {(reClass === "Non-Commercial" && isNetMetered === "Yes") && (
+                  <Alert severity="info" sx={{ mb: 2 }}>
+                    Own Use is automatically set to "No" when net metered is "Yes".
+                  </Alert>
+                )}
+                {(reClass === "Non-Commercial" && isDer === "Yes") && (
+                  <Alert severity="info" sx={{ mb: 2 }}>
+                    Own Use is automatically set to "No" when DER is "Yes".
+                  </Alert>
+                )}
+
+                {/* Establishment Type - Only when Own Use is Yes and DER is No */}
+                {reClass === "Non-Commercial" && isOwnUse === "Yes" && isDer === "No" && (
+                  <>
+                    <Typography sx={{ fontWeight: 700, mb: 1 }} component="label">
+                      Establishment Type
+                    </Typography>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      id="establishmentType"
+                      select
+                      name="establishmentType"
+                      label="Select Establishment Type"
+                      value={establishmentType || ""}
+                      onChange={(e) => {
+                        if (isReadOnly) return;
+                        setEstablishmentType(e.target.value);
+                      }}
+                      disabled={isReadOnly}
+                      sx={{ mb: 2 }}
+                    >
+                      <MenuItem value="Residential Establishment">Residential Establishment</MenuItem>
+                      <MenuItem value="Commercial Establishment">Commercial Establishment</MenuItem>
+                      <MenuItem value="Industrial Establishment">Industrial Establishment</MenuItem>
+                    </TextField>
+                  </>
                 )}
               </Box>
             </Box>
@@ -1040,6 +1501,25 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
               <Typography sx={{ fontStyle: 'italic' }} component='h1' variant='subtitle2'>
                 Coordinates
               </Typography>
+              {/* Coordinate change indicator */}
+              {originalCoordinates && haveCoordinatesChanged() && (
+                <Alert 
+                  severity="info" 
+                  sx={{ mb: 2, fontSize: '0.875rem' }}
+                  icon={<InfoIcon />}
+                >
+                  Coordinates have been modified from original values. Duplicate detection will be active.
+                </Alert>
+              )}
+              {originalCoordinates && !haveCoordinatesChanged() && (
+                <Alert 
+                  severity="success" 
+                  sx={{ mb: 2, fontSize: '0.875rem' }}
+                  icon={<CheckCircleIcon />}
+                >
+                  Coordinates unchanged. Duplicate detection will be skipped.
+                </Alert>
+              )}
               <Box
                 sx={{
                   display: 'grid',
@@ -1100,21 +1580,40 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
                 label='Region'
                 id='region'
                 name='properties.address.region'
-                type='text'
+                select
                 value={region}
                 onChange={onRegionChanged}
                 disabled={isReadOnly}
-              />
+              >
+                <MenuItem value="">
+                  <em>Select Region</em>
+                </MenuItem>
+                {getAllRegionNames().map((regionName) => (
+                  <MenuItem key={regionName} value={regionName}>
+                    {regionName}
+                  </MenuItem>
+                ))}
+              </TextField>
               <TextField
                 fullWidth
                 label='Province'
                 id='province'
                 name='properties.address.province'
-                type='text'
+                select
                 value={province}
                 onChange={onProvinceChanged}
-                disabled={isReadOnly}
-              />
+                disabled={isReadOnly || !region}
+                helperText={!region ? 'Please select a region first' : ''}
+              >
+                <MenuItem value="">
+                  <em>Select Province</em>
+                </MenuItem>
+                {region && getProvincesForRegion(region).map((provinceName) => (
+                  <MenuItem key={provinceName} value={provinceName}>
+                    {provinceName}
+                  </MenuItem>
+                ))}
+              </TextField>
               <TextField
                 fullWidth
                 label='City/Municipality'
@@ -1196,52 +1695,131 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
           />
 
           {/* Duplicate detection modal */}
-          <Dialog open={showDuplicateModal} onClose={handleCancelDuplicate}>
-            <DialogTitle>Potential Duplicate Detected</DialogTitle>
-            <DialogContent>
-              <MuiAlert severity="warning" sx={{ mb: 2 }}>
+          <Dialog 
+            open={showDuplicateModal} 
+            onClose={handleCancelDuplicate}
+            maxWidth="md"
+            fullWidth
+          >
+            <DialogTitle sx={{ 
+              backgroundColor: 'warning.light', 
+              color: 'warning.contrastText',
+              fontWeight: 'bold',
+              fontSize: '1.25rem'
+            }}>
+              ⚠️ Potential Duplicate Detected
+            </DialogTitle>
+            <DialogContent sx={{ pt: 3 }}>
+              <MuiAlert 
+                severity="warning" 
+                sx={{ 
+                  mb: 3,
+                  fontSize: '1rem',
+                  '& .MuiAlert-message': {
+                    fontWeight: 500
+                  }
+                }}
+              >
                 There is/are technical assessment(s) within 100 meters of this location.
                 <br />
-                Is this the same RE System as any of the following?
+                <strong>Is this the same RE System as any of the following?</strong>
               </MuiAlert>
-              <List>
+              <List sx={{ mb: 2 }}>
                 {potentialDuplicates.map((dup, idx) => (
-                  <ListItem key={dup._id || idx}>
+                  <ListItem 
+                    key={dup._id || idx}
+                    sx={{
+                      border: '1px solid',
+                      borderColor: 'divider',
+                      borderRadius: 1,
+                      mb: 1,
+                      backgroundColor: 'background.paper'
+                    }}
+                  >
                     <ListItemText
-                      primary={dup.properties?.ownerName || "Unknown"}
+                      primary={
+                        <Typography variant="h6" color="primary" sx={{ fontWeight: 'bold' }}>
+                          {dup.properties?.ownerName || "Unknown"}
+                        </Typography>
+                      }
                       secondary={
-                        <>
-                          <Typography variant="body2">
-                            <b>RE Cat:</b> {dup.properties?.reCat}
+                        <Box sx={{ mt: 1 }}>
+                          <Typography variant="body2" sx={{ mb: 0.5 }}>
+                            <strong>RE Category:</strong> {dup.properties?.reCat}
                           </Typography>
-                          <Typography variant="body2">
-                            <b>RE Class:</b> {dup.properties?.reClass}
+                          <Typography variant="body2" sx={{ mb: 0.5 }}>
+                            <strong>RE Class:</strong> {dup.properties?.reClass}
                           </Typography>
-                          <Typography variant="body2">
-                            <b>Year Est.:</b> {dup.properties?.yearEst}
+                          <Typography variant="body2" sx={{ mb: 0.5 }}>
+                            <strong>Year Established:</strong> {dup.properties?.yearEst}
                           </Typography>
-                          <Typography variant="body2">
-                            <b>Address:</b> {dup.properties?.address?.city}, {dup.properties?.address?.province}, {dup.properties?.address?.region}
+                          <Typography variant="body2" sx={{ mb: 0.5 }}>
+                            <strong>Address:</strong> {dup.properties?.address?.city}, {dup.properties?.address?.province}, {dup.properties?.address?.region}
                           </Typography>
-                          <Typography variant="body2">
-                            <b>Coordinates:</b> {dup.coordinates?.coordinates?.[1]}, {dup.coordinates?.coordinates?.[0]}
+                          <Typography variant="body2" sx={{ mb: 0.5 }}>
+                            <strong>Coordinates:</strong> {dup.coordinates?.coordinates?.[1]}, {dup.coordinates?.coordinates?.[0]}
                           </Typography>
-                        </>
+                        </Box>
                       }
                     />
                   </ListItem>
                 ))}
               </List>
-              <MuiAlert severity="info" sx={{ mt: 2 }}>
-                If you wish to proceed with updating this inventory at this location, click "Proceed Anyway".
+              <MuiAlert 
+                severity="info" 
+                sx={{ 
+                  mt: 3,
+                  mb: 1,
+                  fontSize: '1rem',
+                  '& .MuiAlert-message': {
+                    fontWeight: 500
+                  }
+                }}
+              >
+                <strong>Warning:</strong> Updating this inventory may cause data conflicts with nearby systems. 
+                Consider canceling if this affects the same system, or proceed only if you're certain this is appropriate.
               </MuiAlert>
             </DialogContent>
-            <DialogActions>
-              <Button onClick={handleProceedAnyway} color="success" variant="contained">
-                Proceed Anyway
-              </Button>
-              <Button onClick={handleCancelDuplicate} color="secondary" variant="outlined">
+            <DialogActions sx={{ gap: 2, p: 2, flexDirection: 'row-reverse' }}>
+              <Button 
+                onClick={handleCancelDuplicate} 
+                color="error" 
+                variant="contained"
+                size="large"
+                sx={{
+                  minWidth: 140,
+                  fontWeight: 'bold',
+                  fontSize: '1rem',
+                  py: 1.5,
+                  px: 3,
+                  boxShadow: 3,
+                  '&:hover': {
+                    boxShadow: 6,
+                    transform: 'translateY(-1px)',
+                    backgroundColor: 'error.dark'
+                  }
+                }}
+              >
                 Cancel
+              </Button>
+              <Button 
+                onClick={handleProceedAnyway} 
+                color="success" 
+                variant="outlined"
+                size="medium"
+                sx={{
+                  minWidth: 120,
+                  fontWeight: 'normal',
+                  fontSize: '0.9rem',
+                  py: 1,
+                  px: 2,
+                  '&:hover': {
+                    backgroundColor: 'success.light',
+                    color: 'success.contrastText'
+                  }
+                }}
+              >
+                Proceed Anyway
               </Button>
             </DialogActions>
           </Dialog>

@@ -502,6 +502,7 @@ const InventoryMapFilter = () => {
             <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
               RE categories
             </Typography>
+            
             <FormGroup>
               {category.map((type, index) => (
                 <div key={index}>

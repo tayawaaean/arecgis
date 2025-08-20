@@ -553,6 +553,60 @@ const InventoryTable = ({ setClearVal, clearVal, onFlyTo }) => {
         );
       },
       disableClickEventBubbling: true,
+    },
+    {
+      field: 'isDer',
+      headerName: 'DER',
+      width: 130,
+      filterable: true,
+      type: 'singleSelect',
+      valueOptions: ['Yes', 'No'],
+      valueGetter: (inventories) => inventories.row?.properties?.isDer || '',
+      renderCell: (params) => {
+        const value = params.value;
+        if (!value) return (
+          <Typography variant="body2" color="text.secondary" fontStyle="italic">
+            Not specified
+          </Typography>
+        );
+        return (
+          <Chip 
+            label={value} 
+            size="small" 
+            color={value === "Yes" ? "success" : "error"}
+            variant="filled"
+            sx={{ fontWeight: 'medium' }}
+          />
+        );
+      },
+      disableClickEventBubbling: true,
+    },
+    {
+      field: 'establishmentType',
+      headerName: 'Establishment Type',
+      width: 200,
+      filterable: true,
+      type: 'singleSelect',
+      valueOptions: ['Residential Establishment', 'Commercial Establishment', 'Industrial Establishment'],
+      valueGetter: (inventories) => inventories.row?.properties?.establishmentType || '',
+      renderCell: (params) => {
+        const value = params.value;
+        if (!value) return (
+          <Typography variant="body2" color="text.secondary" fontStyle="italic">
+            Not specified
+          </Typography>
+        );
+        return (
+          <Chip 
+            label={value} 
+            size="small" 
+            color="primary"
+            variant="filled"
+            sx={{ fontWeight: 'medium' }}
+          />
+        );
+      },
+      disableClickEventBubbling: true,
     }
   ];
 

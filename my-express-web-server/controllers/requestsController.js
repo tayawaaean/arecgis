@@ -5,8 +5,8 @@ const bcrypt = require('bcrypt')
 
 // Helper function to check user roles
 const hasRole = (user, roleName) => {
-    if (user.roles && user.roles[roleName]) {
-        return user.roles[roleName];
+    if (user.roles && Array.isArray(user.roles)) {
+        return user.roles.includes(roleName);
     }
     return false;
 }
@@ -101,7 +101,8 @@ const createRequest = async (req, res) => {
             requesterId: currentUser._id,
             inventoryId: requestType === 'transfer' ? inventoryId : undefined,
             documents,
-            reason
+            reason,
+            username: currentUser.username // Store username directly for easier access
         })
 
         if (request) {
@@ -115,6 +116,100 @@ const createRequest = async (req, res) => {
     } catch (error) {
         console.error('Error in createRequest:', error)
         return res.status(500).json({ message: 'Error creating request', error: error.message })
+    }
+}
+
+// @desc Create a bulk transfer request for multiple inventories
+// @route POST /requests/bulk-transfer
+// @access Private
+const createBulkTransferRequest = async (req, res) => {
+    const { inventoryIds, reason, password } = req.body
+
+    // Validate request body
+    if (!inventoryIds || !reason || !password) {
+        return res.status(400).json({ message: 'Inventory IDs, reason, and password are required' })
+    }
+
+    // Validate inventoryIds is an array
+    if (!Array.isArray(inventoryIds) || inventoryIds.length === 0) {
+        return res.status(400).json({ message: 'Inventory IDs must be a non-empty array' })
+    }
+
+    // Limit bulk transfers to reasonable number (e.g., 10 inventories max)
+    if (inventoryIds.length > 10) {
+        return res.status(400).json({ message: 'Cannot transfer more than 10 inventories at once' })
+    }
+
+    // For bulk transfer requests, documents are required
+    if (!req.files || req.files.length === 0) {
+        return res.status(400).json({ message: 'Supporting documents are required for bulk transfer requests' })
+    }
+
+    try {
+        // Get current user by username from JWT
+        const username = req.user
+        const currentUser = await User.findOne({ username }).exec()
+        if (!currentUser) {
+            return res.status(401).json({ message: 'User not found' })
+        }
+
+        // Verify user's password
+        const isPasswordValid = await bcrypt.compare(password, currentUser.password)
+        if (!isPasswordValid) {
+            return res.status(401).json({ message: 'Invalid password' })
+        }
+
+        // Validate all inventories exist
+        const inventories = await Inventory.find({ _id: { $in: inventoryIds } }).exec()
+        if (inventories.length !== inventoryIds.length) {
+            return res.status(404).json({ message: 'One or more inventories not found' })
+        }
+
+        // Check if there are already pending transfer requests for any of these inventories
+        const existingTransferRequests = await Request.find({
+            requestType: 'transfer',
+            inventoryId: { $in: inventoryIds },
+            status: 'pending'
+        })
+
+        if (existingTransferRequests.length > 0) {
+            const conflictingInventories = existingTransferRequests.map(req => req.inventoryId)
+            return res.status(400).json({ 
+                message: 'There are already pending transfer requests for some inventories',
+                conflictingInventories
+            })
+        }
+
+        // Create document objects
+        const documents = req.files.map(file => ({
+            name: file.originalname,
+            type: file.mimetype,
+            size: file.size,
+            data: file.buffer.toString('base64')
+        }))
+
+        // Create bulk transfer request
+        const bulkTransferRequest = await Request.create({
+            requestType: 'bulk_transfer',
+            requesterId: currentUser._id,
+            inventoryIds: inventoryIds, // Store array of inventory IDs
+            reason,
+            documents,
+            status: 'pending'
+        })
+
+        if (bulkTransferRequest) {
+            res.status(201).json({
+                message: `Bulk transfer request created successfully for ${inventoryIds.length} inventories`,
+                requestId: bulkTransferRequest._id,
+                inventoryCount: inventoryIds.length
+            })
+        } else {
+            res.status(400).json({ message: 'Invalid bulk transfer data received' })
+        }
+    } catch (error) {
+        console.error('Error in createBulkTransferRequest:', error)
+        res.status(500).json({ message: 'Error creating bulk transfer request', error: error.message })
     }
 }
 
@@ -133,6 +228,7 @@ const getAllRequests = async (req, res) => {
         const requests = await Request.find(filter)
             .populate('requesterId', 'username fullName')
             .populate('inventoryId', 'properties.ownerName properties.reCat properties.reClass properties.address username')
+            .populate('inventoryIds', 'properties.ownerName properties.reCat properties.reClass properties.address username')
             .populate('reviewedBy', 'username fullName')
             .sort({ createdAt: -1 })
             .limit(limit * 1)
@@ -175,6 +271,7 @@ const getUserRequests = async (req, res) => {
         const requests = await Request.find(filter)
             .populate('requesterId', 'username fullName')
             .populate('inventoryId', 'properties.ownerName properties.reCat properties.reClass properties.address')
+            .populate('inventoryIds', 'properties.ownerName properties.reCat properties.reClass properties.address')
             .populate('reviewedBy', 'username fullName')
             .sort({ createdAt: -1 })
             .limit(limit * 1)
@@ -203,6 +300,7 @@ const getRequest = async (req, res) => {
         const request = await Request.findById(req.params.id)
             .populate('requesterId', 'username fullName')
             .populate('inventoryId', 'properties.ownerName properties.reCat properties.reClass properties.address username')
+            .populate('inventoryIds', 'properties.ownerName properties.reCat properties.reClass properties.address username')
             .populate('reviewedBy', 'username fullName')
             .exec()
 
@@ -273,6 +371,28 @@ const approveRequest = async (req, res) => {
             inventory.user = request.requesterId._id
             await inventory.save()
 
+        } else if (request.requestType === 'bulk_transfer') {
+            // For bulk transfer requests, transfer all inventories to the requester
+            if (!request.inventoryIds || request.inventoryIds.length === 0) {
+                return res.status(400).json({ message: 'No inventory IDs found for bulk transfer' })
+            }
+
+            const inventories = await Inventory.find({ _id: { $in: request.inventoryIds } }).exec()
+            if (inventories.length !== request.inventoryIds.length) {
+                return res.status(404).json({ message: 'One or more inventories not found for bulk transfer' })
+            }
+
+            // Transfer ownership for all inventories
+            for (const inventory of inventories) {
+                // Add current owner to previousUsers array
+                if (!inventory.previousUsers.includes(inventory.user)) {
+                    inventory.previousUsers.push(inventory.user)
+                }
+                // Transfer ownership to the requester
+                inventory.user = request.requesterId._id
+                await inventory.save()
+            }
+
         } else if (request.requestType === 'account_deletion') {
             // For account deletion, set the user account as inactive (don't delete data)
             const userToDeactivate = await User.findById(request.requesterId._id)
@@ -290,8 +410,17 @@ const approveRequest = async (req, res) => {
 
         await request.save()
 
+        let message = ''
+        if (request.requestType === 'transfer') {
+            message = 'Transfer request approved successfully'
+        } else if (request.requestType === 'bulk_transfer') {
+            message = `Bulk transfer request approved successfully for ${request.inventoryIds.length} inventories`
+        } else if (request.requestType === 'account_deletion') {
+            message = 'Account deactivation request approved successfully'
+        }
+
         res.json({ 
-            message: `${request.requestType === 'transfer' ? 'Transfer' : 'Account deactivation'} request approved successfully`,
+            message,
             request 
         })
     } catch (error) {
@@ -345,8 +474,17 @@ const rejectRequest = async (req, res) => {
 
         await request.save()
 
+        let message = ''
+        if (request.requestType === 'transfer') {
+            message = 'Transfer request rejected'
+        } else if (request.requestType === 'bulk_transfer') {
+            message = `Bulk transfer request rejected for ${request.inventoryIds?.length || 0} inventories`
+        } else if (request.requestType === 'account_deletion') {
+            message = 'Account deactivation request rejected'
+        }
+
         res.json({ 
-            message: `${request.requestType === 'transfer' ? 'Transfer' : 'Account deactivation'} request rejected`,
+            message,
             request 
         })
     } catch (error) {
@@ -396,12 +534,104 @@ const downloadDocument = async (req, res) => {
     }
 }
 
+// @desc Get notifications for user based on role
+// @route GET /requests/notifications
+// @access Private
+const getNotifications = async (req, res) => {
+    try {
+        const username = req.user
+        const currentUser = await User.findOne({ username }).exec()
+        
+        if (!currentUser) {
+            return res.status(401).json({ message: 'User not found' })
+        }
+
+        const isAdmin = hasRole(currentUser, 'Admin')
+        const isManager = hasRole(currentUser, 'Manager')
+        const isInstaller = hasRole(currentUser, 'Installer')
+        const isEmployee = hasRole(currentUser, 'Employee')
+
+        let query = {}
+        let limit = 3 // Only show 3 notifications
+
+        if (isAdmin || isManager) {
+            // Admin/Manager sees pending requests
+            query.status = 'pending'
+        } else if (isInstaller || isEmployee) {
+            // Installer/Employee sees their own accepted/rejected requests
+            query.requesterId = currentUser._id
+            query.status = { $in: ['approved', 'rejected'] }
+        } else {
+            // Other roles see their own requests
+            query.requesterId = currentUser._id
+        }
+
+        const notifications = await Request.find(query)
+            .populate('requesterId', 'username fullName') // Keep this for backward compatibility with existing records
+            .populate('inventoryId', 'properties.ownerName properties.address')
+            .populate('inventoryIds', 'properties.ownerName properties.address')
+            .populate('reviewedBy', 'username fullName')
+            .sort({ createdAt: -1 })
+            .limit(limit)
+            .lean()
+
+        // Transform the data for frontend
+        const transformedNotifications = notifications.map(notification => {
+            let inventoryName = null
+            let inventoryLocation = null
+            
+            if (notification.requestType === 'bulk_transfer' && notification.inventoryIds) {
+                // For bulk transfers, show count and first inventory details
+                inventoryName = `${notification.inventoryIds.length} Inventories (Bulk Transfer)`
+                if (notification.inventoryIds.length > 0) {
+                    inventoryLocation = notification.inventoryIds[0]?.properties?.address || null
+                }
+            } else if (notification.inventoryId) {
+                // For single transfers
+                inventoryName = notification.inventoryId.properties?.ownerName || 'Inventory'
+                inventoryLocation = notification.inventoryId.properties?.address || null
+            }
+            
+            return {
+                id: notification._id,
+                requestType: notification.requestType,
+                status: notification.status,
+                reason: notification.reason,
+                createdAt: notification.createdAt,
+                requesterName: notification.username || // Use direct username field if available (new records)
+                    (notification.requesterId?.username) || // Fall back to populated username (existing records)
+                    'Unknown User',
+                inventoryName,
+                inventoryLocation,
+                reviewedByName: notification.reviewedBy ? 
+                    (notification.reviewedBy.fullName || notification.reviewedBy.username || 'Admin') : 
+                    null,
+                reviewDate: notification.reviewDate,
+                notes: notification.notes,
+                rejectionReason: notification.rejectionReason
+            };
+        })
+
+        res.json({
+            notifications: transformedNotifications,
+            total: transformedNotifications.length,
+            hasMore: await Request.countDocuments(query) > limit
+        })
+
+    } catch (error) {
+        console.error('Error fetching notifications:', error)
+        res.status(500).json({ message: 'Internal server error' })
+    }
+}
+
 module.exports = {
     createRequest,
+    createBulkTransferRequest,
     getAllRequests,
     getUserRequests,
     getRequest,
     approveRequest,
     rejectRequest,
-    downloadDocument
+    downloadDocument,
+    getNotifications
 }

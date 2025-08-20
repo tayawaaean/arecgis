@@ -15,9 +15,14 @@ const buildFilterQuery = (parsedFilters, username, isAdmin) => {
     query['properties.reClass'] = parsedFilters.reClass
   }
   
-  // Add other filters as needed
+  if (parsedFilters.solarSystemTypes) {
+    query['assessment.solarSystemTypes'] = parsedFilters.solarSystemTypes
+    console.log('Added solarSystemTypes filter:', parsedFilters.solarSystemTypes)
+  }
+  
   if (parsedFilters.reCat) {
     query['properties.reCat'] = parsedFilters.reCat
+    console.log('Added reCat filter:', parsedFilters.reCat)
   }
   
   if (parsedFilters.fitEligible) {
@@ -46,10 +51,6 @@ const buildFilterQuery = (parsedFilters, username, isAdmin) => {
     } else if (parsedFilters.ownUse === 'No') {
       query['properties.ownUse'] = { $in: [false, 'false'] }
     }
-  }
-  
-  if (parsedFilters.solarSystemTypes) {
-    query['assessment.solarSystemTypes'] = parsedFilters.solarSystemTypes
   }
   
   if (parsedFilters.status) {
@@ -105,11 +106,14 @@ const getInventoryList = async (req, res) => {
     let parsedFilters = {}
     try {
       parsedFilters = JSON.parse(filters)
+      console.log('Received filters:', filters)
+      console.log('Parsed filters:', parsedFilters)
     } catch (e) {
       console.error('Error parsing filters:', e)
     }
     
     let query = buildFilterQuery(parsedFilters, username, isAdmin)
+    console.log('Built query:', query)
     
     // Only filter by username for non-admin users
     if (!isAdmin && username) {

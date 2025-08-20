@@ -19,6 +19,37 @@ const getAllUsers = async (req, res) => {
     res.json(encrypted)
 }
 
+// @desc Get user by ID
+// @route GET /users/:id
+// @access Private - Users can access their own profile, Admins/Managers can access any
+const getUserById = async (req, res) => {
+    const { id } = req.params
+    const { user: username, roles } = req // from JWT middleware
+    
+    // Get the current user's ID from the database using username
+    const currentUser = await User.findOne({ username }).select('_id').lean()
+    if (!currentUser) {
+        return res.status(404).json({ message: 'Current user not found' })
+    }
+    
+    // Users can only access their own profile, or Admins/Managers can access any
+    if (id !== currentUser._id.toString() && !roles.includes('Admin') && !roles.includes('Manager')) {
+        return res.status(403).json({ message: 'Access denied - You can only view your own profile' })
+    }
+    
+    const user = await User.findById(id).select('-password').lean()
+    if (!user) {
+        return res.status(404).json({ message: 'User not found' })
+    }
+    
+    // Prefer plain JSON over custom encryption for authenticated endpoints; rely on HTTPS + auth
+    if (!process.env.RETURN_PLAINTEXT_JSON || process.env.RETURN_PLAINTEXT_JSON === 'true') {
+        return res.json(user)
+    }
+    const encrypted = CryptoJS.AES.encrypt(JSON.stringify(user), process.env.SECRET_KEY).toString();
+    res.json(encrypted)
+}
+
 // @desc Create a new user
 // @route POST /users
 // @access Private
@@ -118,6 +149,51 @@ const updateUser = async (req, res) => {
     res.json({ message: `${updatedUser.username} updated` })
 }
 
+// @desc Update own profile (for regular users)
+// @route PATCH /users/profile
+// @access Private - Users can update their own profile
+const updateOwnProfile = async (req, res) => {
+    const { user: currentUsername, roles: currentRoles } = req // from JWT middleware
+    const { fullName, address, contactNumber, affiliation, companyName, companyContactNumber, password, currPW } = req.body
+
+    // Get the current user from the database
+    const currentUser = await User.findOne({ username: currentUsername }).exec()
+    if (!currentUser) {
+        return res.status(404).json({ message: 'User not found' })
+    }
+
+    // Update profile fields if provided
+    if (fullName !== undefined) currentUser.fullName = fullName
+    if (address !== undefined) currentUser.address = address
+    if (contactNumber !== undefined) currentUser.contactNumber = contactNumber
+    if (affiliation !== undefined) currentUser.affiliation = affiliation
+    if (companyName !== undefined) currentUser.companyName = companyName
+    if (companyContactNumber !== undefined) currentUser.companyContactNumber = companyContactNumber
+
+    // Handle password change if provided
+    if (password) {
+        if (!currPW) {
+            return res.status(400).json({ message: 'Current password is required to change password' })
+        }
+        
+        const currMatch = await bcrypt.compare(currPW, currentUser.password)
+        if (!currMatch) {
+            return res.status(401).json({ message: 'Current password does not match!' })
+        }
+        
+        const newMatch = await bcrypt.compare(password, currentUser.password)
+        if (newMatch) {
+            return res.status(400).json({ message: 'The new password must be different from the current password' })
+        }
+        
+        currentUser.password = await bcrypt.hash(password, 10)
+    }
+
+    const updatedUser = await currentUser.save()
+
+    res.json({ message: `Profile updated successfully` })
+}
+
 // @desc Delete a  user
 // @route DELETE /users
 // @access Private
@@ -151,7 +227,9 @@ const deleteUser = async (req, res) => {
 
 module.exports = {
     getAllUsers,
+    getUserById,
     createNewUser,
     updateUser,
+    updateOwnProfile,
     deleteUser,
 }

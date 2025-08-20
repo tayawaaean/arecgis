@@ -63,24 +63,14 @@ export const affiliationsApiSlice = apiSlice.injectEndpoints({
                 { type: 'Affiliation', id: arg.id }
             ]
         }),
-        deleteAffiliation: builder.mutation({
-            query: ({ id }) => ({
-                url: `/affiliations`,
-                method: 'DELETE',
-                body: { id }
-            }),
-            invalidatesTags: (result, error, arg) => [
-                { type: 'Affiliation', id: arg.id }
-            ]
-        }),
+
     }),
 })
 
 export const {
     useGetAffiliationsQuery,
     useAddNewAffiliationMutation,
-    useUpdateAffiliationMutation,
-    useDeleteAffiliationMutation,
+    useUpdateAffiliationMutation
 } = affiliationsApiSlice
 
 // returns the query result object

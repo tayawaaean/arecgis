@@ -57,7 +57,7 @@ import {
   rawBiomassSystemStatus,
 }
   from "../../config/techAssesment"
-import Control from "react-leaflet-custom-control"
+import Control from "../../components/CustomControl"
 import { FadeLoader } from 'react-spinners'
 import {
   Upload as UploadFileIcon,

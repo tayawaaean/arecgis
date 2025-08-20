@@ -268,10 +268,7 @@ const MapFilterHelpModal = ({ open, onClose }) => {
                       />
                     </ListItem>
                     <ListItem>
-                      <ListItemText 
-                        primary="Residential" 
-                        secondary="Home-based systems and personal installations"
-                      />
+                      
                     </ListItem>
                   </List>
                 </CardContent>

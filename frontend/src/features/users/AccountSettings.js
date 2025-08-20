@@ -1,6 +1,5 @@
 import { useParams } from 'react-router-dom'
-import { useSelector } from 'react-redux'
-import { selectUserById } from './usersApiSlice'
+import { useGetUserByIdQuery } from './usersApiSlice'
 import AccountSettingsForm from './AccountSettingsForm'
 import SectionLoading from '../../components/SectionLoading'
 import { CssBaseline, Grid } from '@mui/material'
@@ -12,11 +11,37 @@ const AccountSettings = () => {
 
     const { id } = useParams()
 
-    const user = useSelector(state => selectUserById(state, id))
+    // Don't make the query if no ID is provided
+    const { 
+        data: user, 
+        isLoading, 
+        isError, 
+        error 
+    } = useGetUserByIdQuery(id, {
+        skip: !id
+    })
 
-    // const content = user ? <EditUserForm user={user} /> : <p>Loading...</p>
+    if (!id) {
+        return (
+            <div style={{ padding: '20px', textAlign: 'center' }}>
+                <h3>User ID Required</h3>
+                <p>Please provide a valid user ID to access account settings.</p>
+            </div>
+        )
+    }
 
-    if (!user) return <SectionLoading label="Loading account settings…" />
+    if (isLoading) return <SectionLoading label="Loading account settings…" />
+    
+    if (isError) {
+        return (
+            <div style={{ padding: '20px', textAlign: 'center' }}>
+                <h3>Error loading account settings</h3>
+                <p>{error?.data?.message || 'Failed to load user account settings'}</p>
+            </div>
+        )
+    }
+
+    if (!user) return <SectionLoading label="Account settings not found…" />
 
     const content = <AccountSettingsForm user={user} />
 

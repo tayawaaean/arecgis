@@ -5,6 +5,7 @@ import { useSelector } from 'react-redux';
 import { selectAllInventories } from './inventoriesApiSlice';
 import { selectAllUsers } from '../users/usersApiSlice';
 import { DEFAULT_AFFILIATIONS } from '../../config/affiliations';
+ 
 
 const InventoryFilterContext = createContext();
 
@@ -282,6 +283,8 @@ export const InventoryFilterProvider = ({ children }) => {
       return false;
     });
   };
+
+  // Map cache sync removed
 
   const value = {
     // Filter states

@@ -46,29 +46,34 @@ const Welcome = () => {
   const users = useSelector(selectAllUsers)
   const blogs = useSelector(selectAllBlogs)
   
+  // Filter for non-commercial data only
+  const nonCommercialInventories = inventories?.filter(inv => 
+    inv.properties?.reClass === 'Non-Commercial'
+  ) || []
+  
   // Lightweight loading heuristic for skeletons (no RTK Query here)
   const isOverviewLoading =
     (!inventories || inventories.length === 0) &&
     (!users || users.length === 0) &&
     (!blogs || blogs.length === 0)
   
-  // Calculate summary statistics
-  const totalSystems = inventories?.length || 0
-  const totalCapacity = inventories?.reduce((sum, inv) => {
+  // Calculate summary statistics (non-commercial only)
+  const totalSystems = nonCommercialInventories?.length || 0
+  const totalCapacity = nonCommercialInventories?.reduce((sum, inv) => {
     return sum + (Number(inv.assessment?.capacity) || 0)
   }, 0) || 0
   
-  const systemsByCategory = inventories?.reduce((acc, inv) => {
+  const systemsByCategory = nonCommercialInventories?.reduce((acc, inv) => {
     const category = inv.properties?.reCat || 'Solar Energy'
     acc[category] = (acc[category] || 0) + 1
     return acc
   }, {}) || {}
   
-  const operationalSystems = inventories?.filter(inv => 
+  const operationalSystems = nonCommercialInventories?.filter(inv => 
     inv.assessment?.status === 'Operational'
   ).length || 0
   
-  const recentInventories = inventories?.slice(-3) || []
+  const recentInventories = nonCommercialInventories?.slice(-3) || []
   const totalUsers = users?.length || 0
   
   const getCategoryIcon = (category) => {
@@ -295,6 +300,21 @@ const Welcome = () => {
                   </>
                 ) : (
                   <>
+                    {/* Informational Note */}
+                    <Box sx={{ 
+                      mb: 3, 
+                      p: 2, 
+                      borderRadius: 2, 
+                      backgroundColor: 'rgba(25, 118, 210, 0.08)', 
+                      border: '1px solid rgba(25, 118, 210, 0.2)',
+                      textAlign: 'center'
+                    }}>
+                      <Typography variant="body2" color="primary.main" sx={{ fontWeight: 500 }}>
+                        ℹ️ Dashboard Overview displays <strong>Non-Commercial</strong> renewable energy data only. 
+                        Navigate to Charts & Statistics to view Commercial data or adjust filters.
+                      </Typography>
+                    </Box>
+
                     {/* Key Metrics */}
                     <Grid container spacing={2} sx={{ mb: 3 }}>
                       <Grid item xs={6}>

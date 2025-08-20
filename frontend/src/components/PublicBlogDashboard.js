@@ -11,7 +11,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { selectAllBlogs } from '../features/blogs/publicBlogsApiSlice'
 import { MapContainer, TileLayer, GeoJSON, ZoomControl, LayersControl, Marker, useMap, FeatureGroup, Circle } from 'react-leaflet'
 import { EditControl } from "react-leaflet-draw"
-import Control from 'react-leaflet-custom-control'
+import Control from './CustomControl'
 import { Button, Modal, Drawer, Box, Checkbox, FormControlLabel, FormGroup } from '@mui/material'
 import { DataGrid, GridToolbar } from '@mui/x-data-grid'
 import { SnackBar } from './SnackBar'

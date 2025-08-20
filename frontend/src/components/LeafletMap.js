@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap , Popup} from 'react-leaflet'
 import L from 'leaflet'
-import Control from 'react-leaflet-custom-control'
+import Control from './CustomControl'
 import { Button } from '@mui/material'
 import {  Search as SearchIcon } from '@mui/icons-material'
 import 'leaflet/dist/leaflet.css'

@@ -50,7 +50,23 @@ export const requestsApiSlice = apiSlice.injectEndpoints({
         method: "POST",
         body: formData,
       }),
-      invalidatesTags: [{ type: "Request", id: "LIST" }],
+      invalidatesTags: [
+        { type: "Request", id: "LIST" },
+        { type: "Request", id: "NOTIFICATIONS" }, // Invalidate notifications
+      ],
+    }),
+
+    // Add a new bulk transfer request
+    addBulkTransferRequest: builder.mutation({
+      query: (formData) => ({
+        url: "/requests/bulk-transfer",
+        method: "POST",
+        body: formData,
+      }),
+      invalidatesTags: [
+        { type: "Request", id: "LIST" },
+        { type: "Request", id: "NOTIFICATIONS" }, // Invalidate notifications
+      ],
     }),
 
     // Approve a request
@@ -63,6 +79,7 @@ export const requestsApiSlice = apiSlice.injectEndpoints({
       invalidatesTags: (result, error, { id }) => [
         { type: "Request", id },
         { type: "Request", id: "LIST" },
+        { type: "Request", id: "NOTIFICATIONS" }, // Invalidate notifications
         { type: "Inventory", id: "LIST" }, // Invalidate inventory list for transfer requests
         { type: "User", id: "LIST" }, // Invalidate user list for account deletion requests
       ],
@@ -78,6 +95,7 @@ export const requestsApiSlice = apiSlice.injectEndpoints({
       invalidatesTags: (result, error, { id }) => [
         { type: "Request", id },
         { type: "Request", id: "LIST" },
+        { type: "Request", id: "NOTIFICATIONS" }, // Invalidate notifications
       ],
     }),
 
@@ -90,6 +108,13 @@ export const requestsApiSlice = apiSlice.injectEndpoints({
       }),
     }),
 
+    // Get notifications for user
+    getNotifications: builder.query({
+      query: () => '/requests/notifications',
+      providesTags: [{ type: "Request", id: "NOTIFICATIONS" }],
+      // Refetch notifications every 30 seconds
+      pollingInterval: 30000,
+    }),
 
   }),
 });
@@ -101,4 +126,5 @@ export const {
   useApproveRequestMutation,
   useRejectRequestMutation,
   useDownloadDocumentMutation,
+  useGetNotificationsQuery,
 } = requestsApiSlice;

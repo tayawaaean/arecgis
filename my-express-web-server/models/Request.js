@@ -9,10 +9,10 @@ const documentSchema = new mongoose.Schema({
 }, { _id: false }); // Prevent Mongoose from creating _id for each document
 
 const requestSchema = new mongoose.Schema({
-    // Request type: 'transfer' or 'account_deletion'
+    // Request type: 'transfer', 'bulk_transfer', or 'account_deletion'
     requestType: {
         type: String,
-        enum: ['transfer', 'account_deletion'],
+        enum: ['transfer', 'bulk_transfer', 'account_deletion'],
         required: true
     },
     
@@ -23,11 +23,18 @@ const requestSchema = new mongoose.Schema({
         required: true
     },
     
-    // For transfer requests only
+    // For transfer requests only (single inventory)
     inventoryId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Inventory',
         required: function() { return this.requestType === 'transfer'; }
+    },
+    
+    // For bulk transfer requests (multiple inventories)
+    inventoryIds: {
+        type: [mongoose.Schema.Types.ObjectId],
+        ref: 'Inventory',
+        required: function() { return this.requestType === 'bulk_transfer'; }
     },
     
     // For transfer requests - the new owner (requesting user becomes the new owner)
@@ -77,12 +84,14 @@ const requestSchema = new mongoose.Schema({
             'Insufficient documentation',
             'Invalid reason provided',
             'Request not justified',
-            'Missing required information',
-            'Policy violation',
-            'Duplicate request',
-            'Incorrect inventory selection',
-            'Other'
+            'Some inventories already have pending transfers',
+            'One or more inventories not found'
         ]
+    },
+
+    // Store the username directly for easier access (if this exists in your DB)
+    username: {
+        type: String
     }
 }, {
     timestamps: true

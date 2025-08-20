@@ -169,7 +169,7 @@ export const SnackBar = (props) => {
                         {project?.properties?.reCat === 'Wind Energy' ? <> <var>Wp</var></> : project?.properties?.reCat === 'Biomass' ? <> <var>m&sup3;</var></> : <> <var>Wp</var></>}
                       </TableCell>
                     </TableRow> :
-                    project?.assessment?.solarStreetLights.map((item, index) => (
+                    (project?.assessment?.solarStreetLights || []).map((item, index) => (
                       <TableRow key={index}>
                         <TableCell sx={{ fontWeight: "Medium" }}>Item {index + 1}</TableCell>
                         <TableCell align="left">

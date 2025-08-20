@@ -20,23 +20,37 @@ const DUPLICATE_RADIUS_METERS = 100;
 
 // Helper: Extract coordinates as flat array from any format
 function extractCoordinates(coords) {
+    console.log('extractCoordinates called with:', coords, 'type:', typeof coords);
+    
     if (Array.isArray(coords) && coords.length === 2) {
-        return coords.map(Number);
+        const result = coords.map(Number);
+        console.log('Extracted from array:', result);
+        return result;
     }
     if (coords && coords.type === "Point" && Array.isArray(coords.coordinates) && coords.coordinates.length === 2) {
-        return coords.coordinates.map(Number);
+        const result = coords.coordinates.map(Number);
+        console.log('Extracted from GeoJSON:', result);
+        return result;
     }
     if (typeof coords === "string") {
         try { 
             const parsed = JSON.parse(coords);
+            console.log('Parsed JSON string:', parsed);
             if (Array.isArray(parsed) && parsed.length === 2) {
-                return parsed.map(Number);
+                const result = parsed.map(Number);
+                console.log('Extracted from parsed JSON array:', result);
+                return result;
             }
             if (parsed && parsed.coordinates && Array.isArray(parsed.coordinates) && parsed.coordinates.length === 2) {
-                return parsed.coordinates.map(Number);
+                const result = parsed.coordinates.map(Number);
+                console.log('Extracted from parsed JSON coordinates:', result);
+                return result;
             }
-        } catch {}
+        } catch (e) {
+            console.log('Failed to parse JSON string:', e);
+        }
     }
+    console.log('No valid coordinates found, returning null');
     return null;
 }
 
@@ -258,6 +272,7 @@ const createNewInventory = async (req, res) => {
 
     // Set default Yes/No for net metered and own use if not present
     properties.isNetMetered = properties.isNetMetered || "No";
+    properties.isDer = properties.isDer || "No";
     properties.ownUse = properties.ownUse || "No";
 
     if (!forceCreate) {
@@ -300,6 +315,12 @@ const createNewInventory = async (req, res) => {
 // @access Private
 const updateInventory = async (req, res) => {
     let { id, user, type, coordinates, properties, assessment, forceUpdate } = req.body;
+
+    console.log('updateInventory received:', {
+        id, user, type, coordinates, 
+        coordinatesType: typeof coordinates,
+        forceUpdate
+    });
 
     if (typeof forceUpdate === "string") {
         forceUpdate = forceUpdate === "true";
@@ -386,6 +407,14 @@ const updateInventory = async (req, res) => {
 
     // Create GeoJSON Point for spatial queries
     const geoJsonPoint = createGeoJsonPoint(coordArray);
+    
+    console.log('Update coordinates processing:', {
+        receivedCoordinates: coordinates,
+        extractedCoordArray: coordArray,
+        geoJsonPoint,
+        coordArrayType: typeof coordArray,
+        coordArrayLength: coordArray?.length
+    });
 
     // Capacity validation (optional, but if present, must be valid number)
     if (assessment && Object.prototype.hasOwnProperty.call(assessment, 'capacity') && assessment.capacity !== "") {
@@ -434,7 +463,7 @@ const updateInventory = async (req, res) => {
                     .toBuffer();
                 
                 // Upload to GridFS
-                const uploadStream = gfsi.openUploadStream(filename, {
+                const uploadStream = getBucket().openUploadStream(filename, {
                     contentType: 'image/webp'
                 });
                 
@@ -454,21 +483,82 @@ const updateInventory = async (req, res) => {
     }
 
     if (!forceUpdate) {
-        const possibleDuplicates = await Inventory.find({
-            _id: { $ne: id }, // exclude the inventory being edited
-            coordinates: {
-                $near: {
-                    $geometry: geoJsonPoint,
-                    $maxDistance: DUPLICATE_RADIUS_METERS
+        // First, check if coordinates have actually changed from the original inventory
+        const originalInventory = await Inventory.findById(id).exec();
+        if (!originalInventory) {
+            return res.status(400).json({ message: 'Technical assessment not found' });
+        }
+        
+        const originalCoords = originalInventory.coordinates;
+        const newCoords = coordArray;
+        
+        // Check if coordinates are the same (within a small tolerance for floating point precision)
+        const coordsUnchanged = (
+            originalCoords && 
+            newCoords && 
+            originalCoords.length === 2 && 
+            newCoords.length === 2 &&
+            Math.abs(originalCoords[0] - newCoords[0]) < 0.000001 && // ~1 meter precision
+            Math.abs(originalCoords[1] - newCoords[1]) < 0.000001
+        );
+        
+        console.log('Coordinate change check:', {
+            originalCoords,
+            newCoords,
+            coordsUnchanged,
+            tolerance: 0.000001
+        });
+        
+        // Only check for duplicates if coordinates have actually changed
+        if (!coordsUnchanged) {
+            // First, let's check if there are any inventories at all and test the spatial index
+            const totalInventories = await Inventory.countDocuments();
+            console.log('Total inventories in database:', totalInventories);
+            
+            // Test a simple spatial query to see if the index works
+            const testQuery = await Inventory.find({
+                coordinates: {
+                    $near: {
+                        $geometry: geoJsonPoint,
+                        $maxDistance: 10000 // 10km for testing
+                    }
                 }
-            }
-        }).lean();
-
-        if (possibleDuplicates && possibleDuplicates.length > 0) {
-            return res.status(409).json({
-                message: "Potential duplicate detected",
-                duplicates: possibleDuplicates
+            }).limit(5).lean();
+            
+            console.log('Test spatial query (10km radius):', {
+                found: testQuery.length,
+                sample: testQuery.slice(0, 2).map(inv => ({
+                    id: inv._id,
+                    coords: inv.coordinates,
+                    owner: inv.properties?.ownerName
+                }))
             });
+            
+            const possibleDuplicates = await Inventory.find({
+                _id: { $ne: id }, // exclude the inventory being edited
+                coordinates: {
+                    $near: {
+                        $geometry: geoJsonPoint,
+                        $maxDistance: DUPLICATE_RADIUS_METERS
+                    }
+                }
+            }).lean();
+
+            console.log('Duplicate detection query:', {
+                id,
+                geoJsonPoint,
+                maxDistance: DUPLICATE_RADIUS_METERS,
+                possibleDuplicates: possibleDuplicates?.length || 0
+            });
+
+            if (possibleDuplicates && possibleDuplicates.length > 0) {
+                return res.status(409).json({
+                    message: "Potential duplicate detected",
+                    duplicates: possibleDuplicates
+                });
+            }
+        } else {
+            console.log('Coordinates unchanged, skipping duplicate detection');
         }
     }
 
@@ -480,6 +570,7 @@ const updateInventory = async (req, res) => {
     inventory.user = user;
     inventory.type = type;
     inventory.coordinates = coordArray; // Store as flat array
+    console.log('Storing coordinates in database:', coordArray);
     inventory.images = [...(inventory.images || []), ...images];
     inventory.properties.address.country = properties.address.country;
     inventory.properties.address.region = properties.address.region;
@@ -495,8 +586,14 @@ const updateInventory = async (req, res) => {
     if (properties && Object.prototype.hasOwnProperty.call(properties, 'isNetMetered')) {
         inventory.properties.isNetMetered = properties.isNetMetered;
     }
+    if (properties && Object.prototype.hasOwnProperty.call(properties, 'isDer')) {
+        inventory.properties.isDer = properties.isDer;
+    }
     if (properties && Object.prototype.hasOwnProperty.call(properties, 'ownUse')) {
         inventory.properties.ownUse = properties.ownUse;
+    }
+    if (properties && Object.prototype.hasOwnProperty.call(properties, 'establishmentType')) {
+        inventory.properties.establishmentType = properties.establishmentType;
     }
 
     // Save FIT only if commercial, else remove
@@ -509,7 +606,19 @@ const updateInventory = async (req, res) => {
     inventory.assessment = assessment;
 
     const updatedInventory = await inventory.save();
-    res.json(`'${updatedInventory.type}' updated`);
+    
+    // Return the updated inventory data so the frontend can update its cache
+    res.json({
+        message: `'${updatedInventory.type}' updated`,
+        updatedInventory: {
+            id: updatedInventory._id,
+            coordinates: updatedInventory.coordinates,
+            properties: updatedInventory.properties,
+            assessment: updatedInventory.assessment,
+            user: updatedInventory.user,
+            type: updatedInventory.type
+        }
+    });
 };
 
 const deleteImageInventory = async (req, res) => {

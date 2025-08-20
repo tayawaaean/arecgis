@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { selectAllPublicInventories } from '../features/inventories/publicInventoriesApiSlice'
 import { MapContainer, TileLayer, GeoJSON, ZoomControl, LayersControl, Marker, useMap, FeatureGroup, Circle, Popup } from 'react-leaflet'
 import { EditControl } from "react-leaflet-draw"
-import Control from 'react-leaflet-custom-control'
+import Control from './CustomControl'
 import { Button, Modal, Drawer, Box, Checkbox, FormControlLabel, FormGroup, Stack, Typography, IconButton, Divider, CssBaseline, FormControl, InputLabel, Select, OutlinedInput, ListItemText, MenuItem, Grid, Paper, TextField, Tooltip, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Backdrop, CircularProgress, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from '@mui/material'
 import { DataGrid, GridToolbar } from '@mui/x-data-grid'
 import { SnackBar } from './SnackBar'

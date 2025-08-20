@@ -27,7 +27,7 @@ import {
     Edit as EditIcon,
     Lock as LockIcon
 } from '@mui/icons-material/'
-import { useUpdateUserMutation } from "./usersApiSlice"
+import { useUpdateUserMutation, useUpdateOwnProfileMutation } from "./usersApiSlice"
 import { useGetAffiliationsQuery } from '../affiliations/affiliationsApiSlice'
 import { DEFAULT_AFFILIATIONS } from '../../config/affiliations'
 import { boxmain, boxpaper } from '../../config/style'
@@ -42,11 +42,24 @@ const UserProfileForm = ({ user }) => {
     const { userId: currentUserId, isAdmin, isManager } = useAuth()
 
     const [updateUser, {
-        isLoading,
-        isSuccess,
-        isError,
-        error
+        isLoading: updateUserLoading,
+        isSuccess: updateUserSuccess,
+        isError: updateUserError,
+        error: updateUserErrorData
     }] = useUpdateUserMutation()
+
+    const [updateOwnProfile, {
+        isLoading: updateProfileLoading,
+        isSuccess: updateProfileSuccess,
+        isError: updateProfileError,
+        error: updateProfileErrorData
+    }] = useUpdateOwnProfileMutation()
+
+    // Use the appropriate loading and error states
+    const isLoading = updateUserLoading || updateProfileLoading
+    const isSuccess = updateUserSuccess || updateProfileSuccess
+    const isError = updateUserError || updateProfileError
+    const error = updateUserErrorData || updateProfileErrorData
 
     const {
         data: affiliations,
@@ -110,8 +123,8 @@ const UserProfileForm = ({ user }) => {
     const onAddressChanged = e => setAddress(e.target.value)
     const onContactNumberChanged = e => {
         const value = e.target.value
-        // Only allow +63 followed by digits
-        if (value.startsWith('+63') && /^\+63\d*$/.test(value)) {
+        // Allow empty string or +63 followed by digits
+        if (value === '' || (value.startsWith('+63') && /^\+63\d*$/.test(value))) {
             setContactNumber(value)
         }
     }
@@ -119,8 +132,8 @@ const UserProfileForm = ({ user }) => {
     const onCompanyNameChanged = e => setCompanyName(e.target.value)
     const onCompanyContactNumberChanged = e => {
         const value = e.target.value
-        // Only allow +63 followed by digits
-        if (value.startsWith('+63') && /^\+63\d*$/.test(value)) {
+        // Allow empty string or +63 followed by digits
+        if (value === '' || (value.startsWith('+63') && /^\+63\d*$/.test(value))) {
             setCompanyContactNumber(value)
         }
     }
@@ -144,36 +157,58 @@ const UserProfileForm = ({ user }) => {
     const onSaveProfileClicked = async (e) => {
         e.preventDefault()
         if (canSaveProfile) {
-            await updateUser({
-                id: user.id,
-                username: user.username,
-                roles: user.roles,
-                active: user.active,
-                fullName,
-                address,
-                contactNumber,
-                affiliation,
-                companyName,
-                companyContactNumber,
-                isAdmin,
-                isManager
-            })
+            // If user is updating their own profile, use updateOwnProfile
+            if (currentUserId === user.id) {
+                await updateOwnProfile({
+                    fullName,
+                    address,
+                    contactNumber,
+                    affiliation,
+                    companyName,
+                    companyContactNumber
+                })
+            } else {
+                // If admin/manager is updating someone else's profile, use updateUser
+                await updateUser({
+                    id: user.id,
+                    username: user.username,
+                    roles: user.roles,
+                    active: user.active,
+                    fullName,
+                    address,
+                    contactNumber,
+                    affiliation,
+                    companyName,
+                    companyContactNumber,
+                    isAdmin,
+                    isManager
+                })
+            }
         }
     }
 
     const onChangePasswordClicked = async (e) => {
         e.preventDefault()
         if (canSavePassword) {
-            await updateUser({
-                id: user.id,
-                username: user.username,
-                roles: user.roles,
-                active: user.active,
-                password: newPassword,
-                currPW: currentPassword,
-                isAdmin,
-                isManager
-            })
+            // If user is changing their own password, use updateOwnProfile
+            if (currentUserId === user.id) {
+                await updateOwnProfile({
+                    password: newPassword,
+                    currPW: currentPassword
+                })
+            } else {
+                // If admin/manager is changing someone else's password, use updateUser
+                await updateUser({
+                    id: user.id,
+                    username: user.username,
+                    roles: user.roles,
+                    active: user.active,
+                    password: newPassword,
+                    currPW: currentPassword,
+                    isAdmin,
+                    isManager
+                })
+            }
         }
     }
 

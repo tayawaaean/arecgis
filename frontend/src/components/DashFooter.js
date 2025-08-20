@@ -1,60 +1,58 @@
-import React, { useState } from "react"
-import { useNavigate, useLocation } from "react-router-dom"
-
-
+import React from "react"
 import {
     AppBar,
     Box,
     Toolbar,
-    IconButton,
     Typography,
+    Container,
 } from "@mui/material"
-import {
-  Home as HomeIcon,
 
-} from "@mui/icons-material/"
 const DashFooter = () => {
+    const currentYear = new Date().getFullYear()
 
-
-    const navigate = useNavigate()
-    const { pathname } = useLocation()
-
-    const onGoHomeClicked = () => navigate('/dashboard')
-
-    let goHomeButton = null
-    if (pathname !== '/dashboard') {
-        goHomeButton = (
-
-            <IconButton
-                onClick={onGoHomeClicked}
-            >
-                <HomeIcon/>
-            </IconButton>
- 
-        )
-    }
-
-    const content = (
-        <>
-        <AppBar position="fixed" sx={{ top: 'auto', bottom: 0 }}>
-        <Toolbar>
-        <IconButton color="inherit">
-            {goHomeButton}
-          </IconButton> 
-          <Typography
-            variant="h6"
-            noWrap
-            component="div"
-            sx={{ display: { xs: "none", sm: "block" } }}
-          >
-            Status:
-          </Typography>
-
-               
-        </Toolbar>
-      </AppBar>
-        </>
+    return (
+        <AppBar 
+            position="fixed" 
+            sx={{ 
+                top: 'auto', 
+                bottom: 0,
+                backgroundColor: 'primary.main',
+                boxShadow: '0px -2px 8px rgba(0,0,0,0.1)'
+            }}
+        >
+            <Container maxWidth="xl">
+                <Toolbar sx={{ justifyContent: 'center', minHeight: '48px' }}>
+                    {/* Center - Copyright and branding */}
+                    <Box sx={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        flexDirection: { xs: 'column', sm: 'row' },
+                        gap: { xs: 0.5, sm: 1 }
+                    }}>
+                        <Typography
+                            variant="body2"
+                            sx={{ 
+                                color: 'white',
+                                fontWeight: 500,
+                                textAlign: 'center'
+                            }}
+                        >
+                            AREC GIS
+                        </Typography>
+                        <Typography
+                            variant="body2"
+                            sx={{ 
+                                color: 'rgba(255,255,255,0.8)',
+                                fontSize: '0.75rem'
+                            }}
+                        >
+                            © {currentYear} All Rights Reserved
+                        </Typography>
+                    </Box>
+                </Toolbar>
+            </Container>
+        </AppBar>
     )
-    return content
 }
+
 export default DashFooter

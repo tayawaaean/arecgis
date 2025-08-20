@@ -46,12 +46,13 @@ import { useSelector } from 'react-redux';
 import { selectAllInventories } from '../inventories/inventoriesApiSlice';
 import RequestHelpModal from '../../components/RequestHelpModal';
 
-const steps = ['Select Request Type', 'Fill Details', 'Upload Documents', 'Review & Submit'];
+const steps = ['Select Request Type', 'Choose Transfer Type', 'Fill Details', 'Upload Documents', 'Review & Submit'];
 
 const RequestForm = () => {
   const navigate = useNavigate();
   const { username, isManager, isAdmin } = useAuth();
   const [addNewRequest, { isLoading, isSuccess, isError, error }] = useAddNewRequestMutation();
+  const [addBulkTransferRequest, { isLoading: isBulkLoading, isSuccess: isBulkSuccess, isError: isBulkError, error: bulkError }] = useAddNewRequestMutation();
   
   // Get all inventories for transfer requests (users can transfer any inventory to themselves)
   const allInventories = useSelector(selectAllInventories);
@@ -59,7 +60,9 @@ const RequestForm = () => {
   // Form states
   const [activeStep, setActiveStep] = useState(0);
   const [requestType, setRequestType] = useState('');
+  const [transferType, setTransferType] = useState(''); // 'single' or 'bulk'
   const [selectedInventoryId, setSelectedInventoryId] = useState('');
+  const [selectedInventoryIds, setSelectedInventoryIds] = useState([]); // For bulk transfers
   const [reason, setReason] = useState('');
   const [password, setPassword] = useState('');
   const [documents, setDocuments] = useState([]);
@@ -110,10 +113,10 @@ const RequestForm = () => {
 
   // Reset form on success
   useEffect(() => {
-    if (isSuccess) {
+    if (isSuccess || isBulkSuccess) {
       setShowSuccessDialog(true);
     }
-  }, [isSuccess]);
+  }, [isSuccess, isBulkSuccess]);
 
   // Reset inventory filters when request type changes
   useEffect(() => {
@@ -122,6 +125,8 @@ const RequestForm = () => {
       setInventoryCategoryFilter('');
       setInventoryClassFilter('');
       setSelectedInventoryId('');
+      setSelectedInventoryIds([]);
+      setTransferType('');
     }
   }, [requestType]);
 
@@ -136,10 +141,23 @@ const RequestForm = () => {
         }
         break;
       case 1:
-        if (requestType === 'transfer' && !selectedInventoryId) {
-          errors.selectedInventoryId = 'Please select an inventory to transfer';
+        if (requestType === 'transfer' && !transferType) {
+          errors.transferType = 'Please choose a transfer type';
         }
-        if (requestType === 'transfer' && filteredInventories.length === 0) {
+        break;
+      case 2:
+        if (requestType === 'transfer') {
+          if (transferType === 'single' && !selectedInventoryId) {
+            errors.selectedInventoryId = 'Please select an inventory to transfer';
+          }
+          if (transferType === 'bulk' && selectedInventoryIds.length === 0) {
+            errors.selectedInventoryIds = 'Please select at least one inventory for bulk transfer';
+          }
+          if (transferType === 'bulk' && selectedInventoryIds.length > 10) {
+            errors.selectedInventoryIds = 'Cannot select more than 10 inventories for bulk transfer';
+          }
+        }
+        if ((requestType === 'transfer') && filteredInventories.length === 0) {
           errors.selectedInventoryId = 'No inventories match your search criteria. Please adjust your filters.';
         }
         if (!reason.trim()) {
@@ -148,8 +166,8 @@ const RequestForm = () => {
           errors.reason = 'Reason must be at least 10 characters long';
         }
         break;
-      case 2:
-        if (requestType === 'transfer' && documents.length === 0) {
+      case 3:
+        if ((requestType === 'transfer') && documents.length === 0) {
           errors.documents = 'Supporting documents are required for transfer requests';
         }
         if (!password.trim()) {
@@ -215,7 +233,14 @@ const RequestForm = () => {
     formData.append('password', password);
     
     if (requestType === 'transfer') {
-      formData.append('inventoryId', selectedInventoryId);
+      if (transferType === 'single') {
+        formData.append('inventoryId', selectedInventoryId);
+      } else if (transferType === 'bulk') {
+        // For bulk transfers, append each inventory ID
+        selectedInventoryIds.forEach(id => {
+          formData.append('inventoryIds[]', id);
+        });
+      }
     }
 
     // Add documents
@@ -223,7 +248,11 @@ const RequestForm = () => {
       formData.append('documents', file);
     });
 
-    await addNewRequest(formData);
+    if (requestType === 'transfer' && transferType === 'bulk') {
+      await addBulkTransferRequest(formData);
+    } else {
+      await addNewRequest(formData);
+    }
   };
 
   // Success dialog handlers
@@ -291,12 +320,66 @@ const RequestForm = () => {
         );
 
       case 1:
+        if (requestType === 'transfer') {
+          return (
+            <Box sx={{ mt: 2 }}>
+              <FormControl component="fieldset" fullWidth error={!!validationErrors.transferType}>
+                <FormLabel component="legend" sx={{ mb: 2, fontWeight: 'bold' }}>
+                  Choose Transfer Type
+                </FormLabel>
+                <RadioGroup
+                  value={transferType}
+                  onChange={(e) => setTransferType(e.target.value)}
+                >
+                  <FormControlLabel
+                    value="single"
+                    control={<Radio />}
+                    label={
+                      <Box sx={{ ml: 1 }}>
+                        <Typography variant="body1" fontWeight="bold">
+                          Single Transfer
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Transfer ownership of one specific inventory to yourself
+                        </Typography>
+                      </Box>
+                    }
+                    sx={{ mb: 2, alignItems: 'flex-start' }}
+                  />
+                  <FormControlLabel
+                    value="bulk"
+                    control={<Radio />}
+                    label={
+                      <Box sx={{ ml: 1 }}>
+                        <Typography variant="body1" fontWeight="bold">
+                          Bulk Transfer
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Transfer ownership of multiple inventories (up to 10) to yourself in one request
+                        </Typography>
+                      </Box>
+                    }
+                    sx={{ alignItems: 'flex-start' }}
+                  />
+                </RadioGroup>
+                {validationErrors.transferType && (
+                  <Typography color="error" variant="caption">
+                    {validationErrors.transferType}
+                  </Typography>
+                )}
+              </FormControl>
+            </Box>
+          );
+        }
+        return null;
+
+      case 2:
         return (
           <Box sx={{ mt: 2 }}>
             {requestType === 'transfer' && (
               <Box sx={{ mb: 3 }}>
                 <Typography variant="h6" gutterBottom>
-                  Select Inventory to Transfer
+                  {transferType === 'single' ? 'Select Inventory to Transfer' : 'Select Inventories for Bulk Transfer'}
                 </Typography>
                 
                 {/* Search and Filter Controls */}
@@ -370,53 +453,120 @@ const RequestForm = () => {
                 </Box>
 
                 {/* Inventory Selection */}
-                <FormControl fullWidth error={!!validationErrors.selectedInventoryId}>
-                  <InputLabel>Select Inventory</InputLabel>
-                  <Select
-                    value={selectedInventoryId}
-                    onChange={(e) => setSelectedInventoryId(e.target.value)}
-                    input={<OutlinedInput label="Select Inventory" />}
-                    MenuProps={{
-                      PaperProps: {
-                        style: {
-                          maxHeight: 400,
+                {transferType === 'single' ? (
+                  // Single inventory selection
+                  <FormControl fullWidth error={!!validationErrors.selectedInventoryId}>
+                    <InputLabel>Select Inventory</InputLabel>
+                    <Select
+                      value={selectedInventoryId}
+                      onChange={(e) => setSelectedInventoryId(e.target.value)}
+                      input={<OutlinedInput label="Select Inventory" />}
+                      MenuProps={{
+                        PaperProps: {
+                          style: {
+                            maxHeight: 400,
+                          },
                         },
-                      },
-                    }}
-                  >
-                    {filteredInventories.length === 0 ? (
-                      <MenuItem disabled>
-                        <Typography variant="body2" color="text.secondary">
-                          No inventories match your search criteria
-                        </Typography>
-                      </MenuItem>
-                    ) : (
-                      filteredInventories.map((inventory) => (
-                        <MenuItem key={inventory.id} value={inventory.id}>
-                          <Box sx={{ width: '100%' }}>
-                            <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
-                              {inventory.properties.ownerName}
-                            </Typography>
-                            <Typography variant="body2" color="primary">
-                              {inventory.properties.reCat} • {inventory.properties.reClass}
-                            </Typography>
-                            <Typography variant="caption" color="text.secondary">
-                              📍 {inventory.properties.address?.city}, {inventory.properties.address?.province}
-                            </Typography>
-                            <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
-                              👤 Uploaded by: {inventory.username}
-                            </Typography>
-                          </Box>
+                      }}
+                    >
+                      {filteredInventories.length === 0 ? (
+                        <MenuItem disabled>
+                          <Typography variant="body2" color="text.secondary">
+                            No inventories match your search criteria
+                          </Typography>
                         </MenuItem>
-                      ))
+                      ) : (
+                        filteredInventories.map((inventory) => (
+                          <MenuItem key={inventory.id} value={inventory.id}>
+                            <Box sx={{ width: '100%' }}>
+                              <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
+                                {inventory.properties.ownerName}
+                              </Typography>
+                              <Typography variant="body2" color="primary">
+                                {inventory.properties.reCat} • {inventory.properties.reClass}
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                📍 {inventory.properties.address?.city}, {inventory.properties.address?.province}
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                                👤 Uploaded by: {inventory.username}
+                              </Typography>
+                            </Box>
+                          </MenuItem>
+                        ))
+                      )}
+                    </Select>
+                    {validationErrors.selectedInventoryId && (
+                      <Typography color="error" variant="caption">
+                        {validationErrors.selectedInventoryId}
+                      </Typography>
                     )}
-                  </Select>
-                  {validationErrors.selectedInventoryId && (
-                    <Typography color="error" variant="caption">
-                      {validationErrors.selectedInventoryId}
+                  </FormControl>
+                ) : (
+                  // Bulk inventory selection
+                  <FormControl fullWidth error={!!validationErrors.selectedInventoryIds}>
+                    <InputLabel>Select Inventories (Max 10)</InputLabel>
+                    <Select
+                      multiple
+                      value={selectedInventoryIds}
+                      onChange={(e) => setSelectedInventoryIds(e.target.value)}
+                      input={<OutlinedInput label="Select Inventories (Max 10)" />}
+                      renderValue={(selected) => (
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                          {selected.map((value) => {
+                            const inventory = filteredInventories.find(inv => inv.id === value);
+                            return (
+                              <Chip
+                                key={value}
+                                label={inventory?.properties?.ownerName || 'Unknown'}
+                                size="small"
+                                onDelete={() => {
+                                  setSelectedInventoryIds(selectedInventoryIds.filter(id => id !== value));
+                                }}
+                              />
+                            );
+                          })}
+                        </Box>
+                      )}
+                      MenuProps={{
+                        PaperProps: {
+                          style: {
+                            maxHeight: 400,
+                          },
+                        },
+                      }}
+                    >
+                      {filteredInventories.length === 0 ? (
+                        <MenuItem disabled>
+                          <Typography variant="caption" color="text.secondary">
+                            No inventories match your search criteria
+                          </Typography>
+                        </MenuItem>
+                      ) : (
+                        filteredInventories.map((inventory) => (
+                          <MenuItem key={inventory.id} value={inventory.id}>
+                            <Box sx={{ width: '100%' }}>
+                              <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
+                                {inventory.properties.ownerName}
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                📍 {inventory.properties.address?.city}, {inventory.properties.address?.province}
+                              </Typography>
+                            </Box>
+                          </MenuItem>
+                        ))
+                      )}
+                    </Select>
+                    {validationErrors.selectedInventoryIds && (
+                      <Typography color="error" variant="caption">
+                        {validationErrors.selectedInventoryIds}
+                      </Typography>
+                    )}
+                    <Typography variant="caption" color="text.secondary" sx={{ mt: 1 }}>
+                      Selected: {selectedInventoryIds.length} inventories
                     </Typography>
-                  )}
-                </FormControl>
+                  </FormControl>
+                )}
 
                 {allInventories.length === 0 && (
                   <Alert severity="warning" sx={{ mt: 1 }}>
@@ -436,8 +586,8 @@ const RequestForm = () => {
               error={!!validationErrors.reason}
               helperText={validationErrors.reason || 'Please provide a detailed explanation for your request'}
               placeholder={
-                requestType === 'transfer'
-                  ? 'Explain why you want to transfer this inventory...'
+                requestType === 'transfer' || requestType === 'bulk_transfer'
+                  ? 'Explain why you want to transfer this inventory/inventories...'
                   : 'Explain why you want to delete your account...'
               }
             />
@@ -557,12 +707,14 @@ const RequestForm = () => {
                     Request Type
                   </Typography>
                   <Typography variant="body1">
-                    {requestType === 'transfer' ? 'Transfer Request' : 'Account Deletion Request'}
+                    {requestType === 'transfer' ? 
+                     (transferType === 'single' ? 'Single Transfer Request' : 'Bulk Transfer Request') : 
+                     'Account Deletion Request'}
                   </Typography>
                 </Paper>
               </Grid>
 
-              {requestType === 'transfer' && selectedInventory && (
+              {requestType === 'transfer' && transferType === 'single' && selectedInventory && (
                 <Grid item xs={12}>
                   <Paper sx={{ p: 2, mb: 2 }}>
                     <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
@@ -577,6 +729,32 @@ const RequestForm = () => {
                     <Typography variant="body1">
                       <strong>Location:</strong> {selectedInventory.properties.address?.city}, {selectedInventory.properties.address?.province}
                     </Typography>
+                  </Paper>
+                </Grid>
+              )}
+
+              {requestType === 'transfer' && transferType === 'bulk' && selectedInventoryIds.length > 0 && (
+                <Grid item xs={12}>
+                  <Paper sx={{ p: 2, mb: 2 }}>
+                    <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                      Inventories for Bulk Transfer ({selectedInventoryIds.length} total)
+                    </Typography>
+                    {selectedInventoryIds.map((inventoryId, index) => {
+                      const inventory = allInventories.find(inv => inv.id === inventoryId);
+                      return inventory ? (
+                        <Box key={inventoryId} sx={{ mb: 2, p: 1, border: '1px solid #e0e0e0', borderRadius: 1 }}>
+                          <Typography variant="body2" fontWeight="bold">
+                            {index + 1}. {inventory.properties.ownerName}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {inventory.properties.reCat} • {inventory.properties.reClass}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                            📍 {inventory.properties.address?.city}, {inventory.properties.address?.province}
+                          </Typography>
+                        </Box>
+                      ) : null;
+                    })}
                   </Paper>
                 </Grid>
               )}
@@ -669,9 +847,9 @@ const RequestForm = () => {
             ))}
           </Stepper>
 
-          {isError && (
+          {(isError || isBulkError) && (
             <Alert severity="error" sx={{ mb: 2 }}>
-              {error?.data?.message || 'An error occurred while submitting your request'}
+              {(error?.data?.message || bulkError?.data?.message) || 'An error occurred while submitting your request'}
             </Alert>
           )}
 
@@ -691,10 +869,11 @@ const RequestForm = () => {
                 <Button
                   onClick={handleSubmit}
                   variant="contained"
-                  disabled={isLoading || (requestType === 'transfer' && allInventories.length === 0)}
-                  startIcon={isLoading ? <CircularProgress size={20} /> : <AssignmentIcon />}
+                  disabled={isLoading || isBulkLoading || 
+                    (requestType === 'transfer' && allInventories.length === 0)}
+                  startIcon={(isLoading || isBulkLoading) ? <CircularProgress size={20} /> : <AssignmentIcon />}
                 >
-                  {isLoading ? 'Submitting...' : 'Submit Request'}
+                  {(isLoading || isBulkLoading) ? 'Submitting...' : 'Submit Request'}
                 </Button>
               ) : (
                 <Button
@@ -721,11 +900,19 @@ const RequestForm = () => {
         </DialogTitle>
         <DialogContent>
           <Typography align="center">
-            Your {requestType === 'transfer' ? 'transfer' : 'account deletion'} request has been submitted and is pending review by an administrator.
-            {requestType === 'transfer' && (
+            Your {requestType === 'transfer' ? 
+                   (transferType === 'single' ? 'single transfer' : 'bulk transfer') : 
+                   'account deletion'} request has been submitted and is pending review by an administrator.
+            {requestType === 'transfer' && transferType === 'single' && (
               <>
                 <br /><br />
                 If approved, the selected inventory will be transferred to your account and you will become the new owner.
+              </>
+            )}
+            {requestType === 'transfer' && transferType === 'bulk' && (
+              <>
+                <br /><br />
+                If approved, all {selectedInventoryIds.length} selected inventories will be transferred to your account and you will become the new owner of all of them.
               </>
             )}
           </Typography>

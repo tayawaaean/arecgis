@@ -71,9 +71,36 @@ export const inventoriesApiSlice = apiSlice.injectEndpoints({
                 body: data
                 
             }),
-            invalidatesTags: (result, error, arg) => [
-                { type: 'Inventory', id: arg.id }
-            ]
+            // Update the cache using the id returned by the server (FormData arg doesn't expose id reliably)
+            async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+                try {
+                    const { data: result } = await queryFulfilled;
+                    const updated = result?.updatedInventory;
+                    if (updated && updated.id) {
+                        dispatch(
+                            inventoriesApiSlice.util.updateQueryData('getInventories', undefined, (draft) => {
+                                const inventory = draft.entities[updated.id];
+                                if (inventory) {
+                                    Object.assign(inventory, updated);
+                                }
+                            })
+                        );
+                    }
+                } catch (error) {
+                    console.error('Failed to update cache:', error);
+                }
+            },
+            invalidatesTags: (result) => {
+                const updatedId = result?.updatedInventory?.id;
+                return updatedId
+                    ? [
+                        { type: 'Inventory', id: updatedId },
+                        { type: 'Inventory', id: 'LIST' }
+                      ]
+                    : [
+                        { type: 'Inventory', id: 'LIST' }
+                      ]
+            }
         }),
         deleteImageInventory: builder.mutation({
             query:  (data) => ({

@@ -150,8 +150,8 @@ const EditUserForm = ({ user }) => {
     const onAddressChanged = e => setAddress(e.target.value)
     const onContactNumberChanged = e => {
         const value = e.target.value
-        // Only allow +63 followed by digits
-        if (value.startsWith('+63') && /^\+63\d*$/.test(value)) {
+        // Allow empty string or +63 followed by digits
+        if (value === '' || (value.startsWith('+63') && /^\+63\d*$/.test(value))) {
             setContactNumber(value)
         }
     }
@@ -159,8 +159,8 @@ const EditUserForm = ({ user }) => {
     const onCompanyNameChanged = e => setCompanyName(e.target.value)
     const onCompanyContactNumberChanged = e => {
         const value = e.target.value
-        // Only allow +63 followed by digits
-        if (value.startsWith('+63') && /^\+63\d*$/.test(value)) {
+        // Allow empty string or +63 followed by digits
+        if (value === '' || (value.startsWith('+63') && /^\+63\d*$/.test(value))) {
             setCompanyContactNumber(value)
         }
     }

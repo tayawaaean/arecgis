@@ -47,6 +47,36 @@ export const usersApiSlice = apiSlice.injectEndpoints({
                 } else return [{ type: 'User', id: 'LIST' }]
             }
         }),
+        getUserById: builder.query({
+            query: (id) => ({
+                url: `/users/${id}`,
+                validateStatus: (response, result) => {
+                    return response.status === 200 && !result.isError
+                },
+            }),
+            transformResponse: responseData => {
+                let data = responseData
+                // Backward compatibility: decrypt if server returned an encrypted string
+                if (typeof responseData === 'string') {
+                    try {
+                        const secret = process.env.REACT_APP_SECRET_KEY || '2023@REcMMSU'
+                        const bytes = CryptoJS.AES.decrypt(responseData, secret)
+                        const decoded = bytes.toString(CryptoJS.enc.Utf8)
+                        data = JSON.parse(decoded)
+                    } catch (e) {
+                        data = null
+                    }
+                }
+                if (data) {
+                    data.id = data._id
+                    return data
+                }
+                return null
+            },
+            providesTags: (result, error, arg) => [
+                { type: 'User', id: arg }
+            ]
+        }),
         addNewUser: builder.mutation({
             query: initialUserData => ({
                 url: '/users',
@@ -71,6 +101,18 @@ export const usersApiSlice = apiSlice.injectEndpoints({
                 { type: 'User', id: arg.id }
             ]
         }),
+        updateOwnProfile: builder.mutation({
+            query: profileData => ({
+                url: '/users/profile',
+                method: 'PATCH',
+                body: {
+                    ...profileData,
+                }
+            }),
+            invalidatesTags: (result, error, arg) => [
+                { type: 'User', id: 'LIST' }
+            ]
+        }),
         deleteUser: builder.mutation({
             query: ({ id }) => ({
                 url: `/users`,
@@ -86,8 +128,10 @@ export const usersApiSlice = apiSlice.injectEndpoints({
 
 export const {
     useGetUsersQuery,
+    useGetUserByIdQuery,
     useAddNewUserMutation,
     useUpdateUserMutation,
+    useUpdateOwnProfileMutation,
     useDeleteUserMutation,
 } = usersApiSlice
 

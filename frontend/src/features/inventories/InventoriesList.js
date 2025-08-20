@@ -68,6 +68,10 @@ const extractedFilters = useMemo(() => {
     filters.quickSearch = filterModel.quickFilterValues[0]
   }
   
+  console.log('Filter extraction debug:', {
+    filterModel,
+    extractedFilters: filters
+  });
   
   return filters
 }, [filterModel])
@@ -87,6 +91,11 @@ const extractedFilters = useMemo(() => {
         setPaginationModel(prev => ({ ...prev, page: 0 }))
       }
     }, [filterModel])
+    
+    // Debug: Monitor filter model changes
+    useEffect(() => {
+      console.log('Filter model changed:', filterModel);
+    }, [filterModel]);
 
     // Process inventory data and add relevant flags
     const inventories = useMemo(() => {
@@ -807,6 +816,7 @@ const extractedFilters = useMemo(() => {
                                     filterMode="server"
                                     filterModel={filterModel}
                                     onFilterModelChange={setFilterModel}
+                                    keepNonExistentRowsSelected={false}
                                     slots={{ toolbar: GridToolbar, noRowsOverlay: () => (
                                         <Box role="status" aria-live="polite" sx={{ p: 3, textAlign: 'center' }}>
                                             <Typography variant="body2" color="text.secondary">No inventories to display.</Typography>

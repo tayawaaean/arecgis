@@ -19,7 +19,6 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  Divider,
   List,
   ListItem,
   ListItemText,
@@ -35,6 +34,7 @@ import { Wind } from "../categories/Wind";
 import { Biomass } from "../categories/Biomass";
 import { Hydropower } from "../categories/Hydropower";
 import InventoryHelpModal from "../../components/InventoryHelpModal";
+import { getAllRegionNames, getProvincesForRegion } from '../../config/regions'
 
 const DUPLICATE_RADIUS_METERS = 100; // Should match backend value!
 
@@ -52,7 +52,7 @@ const NewInventoryForm = ({ allUsers }) => {
   const years = Array.from(new Array(124), (val, index) => year - index);
 
   const GEOCODE_URL =
-    "https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=pjson&langCode=EN&location=";
+    "https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=pjson&langCode=EN&outFields=*&returnIntersection=false&location=";
 
   const [openModal, setOpenModal] = useState(false);
   const [ownerName, setOwnerName] = useState("");
@@ -78,6 +78,8 @@ const NewInventoryForm = ({ allUsers }) => {
   const [hydropower, setHydropower] = useState([]);
   const [isOwnUse, setIsOwnUse] = useState(null);
   const [isNetMetered, setIsNetMetered] = useState(null);
+  const [isDer, setIsDer] = useState(null);
+  const [establishmentType, setEstablishmentType] = useState("");
 
   // FIT-related states
   const [isFitEligible, setIsFitEligible] = useState(false);
@@ -95,42 +97,7 @@ const NewInventoryForm = ({ allUsers }) => {
   // HELP MODAL STATE
   const [openHelpModal, setOpenHelpModal] = useState(false);
 
-  // Group installers and users by affiliation for sectioned Assigned To select
-  const installersGroup = useMemo(() => {
-    if (!allUsers || allUsers.length === 0) return [];
-    return allUsers
-      .filter(user => Array.isArray(user.roles) && user.roles.includes('Installer'))
-      .map(user => ({
-        id: user.id,
-        username: user.username,
-        fullName: user.fullName || user.username,
-        companyName: user.companyName || '',
-        displayName: user.companyName || user.fullName || user.username,
-        displaySecondary: user.companyName ? `${user.fullName || user.username} (${user.username})` : user.username
-      }))
-      .sort((a, b) => a.displayName.localeCompare(b.displayName));
-  }, [allUsers]);
 
-  const usersByAffiliation = useMemo(() => {
-    if (!allUsers || allUsers.length === 0) return {};
-    const grouped = {};
-    allUsers.forEach(user => {
-      const affiliation = user.affiliation || 'Not Affiliated';
-      if (!grouped[affiliation]) grouped[affiliation] = [];
-      grouped[affiliation].push({
-        id: user.id,
-        username: user.username,
-        fullName: user.fullName || user.username,
-        displayName: user.fullName || user.username,
-        displaySecondary: user.username
-      });
-    });
-    // sort each group by displayName
-    Object.keys(grouped).forEach(key => grouped[key].sort((a,b) => a.displayName.localeCompare(b.displayName)));
-    return grouped;
-  }, [allUsers]);
-
-  const availableAffiliations = useMemo(() => Object.keys(usersByAffiliation).sort(), [usersByAffiliation]);
 
   useEffect(() => {
     // For non-admin/manager, default Assigned to to current user (uploader)
@@ -153,8 +120,34 @@ const NewInventoryForm = ({ allUsers }) => {
     if (reClass === "Commercial") {
       setIsNetMetered(false);
       setIsOwnUse(false);
+      setIsDer(false);
     }
   }, [reClass]);
+
+  // Conditional logic for DER and Own Use based on net metering
+  useEffect(() => {
+    if (reClass === "Non-Commercial") {
+      if (isNetMetered === true) {
+        // If net metered is Yes, disable DER and Own Use, set them to No
+        setIsDer(false);
+        setIsOwnUse(false);
+        setEstablishmentType("");
+      }
+      // If net metered is No, DER will be enabled
+    }
+  }, [isNetMetered, reClass]);
+
+  // Handle DER selection effect on Own Use
+  useEffect(() => {
+    if (reClass === "Non-Commercial" && isNetMetered === false) {
+      if (isDer === true) {
+        // If DER is Yes, disable Own Use and set to No
+        setIsOwnUse(false);
+        setEstablishmentType("");
+      }
+      // If DER is No, Own Use will be enabled
+    }
+  }, [isDer, reClass, isNetMetered]);
 
   useEffect(() => {
     if (isSuccess) {
@@ -179,6 +172,8 @@ const NewInventoryForm = ({ allUsers }) => {
       setHydropower([]);
       setIsOwnUse(null);
       setIsNetMetered(null);
+      setIsDer(null);
+      setEstablishmentType("");
       setmyUploads("");
       setFilesCount(null);
       // Reset FIT fields
@@ -187,9 +182,17 @@ const NewInventoryForm = ({ allUsers }) => {
       setFitRate("");
       setFitRef("");
       setFitStatus("");
-      navigate("/dashboard/inventories");
+      // Stay on the new inventory form instead of redirecting to map dashboard
+      // navigate("/dashboard/inventories");
     }
-  }, [isSuccess, navigate, years]);
+  }, [isSuccess, years]);
+
+  // Reset province when region changes
+  useEffect(() => {
+    if (region) {
+      setProvince(''); // Reset province when region changes
+    }
+  }, [region]);
 
   const onOwnerNameChanged = (e) => setOwnerName(e.target.value);
   const onCountryChanged = (e) => setCountry(e.target.value);
@@ -231,18 +234,190 @@ const NewInventoryForm = ({ allUsers }) => {
   const onYearEstChanged = (e) => setYearEst(e.target.value);
 
   const reverseGeoCoding = async (coordinates) => {
-    const data = await (
-      await fetch(GEOCODE_URL + `${coordinates.lng},${coordinates.lat}`)
-    ).json();
-    if (data.address !== undefined) {
-      setBrgy(data.address.Neighborhood);
-      setCity(data.address.City);
-      setProvince(data.address.Subregion);
-      setRegion(data.address.Region);
-      setCountry(data.address.CntryName);
-      setLat(coordinates?.lat);
-      setLng(coordinates?.lng);
-      setCoordinates([coordinates?.lng, coordinates?.lat]);
+    console.log('=== REVERSE GEOCODING STARTED ===');
+    console.log('reverseGeoCoding called with:', coordinates);
+    console.log('GEOCODE_URL:', GEOCODE_URL);
+    
+    // Optimistically set coords first to avoid flicker/revert
+    setLat(coordinates?.lat);
+    setLng(coordinates?.lng);
+    setCoordinates([coordinates?.lng, coordinates?.lat]);
+    
+    try {
+      const fullUrl = GEOCODE_URL + `${coordinates.lng},${coordinates.lat}`;
+      console.log('Making geocoding request to:', fullUrl);
+      console.log('Coordinates being sent - Longitude:', coordinates.lng, 'Latitude:', coordinates.lat);
+      console.log('Coordinate format check - coordinates.lng type:', typeof coordinates.lng, 'coordinates.lat type:', typeof coordinates.lat);
+      
+      const resp = await fetch(fullUrl);
+      console.log('Geocoding response status:', resp.status);
+      console.log('Geocoding response headers:', resp.headers);
+      
+      if (!resp.ok) {
+        console.error('Geocoding request failed:', resp.status, resp.statusText);
+        console.log('Trying fallback geocoding service...');
+        
+        // Try OpenStreetMap Nominatim as fallback
+        const fallbackUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${coordinates.lat}&lon=${coordinates.lng}&zoom=18&addressdetails=1`;
+        console.log('Trying fallback URL:', fallbackUrl);
+        
+        try {
+          const fallbackResp = await fetch(fallbackUrl);
+          if (fallbackResp.ok) {
+            const fallbackData = await fallbackResp.json();
+            console.log('Fallback geocoding response:', fallbackData);
+            
+            if (fallbackData && fallbackData.address) {
+              // Map OpenStreetMap fields to our expected format
+              const fallbackCity = fallbackData.address.city || 
+                                  fallbackData.address.town || 
+                                  fallbackData.address.municipality ||
+                                  fallbackData.address.village ||
+                                  '';
+              
+              const fallbackBarangay = fallbackData.address.suburb || 
+                                      fallbackData.address.neighbourhood ||
+                                      fallbackData.address.district ||
+                                      '';
+              
+              const fallbackRegion = fallbackData.address.state || 
+                                    fallbackData.address.province ||
+                                    '';
+              
+              if (fallbackCity) {
+                setCity(fallbackCity);
+                console.log('City set from fallback service:', fallbackCity);
+              }
+              if (fallbackBarangay) {
+                setBrgy(fallbackBarangay);
+                console.log('Barangay set from fallback service:', fallbackBarangay);
+              }
+              if (fallbackRegion) {
+                // Try to match with our predefined regions
+                const allRegions = getAllRegionNames();
+                const matchedRegion = allRegions.find(region => 
+                  region.toLowerCase().includes(fallbackRegion.toLowerCase()) ||
+                  fallbackRegion.toLowerCase().includes(region.toLowerCase())
+                );
+                
+                if (matchedRegion) {
+                  setRegion(matchedRegion);
+                  console.log('Region set from fallback service:', matchedRegion);
+                  setProvince('');
+                }
+              }
+              
+              setCountry(fallbackData.address.country || 'Philippines');
+              console.log('Country set from fallback service:', fallbackData.address.country || 'Philippines');
+              
+              console.log('=== FALLBACK GEOCODING COMPLETED SUCCESSFULLY ===');
+              return; // Exit early since we got data from fallback
+            }
+          }
+        } catch (fallbackError) {
+          console.error('Fallback geocoding also failed:', fallbackError);
+        }
+        
+        return;
+      }
+      
+      const data = await resp.json();
+      console.log('Geocoding response data:', data);
+      
+      if (data && data.address) {
+        console.log('Address data received:', data.address);
+        console.log('All available address fields:', Object.keys(data.address));
+        console.log('Full address object:', JSON.stringify(data.address, null, 2));
+        
+        // Try multiple possible field names for barangay/neighborhood
+        const barangay = data.address.Neighborhood || 
+                        data.address.SubNeighborhood || 
+                        data.address.District || 
+                        data.address.Area || 
+                        data.address.Locality ||
+                        data.address.Barangay ||
+                        data.address.Community ||
+                        '';
+        
+        // Try multiple possible field names for city/municipality
+        const city = data.address.City || 
+                    data.address.Municipality || 
+                    data.address.Locality || 
+                    data.address.PlaceName ||
+                    data.address.MetroArea ||
+                    data.address.UrbanArea ||
+                    '';
+        
+        // Additional fallback: try to extract from other fields
+        if (!city && data.address.LongLabel) {
+          // Sometimes the full address is in LongLabel
+          const longLabel = data.address.LongLabel;
+          console.log('Trying to extract city from LongLabel:', longLabel);
+          
+          // Look for common city indicators in the long label
+          if (longLabel.includes(', ')) {
+            const parts = longLabel.split(', ');
+            // Usually city is the second or third part
+            if (parts.length >= 2) {
+              const potentialCity = parts[1] || parts[0];
+              if (potentialCity && !potentialCity.includes('Region') && !potentialCity.includes('Province')) {
+                console.log('Extracted city from LongLabel:', potentialCity);
+                setCity(potentialCity);
+              }
+            }
+          }
+        }
+        
+        console.log('Extracted barangay:', barangay);
+        console.log('Extracted city:', city);
+        
+        // Set barangay and city if we found them
+        if (barangay) {
+          setBrgy(barangay);
+          console.log('Barangay set to:', barangay);
+        }
+        if (city) {
+          setCity(city);
+          console.log('City set to:', city);
+        }
+        
+        // Map geocoded region to our predefined regions
+        const geocodedRegion = data.address.Subregion;
+        if (geocodedRegion) {
+          const allRegions = getAllRegionNames();
+          const matchedRegion = allRegions.find(region => 
+            region.toLowerCase().includes(geocodedRegion.toLowerCase()) ||
+            geocodedRegion.toLowerCase().includes(region.toLowerCase())
+          );
+          
+          if (matchedRegion) {
+            setRegion(matchedRegion);
+            console.log('Region set to:', matchedRegion);
+            // Reset province when region changes
+            setProvince('');
+          } else {
+            // If no match found, try to set a default based on coordinates
+            // For now, we'll leave it as is and let user select manually
+            console.log('No region match found for:', geocodedRegion);
+          }
+        }
+        
+        setCountry(data.address.CntryName);
+        console.log('Country set to:', data.address.CntryName);
+        
+        console.log('=== REVERSE GEOCODING COMPLETED SUCCESSFULLY ===');
+      } else {
+        console.log('No address data in response:', data);
+      }
+    } catch (e) {
+      console.error('=== REVERSE GEOCODING FAILED ===');
+      console.error('Geocoding error:', e);
+      console.error('Error details:', {
+        message: e.message,
+        stack: e.stack,
+        name: e.name
+      });
+      // ignore geocode errors; coords already set
     }
   };
 
@@ -269,9 +444,8 @@ const NewInventoryForm = ({ allUsers }) => {
     data.append("user", userId);
     data.append("type", type);
     // Send coordinates as GeoJSON for backend detection!
-    data.append("coordinates[type]", "Point");
-    data.append("coordinates[coordinates][]", lng);
-    data.append("coordinates[coordinates][]", lat);
+    // Send coordinates in a format the backend extracts reliably
+    data.append("coordinates", JSON.stringify([parseFloat(lng), parseFloat(lat)]));
     data.append("properties[ownerName]", ownerName);
     data.append("properties[reCat]", reCat);
     data.append("properties[reClass]", reClass);
@@ -284,6 +458,8 @@ const NewInventoryForm = ({ allUsers }) => {
     data.append("properties[address][brgy]", brgy);
     if (isOwnUse !== null) data.append("properties[ownUse]", isOwnUse ? "Yes" : "No");
     if (isNetMetered !== null) data.append("properties[isNetMetered]", isNetMetered ? "Yes" : "No");
+    if (isDer !== null) data.append("properties[isDer]", isDer ? "Yes" : "No");
+    if (establishmentType) data.append("properties[establishmentType]", establishmentType);
     
     // Add FIT information when Commercial
     if (reClass === "Commercial") {
@@ -513,32 +689,10 @@ const NewInventoryForm = ({ allUsers }) => {
                 value={userId || ""}
                 onChange={onUserIdChanged}
               >
-                {/* Installers section */}
-                {installersGroup.length > 0 && (
-                  <>
-                    <MenuItem disabled key="installers-header" sx={{ backgroundColor: '#e3f2fd', fontWeight: 'bold', borderBottom: '1px solid #2196f3', color: '#1976d2' }}>
-                      🏗️ Installers ({installersGroup.length} companies)
-                    </MenuItem>
-                    {installersGroup.map(u => (
-                      <MenuItem key={`installer-${u.id}`} value={u.id} sx={{ pl: 3 }}>
-                        <ListItemText primary={u.displayName} secondary={u.displaySecondary} />
-                      </MenuItem>
-                    ))}
-                    <Divider sx={{ my: 1 }} />
-                  </>
-                )}
-                {/* Affiliations sections */}
-                {availableAffiliations.map(aff => (
-                  <React.Fragment key={`aff-${aff}`}>
-                    <MenuItem disabled sx={{ backgroundColor: '#f5f5f5', fontWeight: 'bold', borderBottom: '1px solid #e0e0e0', color: '#1976d2' }}>
-                      {aff} ({usersByAffiliation[aff]?.length || 0} users)
-                    </MenuItem>
-                    {(usersByAffiliation[aff] || []).map(u => (
-                      <MenuItem key={`aff-${aff}-${u.id}`} value={u.id} sx={{ pl: 3 }}>
-                        <ListItemText primary={u.displayName} secondary={u.displaySecondary} />
-                      </MenuItem>
-                    ))}
-                  </React.Fragment>
+                {allUsers?.map((user) => (
+                  <MenuItem key={user.id} value={user.id}>
+                    {user.fullName || user.username}
+                  </MenuItem>
                 ))}
               </TextField>
             ) : (
@@ -687,6 +841,54 @@ const NewInventoryForm = ({ allUsers }) => {
                   Commercial RE systems are automatically set as not net-metered.
                 </Alert>
               )}
+
+              {/* DER Field - Only for Non-Commercial, appears after Net Metered */}
+              {reClass === "Non-Commercial" && (
+                <>
+                  <Typography sx={{ fontWeight: 700, mb: 1 }} component="label">
+                    Is DER (Distributed Energy Resource)?
+                  </Typography>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "row",
+                      alignItems: "center",
+                      mb: 2,
+                    }}
+                  >
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={isDer === true}
+                          onChange={() => setIsDer(true)}
+                          color="primary"
+                          disabled={isNetMetered === true} // Disable when net metered is Yes
+                        />
+                      }
+                      label="Yes"
+                      sx={{ mr: 2, ml: 1 }}
+                    />
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={isDer === false}
+                          onChange={() => setIsDer(false)}
+                          color="primary"
+                          disabled={isNetMetered === true} // Disable when net metered is Yes
+                        />
+                      }
+                      label="No"
+                      sx={{ ml: 2 }}
+                    />
+                  </Box>
+                  {isNetMetered === true && (
+                    <Alert severity="info" sx={{ mb: 2 }}>
+                      DER is automatically set to "No" when net metered is "Yes".
+                    </Alert>
+                  )}
+                </>
+              )}
+
               <Typography sx={{ fontWeight: 700, mb: 1 }} component="label">
                 Own use?
               </Typography>
@@ -704,7 +906,7 @@ const NewInventoryForm = ({ allUsers }) => {
                       checked={isOwnUse === true}
                       onChange={() => setIsOwnUse(true)}
                       color="primary"
-                      disabled={reClass === "Commercial"} // Disable when Commercial
+                      disabled={reClass === "Commercial" || (reClass === "Non-Commercial" && isNetMetered === true) || (reClass === "Non-Commercial" && isDer === true)} // Disable when Commercial, or when net metered is Yes, or when DER is Yes
                     />
                   }
                   label="Yes"
@@ -716,7 +918,7 @@ const NewInventoryForm = ({ allUsers }) => {
                       checked={isOwnUse === false}
                       onChange={() => setIsOwnUse(false)}
                       color="primary"
-                      disabled={reClass === "Commercial"} // Disable when Commercial
+                      disabled={reClass === "Commercial" || (reClass === "Non-Commercial" && isNetMetered === true) || (reClass === "Non-Commercial" && isDer === true)} // Disable when Commercial, or when net metered is Yes, or when DER is Yes
                     />
                   }
                   label="No"
@@ -727,6 +929,40 @@ const NewInventoryForm = ({ allUsers }) => {
                 <Alert severity="info" sx={{ mb: 2 }}>
                   Commercial RE systems are automatically set as not for own use.
                 </Alert>
+              )}
+              {(reClass === "Non-Commercial" && isNetMetered === true) && (
+                <Alert severity="info" sx={{ mb: 2 }}>
+                  Own Use is automatically set to "No" when net metered is "Yes".
+                </Alert>
+              )}
+              {(reClass === "Non-Commercial" && isDer === true) && (
+                <Alert severity="info" sx={{ mb: 2 }}>
+                  Own Use is automatically set to "No" when DER is "Yes".
+                </Alert>
+              )}
+
+              {/* Establishment Type - Only when Own Use is Yes and DER is No */}
+              {reClass === "Non-Commercial" && isOwnUse === true && isDer === false && (
+                <>
+                  <Typography sx={{ fontWeight: 700, mb: 1 }} component="label">
+                    Establishment Type
+                  </Typography>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    id="establishmentType"
+                    select
+                    name="establishmentType"
+                    label="Select Establishment Type"
+                    value={establishmentType || ""}
+                    onChange={(e) => setEstablishmentType(e.target.value)}
+                    sx={{ mb: 2 }}
+                  >
+                    <MenuItem value="Residential Establishment">Residential Establishment</MenuItem>
+                    <MenuItem value="Commercial Establishment">Commercial Establishment</MenuItem>
+                    <MenuItem value="Industrial Establishment">Industrial Establishment</MenuItem>
+                  </TextField>
+                </>
               )}
             </Box>
           </Box>
@@ -808,20 +1044,40 @@ const NewInventoryForm = ({ allUsers }) => {
               label="Region"
               id="region"
               name="properties.address.region"
-              type="text"
+              select
               value={region}
               onChange={onRegionChanged}
-            />
+            >
+              <MenuItem value="">
+                <em>Select Region</em>
+              </MenuItem>
+              {getAllRegionNames().map((reg, index) => (
+                <MenuItem key={index} value={reg}>
+                  {reg}
+                </MenuItem>
+              ))}
+            </TextField>
             <TextField
               fullWidth
               size="small"
               label="Province"
               id="province"
               name="properties.address.province"
-              type="text"
+              select
               value={province}
               onChange={onProvinceChanged}
-            />
+              disabled={!region}
+              helperText={!region ? 'Please select a region first' : ''}
+            >
+              <MenuItem value="">
+                <em>Select Province</em>
+              </MenuItem>
+              {region && getProvincesForRegion(region).map((prov, index) => (
+                <MenuItem key={index} value={prov}>
+                  {prov}
+                </MenuItem>
+              ))}
+            </TextField>
             <TextField
               fullWidth
               size="small"
@@ -907,52 +1163,131 @@ const NewInventoryForm = ({ allUsers }) => {
         />
 
         {/* Duplicate detection modal */}
-        <Dialog open={showDuplicateModal} onClose={handleCancel}>
-          <DialogTitle>Potential Duplicate Detected</DialogTitle>
-          <DialogContent>
-            <Alert severity="warning" sx={{ mb: 2 }}>
+        <Dialog 
+          open={showDuplicateModal} 
+          onClose={handleCancel}
+          maxWidth="md"
+          fullWidth
+        >
+          <DialogTitle sx={{ 
+            backgroundColor: 'warning.light', 
+            color: 'warning.contrastText',
+            fontWeight: 'bold',
+            fontSize: '1.25rem'
+          }}>
+            ⚠️ Potential Duplicate Detected
+          </DialogTitle>
+          <DialogContent sx={{ pt: 3 }}>
+            <Alert 
+              severity="warning" 
+              sx={{ 
+                mb: 3,
+                fontSize: '1rem',
+                '& .MuiAlert-message': {
+                  fontWeight: 500
+                }
+              }}
+            >
               There is/are technical assessment(s) within {DUPLICATE_RADIUS_METERS} meters of this location.
               <br />
-              Is this the same RE System as any of the following?
+              <strong>Is this the same RE System as any of the following?</strong>
             </Alert>
-            <List>
+            <List sx={{ mb: 2 }}>
               {potentialDuplicates.map((dup, idx) => (
-                <ListItem key={dup._id || idx}>
+                <ListItem 
+                  key={dup._id || idx}
+                  sx={{
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    borderRadius: 1,
+                    mb: 1,
+                    backgroundColor: 'background.paper'
+                  }}
+                >
                   <ListItemText
-                    primary={dup.properties?.ownerName || "Unknown"}
+                    primary={
+                      <Typography variant="h6" color="primary" sx={{ fontWeight: 'bold' }}>
+                        {dup.properties?.ownerName || "Unknown"}
+                      </Typography>
+                    }
                     secondary={
-                      <>
-                        <Typography variant="body2">
-                          <b>RE Cat:</b> {dup.properties?.reCat}
+                      <Box sx={{ mt: 1 }}>
+                        <Typography variant="body2" sx={{ mb: 0.5 }}>
+                          <strong>RE Category:</strong> {dup.properties?.reCat}
                         </Typography>
-                        <Typography variant="body2">
-                          <b>RE Class:</b> {dup.properties?.reClass}
+                        <Typography variant="body2" sx={{ mb: 0.5 }}>
+                          <strong>RE Class:</strong> {dup.properties?.reClass}
                         </Typography>
-                        <Typography variant="body2">
-                          <b>Year Est.:</b> {dup.properties?.yearEst}
+                        <Typography variant="body2" sx={{ mb: 0.5 }}>
+                          <strong>Year Established:</strong> {dup.properties?.yearEst}
                         </Typography>
-                        <Typography variant="body2">
-                          <b>Address:</b> {dup.properties?.address?.city}, {dup.properties?.address?.province}, {dup.properties?.address?.region}
+                        <Typography variant="body2" sx={{ mb: 0.5 }}>
+                          <strong>Address:</strong> {dup.properties?.address?.city}, {dup.properties?.address?.province}, {dup.properties?.address?.region}
                         </Typography>
-                        <Typography variant="body2">
-                          <b>Coordinates:</b> {dup.coordinates?.[1]}, {dup.coordinates?.[0]}
+                        <Typography variant="body2" sx={{ mb: 0.5 }}>
+                          <strong>Coordinates:</strong> {dup.coordinates?.[1]}, {dup.coordinates?.[0]}
                         </Typography>
-                      </>
+                      </Box>
                     }
                   />
                 </ListItem>
               ))}
             </List>
-            <Alert severity="info" sx={{ mt: 2 }}>
-              If you wish to proceed with creating a new inventory at this location, click "Proceed Anyway".
+            <Alert 
+              severity="info" 
+              sx={{ 
+                mt: 3,
+                mb: 1,
+                fontSize: '1rem',
+                '& .MuiAlert-message': {
+                  fontWeight: 500
+                }
+              }}
+            >
+              <strong>Warning:</strong> Creating a duplicate inventory may cause data conflicts. 
+              Consider canceling if this is the same system, or proceed only if you're certain this is a different installation.
             </Alert>
           </DialogContent>
-          <DialogActions>
-            <Button onClick={handleProceedAnyway} color="success" variant="contained">
-              Proceed Anyway
-            </Button>
-            <Button onClick={handleCancel} color="secondary" variant="outlined">
+          <DialogActions sx={{ gap: 2, p: 2, flexDirection: 'row-reverse' }}>
+            <Button 
+              onClick={handleCancel} 
+              color="error" 
+              variant="contained"
+              size="large"
+              sx={{
+                minWidth: 140,
+                fontWeight: 'bold',
+                fontSize: '1rem',
+                py: 1.5,
+                px: 3,
+                boxShadow: 3,
+                '&:hover': {
+                  boxShadow: 6,
+                  transform: 'translateY(-1px)',
+                  backgroundColor: 'error.dark'
+                }
+              }}
+            >
               Cancel
+            </Button>
+            <Button 
+              onClick={handleProceedAnyway} 
+              color="success" 
+              variant="outlined"
+              size="medium"
+              sx={{
+                minWidth: 120,
+                fontWeight: 'normal',
+                fontSize: '0.9rem',
+                py: 1,
+                px: 2,
+                '&:hover': {
+                  backgroundColor: 'success.light',
+                  color: 'success.contrastText'
+                }
+              }}
+            >
+              Proceed Anyway
             </Button>
           </DialogActions>
         </Dialog>

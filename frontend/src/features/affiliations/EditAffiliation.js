@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useUpdateAffiliationMutation, useDeleteAffiliationMutation } from './affiliationsApiSlice'
+import { useUpdateAffiliationMutation } from './affiliationsApiSlice'
 import { useNavigate } from 'react-router-dom'
 import {
     Box,
@@ -11,16 +11,10 @@ import {
     Typography,
     Switch,
     FormControlLabel,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogContentText,
-    DialogActions,
     Grid
 } from '@mui/material'
 import {
-    Save as SaveIcon,
-    Delete as DeleteIcon
+    Save as SaveIcon
 } from '@mui/icons-material'
 
 const EditAffiliation = ({ affiliation }) => {
@@ -31,18 +25,13 @@ const EditAffiliation = ({ affiliation }) => {
         error
     }] = useUpdateAffiliationMutation()
 
-    const [deleteAffiliation, {
-        isSuccess: isDelSuccess,
-        isError: isDelError,
-        error: delerror
-    }] = useDeleteAffiliationMutation()
+
 
     const navigate = useNavigate()
 
     const [name, setName] = useState(affiliation.name)
     const [code, setCode] = useState(affiliation.code)
     const [active, setActive] = useState(affiliation.active)
-    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
 
     const onNameChanged = e => setName(e.target.value)
     const onCodeChanged = e => setCode(e.target.value)
@@ -56,13 +45,10 @@ const EditAffiliation = ({ affiliation }) => {
         }
     }
 
-    const onDeleteAffiliationClicked = async () => {
-        await deleteAffiliation({ id: affiliation.id })
-        setDeleteDialogOpen(false)
-    }
 
-    const errClass = (isError || isDelError) ? "errmsg" : "offscreen"
-    const errContent = (error?.data?.message || delerror?.data?.message) ?? ''
+
+    const errClass = isError ? "errmsg" : "offscreen"
+    const errContent = error?.data?.message ?? ''
 
     return (
         <>
@@ -114,41 +100,13 @@ const EditAffiliation = ({ affiliation }) => {
                                 >
                                     Save
                                 </Button>
-                                <Button
-                                    variant="outlined"
-                                    color="error"
-                                    startIcon={<DeleteIcon />}
-                                    onClick={() => setDeleteDialogOpen(true)}
-                                    size="small"
-                                >
-                                    Delete
-                                </Button>
                             </Box>
                         </Grid>
                     </Grid>
                 </CardContent>
             </Card>
 
-            {/* Delete Confirmation Dialog */}
-            <Dialog
-                open={deleteDialogOpen}
-                onClose={() => setDeleteDialogOpen(false)}
-            >
-                <DialogTitle>Delete Affiliation</DialogTitle>
-                <DialogContent>
-                    <DialogContentText>
-                        Are you sure you want to delete "{affiliation.name}"? This action cannot be undone.
-                    </DialogContentText>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setDeleteDialogOpen(false)}>
-                        Cancel
-                    </Button>
-                    <Button onClick={onDeleteAffiliationClicked} color="error" autoFocus>
-                        Delete
-                    </Button>
-                </DialogActions>
-            </Dialog>
+
         </>
     )
 }

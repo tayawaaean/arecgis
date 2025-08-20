@@ -4,16 +4,11 @@ import { selectAllInventories } from "../inventories/inventoriesApiSlice";
 import { selectAllUsers } from "../users/usersApiSlice";
 import {
   Box, Paper, Typography, FormControl, InputLabel, Select, MenuItem,
-  Container, useTheme, Divider, Grid, Card, CardContent, Tooltip, Fade,
+  Container, useTheme, Divider, Grid, Tooltip, Fade,
   OutlinedInput, Checkbox, ListItemText, Alert, CircularProgress, Button, IconButton, Chip,
   Collapse, Accordion, AccordionSummary, AccordionDetails
 } from "@mui/material";
-import EnergySavingsLeafIcon from '@mui/icons-material/EnergySavingsLeaf';
-import ScatterPlotIcon from '@mui/icons-material/ScatterPlot';
-import NaturePeopleIcon from '@mui/icons-material/NaturePeople';
-import CloudQueueIcon from '@mui/icons-material/CloudQueue';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+
 import AirIcon from '@mui/icons-material/Air';
 import WaterIcon from '@mui/icons-material/Water';
 import GrassIcon from '@mui/icons-material/Grass';
@@ -28,6 +23,21 @@ import ChartHelpModal from "../../components/ChartHelpModal";
 const CO2_PER_KWH = 0.82;
 const COAL_PER_KWH = 0.4;
 const CO2_ABSORBED_PER_TREE_PER_YEAR = 21;
+
+// Function to format large numbers with appropriate units
+const formatLargeNumber = (num) => {
+  if (num >= 1e12) {
+    return (num / 1e12).toFixed(2) + 'T';
+  } else if (num >= 1e9) {
+    return (num / 1e9).toFixed(2) + 'B';
+  } else if (num >= 1e6) {
+    return (num / 1e6).toFixed(2) + 'M';
+  } else if (num >= 1e3) {
+    return (num / 1e3).toFixed(2) + 'K';
+  } else {
+    return num.toFixed(2);
+  }
+};
 
 const chartOptions = [
   // General/Overview Charts
@@ -358,51 +368,7 @@ const getChartSubtitle = ({
   }
 };
 
-const metricCards = [
-  {
-    label: "Total Capacity",
-    icon: <EnergySavingsLeafIcon fontSize="large" color="success" />,
-    key: "realTotalCapacity",
-    unit: "MW",
-    tooltip: "Total installed capacity (all types, MW)."
-  },
-  {
-    label: "Total Units Installed",
-    icon: <ScatterPlotIcon fontSize="large" color="info" />,
-    key: "totalUnits",
-    unit: "",
-    tooltip: "Total number of units (all types)."
-  },
-  {
-    label: "CO₂ Emissions Avoided",
-    icon: <CloudQueueIcon fontSize="large" color="primary" />,
-    key: "co2SavedKg",
-    unit: "tons",
-    tooltip: "Estimated CO₂ emissions avoided by all installations per year."
-  },
-  {
-    label: "Equivalent Trees Planted",
-    icon: <NaturePeopleIcon fontSize="large" color="success" />,
-    key: "treesEquivalent",
-    unit: "trees",
-    tooltip: "Equivalent number of trees needed to absorb the same CO₂ emissions per year."
-  },
-  {
-    label: "Coal Saved",
-    icon: <LocalShippingIcon fontSize="large" sx={{ color: "#a1887f" }} />,
-    key: "coalSavedKg",
-    unit: "tons",
-    tooltip: "Estimated coal saved (in tons) per year."
-  },
-  {
-    label: "Uptime / Operational Rate",
-    icon: <CheckCircleIcon fontSize="large" color="success" />,
-    key: "uptimeRate",
-    unit: "%",
-    tooltip: "Percentage of systems currently operational.",
-    renderValue: (val, {operationalSystems, totalSystems}) => `${val.toFixed(1)}% (${operationalSystems}/${totalSystems})`
-  }
-];
+
 
 function MultiFilter({
   chartOptions,
@@ -416,6 +382,9 @@ function MultiFilter({
   reCatOptionsFiltered,
   uploaderOptions, uploaderFilter, setUploaderFilter,
   statusFilter, setStatusFilter,
+  ownUseFilter, setOwnUseFilter,
+  netMeteredFilter, setNetMeteredFilter,
+  fitFilter, setFitFilter,
   isAdminOrManager, username,
   usersByAffiliation, availableAffiliations,
   installersGroup
@@ -558,7 +527,7 @@ function MultiFilter({
           fontSize: '0.8rem',
           lineHeight: 1.4
         }}>
-            <strong>💡 Quick Start:</strong> Select an RE Category and Chart Type. Additional filters appear below when needed.
+            <strong>💡 Quick Start:</strong> Select an RE Category and Chart Type. Data displays immediately. Use optional filters below to refine your view.
         </Typography>
       </Box>
       
@@ -1092,7 +1061,7 @@ function MultiFilter({
               </FormControl>
             </Grid>
             
-            <Grid item xs={12} md={3}>
+            <Grid item xs={12} md={4}>
               {/* Status filter */}
               <FormControl fullWidth>
                 <Tooltip 
@@ -1138,6 +1107,228 @@ function MultiFilter({
                     <MenuItem key={status} value={status}>
                       <Checkbox checked={statusFilter.includes(status)} color="primary" />
                       <ListItemText primary={status} />
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+
+            <Grid item xs={12} md={4}>
+              {/* Own Use filter */}
+              <FormControl fullWidth>
+                <Tooltip 
+                  title="Filter by whether systems are for own use or not (optional - leave unselected to show all)" 
+                  placement="top" 
+                  arrow
+                >
+                  <InputLabel id="ownuse-selector-label" sx={{ fontWeight: 500 }}>🏠 Own Use (Optional)</InputLabel>
+                </Tooltip>
+                <Select
+                  labelId="ownuse-selector-label"
+                  multiple
+                  value={ownUseFilter}
+                  onChange={e => {
+                    const value = typeof e.target.value === 'string' ? e.target.value.split(',') : e.target.value;
+                    setOwnUseFilter(value);
+                  }}
+                  input={<OutlinedInput 
+                    label="🏠 Own Use (Optional)" 
+                    placeholder="Leave unselected to show all"
+                    sx={{ 
+                      borderRadius: 2,
+                      "&:hover": { borderColor: theme.palette.primary.main }
+                    }}
+                  />}
+                  renderValue={selected => selected.join(', ')}
+                  MenuProps={{
+                    PaperProps: {
+                      style: {
+                        maxHeight: 300,
+                        width: 300,
+                      },
+                    },
+                  }}
+                  sx={{
+                    borderRadius: 2,
+                    "& .MuiOutlinedInput-root": {
+                      "&:hover fieldset": { borderColor: theme.palette.primary.main },
+                      "&.Mui-focused fieldset": { borderColor: theme.palette.primary.main }
+                    }
+                  }}
+                >
+                  {ownUseFilter.length === 0 && (
+                    <MenuItem disabled>
+                      <Typography variant="body2" color="text.secondary">
+                        No filters selected - showing all data
+                      </Typography>
+                    </MenuItem>
+                  )}
+                  <MenuItem 
+                    onClick={() => setOwnUseFilter(ownUseFilter.length === 2 ? [] : ["Yes", "No"])}
+                    sx={{ borderBottom: '1px solid #e0e0e0' }}
+                  >
+                    <Checkbox 
+                      checked={ownUseFilter.length === 2} 
+                      indeterminate={ownUseFilter.length === 1}
+                      color="primary" 
+                    />
+                    <ListItemText 
+                      primary={ownUseFilter.length === 2 ? "Deselect All" : "Select All"} 
+                      primaryTypographyProps={{ fontWeight: 'bold' }}
+                    />
+                  </MenuItem>
+                  {["Yes", "No"].map((option) => (
+                    <MenuItem key={option} value={option}>
+                      <Checkbox checked={ownUseFilter.includes(option)} color="primary" />
+                      <ListItemText primary={option} />
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+
+            <Grid item xs={12} md={4}>
+              {/* Net Metered filter */}
+              <FormControl fullWidth>
+                <Tooltip 
+                  title="Filter by whether systems are net-metered or not (optional - leave unselected to show all)" 
+                  placement="top" 
+                  arrow
+                >
+                  <InputLabel id="netmetered-selector-label" sx={{ fontWeight: 500 }}>⚡ Net Metered (Optional)</InputLabel>
+                </Tooltip>
+                <Select
+                  labelId="netmetered-selector-label"
+                  multiple
+                  value={netMeteredFilter}
+                  onChange={e => {
+                    const value = typeof e.target.value === 'string' ? e.target.value.split(',') : e.target.value;
+                    setNetMeteredFilter(value);
+                  }}
+                  input={<OutlinedInput 
+                    label="⚡ Net Metered (Optional)" 
+                    placeholder="Leave unselected to show all"
+                    sx={{ 
+                      borderRadius: 2,
+                      "&:hover": { borderColor: theme.palette.primary.main }
+                    }}
+                  />}
+                  renderValue={selected => selected.join(', ')}
+                  MenuProps={{
+                    PaperProps: {
+                      style: {
+                        maxHeight: 300,
+                        width: 300,
+                      },
+                    },
+                  }}
+                  sx={{
+                    borderRadius: 2,
+                    "& .MuiOutlinedInput-root": {
+                      "&:hover fieldset": { borderColor: theme.palette.primary.main },
+                      "&.Mui-focused fieldset": { borderColor: theme.palette.primary.main }
+                    }
+                  }}
+                >
+                  {netMeteredFilter.length === 0 && (
+                    <MenuItem disabled>
+                      <Typography variant="body2" color="text.secondary">
+                        No filters selected - showing all data
+                      </Typography>
+                    </MenuItem>
+                  )}
+                  <MenuItem 
+                    onClick={() => setNetMeteredFilter(netMeteredFilter.length === 2 ? [] : ["Yes", "No"])}
+                    sx={{ borderBottom: '1px solid #e0e0e0' }}
+                  >
+                    <Checkbox 
+                      checked={netMeteredFilter.length === 2} 
+                      indeterminate={netMeteredFilter.length === 1}
+                      color="primary" 
+                    />
+                    <ListItemText 
+                      primary={netMeteredFilter.length === 2 ? "Deselect All" : "Select All"} 
+                      primaryTypographyProps={{ fontWeight: 'bold' }}
+                    />
+                  </MenuItem>
+                  {["Yes", "No"].map((option) => (
+                    <MenuItem key={option} value={option}>
+                      <Checkbox checked={netMeteredFilter.includes(option)} color="primary" />
+                      <ListItemText primary={option} />
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+
+            <Grid item xs={12} md={4}>
+              {/* FIT filter */}
+              <FormControl fullWidth>
+                <Tooltip 
+                  title="Filter by Feed-in Tariff (FIT) phase (optional - leave unselected to show all)" 
+                  placement="top" 
+                  arrow
+                >
+                  <InputLabel id="fit-selector-label" sx={{ fontWeight: 500 }}>💰 FIT Phase (Optional)</InputLabel>
+                </Tooltip>
+                <Select
+                  labelId="fit-selector-label"
+                  multiple
+                  value={fitFilter}
+                  onChange={e => {
+                    const value = typeof e.target.value === 'string' ? e.target.value.split(',') : e.target.value;
+                    setFitFilter(value);
+                  }}
+                  input={<OutlinedInput 
+                    label="💰 FIT Phase (Optional)" 
+                    placeholder="Leave unselected to show all"
+                    sx={{ 
+                      borderRadius: 2,
+                      "&:hover": { borderColor: theme.palette.primary.main }
+                    }}
+                  />}
+                  renderValue={selected => selected.join(', ')}
+                  MenuProps={{
+                    PaperProps: {
+                      style: {
+                        maxHeight: 300,
+                        width: 300,
+                      },
+                    },
+                  }}
+                  sx={{
+                    borderRadius: 2,
+                    "& .MuiOutlinedInput-root": {
+                      "&:hover fieldset": { borderColor: theme.palette.primary.main },
+                      "&.Mui-focused fieldset": { borderColor: theme.palette.primary.main }
+                    }
+                  }}
+                >
+                  {fitFilter.length === 0 && (
+                    <MenuItem disabled>
+                      <Typography variant="body2" color="text.secondary">
+                        No filters selected - showing all data
+                      </Typography>
+                    </MenuItem>
+                  )}
+                  <MenuItem 
+                    onClick={() => setFitFilter(fitFilter.length === 4 ? [] : ["FIT1", "FIT2", "FIT3", "Non-FIT"])}
+                    sx={{ borderBottom: '1px solid #e0e0e0' }}
+                  >
+                    <Checkbox 
+                      checked={fitFilter.length === 4} 
+                      indeterminate={fitFilter.length > 0 && fitFilter.length < 4}
+                      color="primary" 
+                    />
+                    <ListItemText 
+                      primary={fitFilter.length === 4 ? "Deselect All" : "Select All"} 
+                      primaryTypographyProps={{ fontWeight: 'bold' }}
+                    />
+                  </MenuItem>
+                  {["FIT1", "FIT2", "FIT3", "Non-FIT"].map((option) => (
+                    <MenuItem key={option} value={option}>
+                      <Checkbox checked={fitFilter.includes(option)} color="primary" />
+                      <ListItemText primary={option} />
                     </MenuItem>
                   ))}
                 </Select>
@@ -1243,14 +1434,17 @@ const Charts = () => {
     ? Array.from(new Set(inventories.map(inv => inv.username).filter(Boolean)))
     : [];
 
-  // Default: show data immediately for non-admin users, require selection for admin
-  const [uploaderFilter, setUploaderFilter] = useState(isAdminOrManager ? [] : ["all"]);
+  // Default: show data immediately for all users by selecting all uploaders
+  const [uploaderFilter, setUploaderFilter] = useState(["all"]);
   const [selectedChart, setSelectedChart] = useState("totalCap");
   const [regionValue, setRegionValue] = useState("");
   const [yearValue, setYearValue] = useState("");
-  const [selectedReClass, setSelectedReClass] = useState("all");
+  const [selectedReClass, setSelectedReClass] = useState("Non-Commercial");
   const [selectedReCat, setSelectedReCat] = useState("all");
   const [statusFilter, setStatusFilter] = useState(["Operational", "For Repair", "Condemable"]);
+  const [ownUseFilter, setOwnUseFilter] = useState([]);
+  const [netMeteredFilter, setNetMeteredFilter] = useState([]);
+  const [fitFilter, setFitFilter] = useState([]);
   
   // Help modal state
   const [openHelpModal, setOpenHelpModal] = useState(false);
@@ -1275,6 +1469,9 @@ const Charts = () => {
       if (invYear !== yearValue) return false;
     }
     if (statusFilter.length > 0 && !statusFilter.includes(inv.assessment?.status)) return false;
+    if (ownUseFilter.length > 0 && !ownUseFilter.includes(inv.properties?.ownUse)) return false;
+    if (netMeteredFilter.length > 0 && !netMeteredFilter.includes(inv.properties?.isNetMetered)) return false;
+    if (fitFilter.length > 0 && !fitFilter.includes(inv.properties?.fit?.phase || "Non-FIT")) return false;
     return true;
   });
 
@@ -1314,43 +1511,132 @@ const Charts = () => {
       if (invYear !== yearValue) return false;
     }
     if (statusFilter.length > 0 && !statusFilter.includes(inv.assessment?.status)) return false;
+    if (ownUseFilter.length > 0 && !ownUseFilter.includes(inv.properties?.ownUse)) return false;
+    if (netMeteredFilter.length > 0 && !netMeteredFilter.includes(inv.properties?.isNetMetered)) return false;
+    if (fitFilter.length > 0 && !fitFilter.includes(inv.properties?.fit?.phase || "Non-FIT")) return false;
     return true;
   });
 
+  // Overview metrics calculations
+  const overviewMetrics = useMemo(() => {
+    const overviewTotalSystems = filteredInventories.length;
+    const overviewOperationalCount = filteredInventories.filter(inv => inv.assessment?.status === "Operational").length;
+    const overviewUptimeRate = overviewTotalSystems > 0 ? (overviewOperationalCount / overviewTotalSystems) * 100 : 0;
+    
+    // Calculate total capacity
+    let overviewTotalCapacity = 0;
+    filteredInventories.forEach(inv => {
+      if (inv.assessment?.capacity) {
+        overviewTotalCapacity += Number(inv.assessment.capacity) || 0;
+      }
+      // Add solar streetlights capacity
+      if (inv.assessment?.solarStreetLights && Array.isArray(inv.assessment.solarStreetLights)) {
+        inv.assessment.solarStreetLights.forEach(item => {
+          overviewTotalCapacity += (Number(item.capacity) || 0) * (Number(item.pcs) || 0);
+        });
+      }
+    });
+    
+    const overviewTotalCapacityMW = overviewTotalCapacity / 1000;
+    
+    // Estimate annual energy production (assuming 1400 kWh per kW per year)
+    const overviewEstimatedAnnualEnergy = overviewTotalCapacity * 1.4; // 1400 kWh/kW/year
+    
+    // Calculate CO2 and coal savings
+    const overviewCo2Saved = overviewEstimatedAnnualEnergy * CO2_PER_KWH;
+    const overviewCoalSaved = overviewEstimatedAnnualEnergy * COAL_PER_KWH;
+    const overviewTreesEquivalent = overviewCo2Saved / CO2_ABSORBED_PER_TREE_PER_YEAR;
+    
+    // Calculate RE category breakdown
+    const reCategoryCounts = {};
+    filteredInventories.forEach(inv => {
+      const category = inv.properties?.reCat || "Solar Energy";
+      reCategoryCounts[category] = (reCategoryCounts[category] || 0) + 1;
+    });
+    
+    const reCategoryBreakdown = {};
+    Object.keys(reCategoryCounts).forEach(category => {
+      reCategoryBreakdown[category] = overviewTotalSystems > 0 ? (reCategoryCounts[category] / overviewTotalSystems) * 100 : 0;
+    });
+    
+    return {
+      overviewTotalSystems,
+      overviewOperationalCount,
+      overviewUptimeRate,
+      overviewTotalCapacity,
+      overviewTotalCapacityMW,
+      overviewEstimatedAnnualEnergy,
+      overviewCo2Saved,
+      overviewCoalSaved,
+      overviewTreesEquivalent,
+      reCategoryBreakdown
+    };
+  }, [filteredInventories]);
+
+  // Destructure overview metrics for easy access
   const {
-    xLabels,
-    solarStTotalCap,
-    solarPowerGenTotalCap,
-    solarPumpTotalCap,
-    windTotalCap,
-    hydroTotalCap,
-    biomassTotalCap,
-    solarPowerGenTotalAEP,
-    solarStCapSeries,
-    powerGenCapSeries,
-    pumpCapSeries,
-    windCapSeries,
-    hydroCapSeries,
-    biomassCapSeries,
-    powerGenAEPSeries,
-    countSeries,
-    totalCapacitySeries,
-    realTotalCapacity,
-    totalUnits,
-    co2SavedKg,
-    coalSavedKg,
-    treesEquivalent,
-    uptimeRate,
-    totalSystems,
-    operationalSystems,
-  } = groupAggregates(filteredInventories);
+    overviewTotalSystems,
+    overviewOperationalCount,
+    overviewUptimeRate,
+    overviewTotalCapacity,
+    overviewTotalCapacityMW,
+    overviewEstimatedAnnualEnergy,
+    overviewCo2Saved,
+    overviewCoalSaved,
+    overviewTreesEquivalent,
+    reCategoryBreakdown
+  } = overviewMetrics;
+
+  // Ensure filteredInventories is valid before processing
+  const validInventories = filteredInventories || [];
+  
+  const {
+    xLabels = [],
+    solarStTotalCap = 0,
+    solarPowerGenTotalCap = 0,
+    solarPumpTotalCap = 0,
+    windTotalCap = 0,
+    hydroTotalCap = 0,
+    biomassTotalCap = 0,
+    solarPowerGenTotalAEP = 0,
+    solarStCapSeries = [],
+    powerGenCapSeries = [],
+    pumpCapSeries = [],
+    windCapSeries = [],
+    hydroCapSeries = [],
+    biomassCapSeries = [],
+    powerGenAEPSeries = [],
+    countSeries = [],
+    totalCapacitySeries = [],
+    realTotalCapacity = 0,
+    totalUnits = 0,
+    co2SavedKg = 0,
+    coalSavedKg = 0,
+    treesEquivalent = 0,
+    uptimeRate = 0,
+    totalSystems = 0,
+    operationalSystems = 0,
+  } = groupAggregates(validInventories) || {};
 
   let chartComponent = null;
+  
+  // Ensure chart data is valid before rendering
+  const safeXLabels = Array.isArray(xLabels) ? xLabels : [];
+  const safeSolarStCapSeries = Array.isArray(solarStCapSeries) ? solarStCapSeries : [];
+  const safePowerGenCapSeries = Array.isArray(powerGenCapSeries) ? powerGenCapSeries : [];
+  const safePumpCapSeries = Array.isArray(pumpCapSeries) ? pumpCapSeries : [];
+  const safeWindCapSeries = Array.isArray(windCapSeries) ? windCapSeries : [];
+  const safeHydroCapSeries = Array.isArray(hydroCapSeries) ? hydroCapSeries : [];
+  const safeBiomassCapSeries = Array.isArray(biomassCapSeries) ? biomassCapSeries : [];
+  const safePowerGenAEPSeries = Array.isArray(powerGenAEPSeries) ? powerGenAEPSeries : [];
+  const safeCountSeries = Array.isArray(countSeries) ? countSeries : [];
+  const safeTotalCapacitySeries = Array.isArray(totalCapacitySeries) ? totalCapacitySeries : [];
+  
   if (selectedChart === "solarSt") {
     chartComponent = (
       <BarChart
-        xAxis={[{ id: 'months', data: xLabels ?? [], scaleType: 'band', label: 'Month' }]}
-        series={[{ data: solarStCapSeries ?? [], label: 'Solar Streetlights/Lights (kWp)', color: theme.palette.warning.main }]}
+        xAxis={[{ id: 'months', data: safeXLabels, scaleType: 'band', label: 'Month' }]}
+        series={[{ data: safeSolarStCapSeries, label: 'Solar Streetlights/Lights (kWp)', color: theme.palette.warning.main }]}
         height={500}
         sx={{ 
           background: "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)", 
@@ -1365,8 +1651,8 @@ const Charts = () => {
   } else if (selectedChart === "powerGen") {
     chartComponent = (
       <BarChart
-        xAxis={[{ id: 'months', data: xLabels ?? [], scaleType: 'band', label: 'Month' }]}
-        series={[{ data: powerGenCapSeries ?? [], label: 'Solar Power Generation (kWp)', color: theme.palette.primary.main }]}
+        xAxis={[{ id: 'months', data: safeXLabels, scaleType: 'band', label: 'Month' }]}
+        series={[{ data: safePowerGenCapSeries, label: 'Solar Power Generation (kWp)', color: theme.palette.primary.main }]}
         height={500}
         sx={{ 
           background: "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)", 
@@ -1381,8 +1667,8 @@ const Charts = () => {
   } else if (selectedChart === "pump") {
     chartComponent = (
       <BarChart
-        xAxis={[{ id: 'months', data: xLabels ?? [], scaleType: 'band', label: 'Month' }]}
-        series={[{ data: pumpCapSeries ?? [], label: 'Solar Pump (kWp)', color: theme.palette.info.main }]}
+        xAxis={[{ id: 'months', data: safeXLabels, scaleType: 'band', label: 'Month' }]}
+        series={[{ data: safePumpCapSeries, label: 'Solar Pump (kWp)', color: theme.palette.info.main }]}
         height={500}
         sx={{ 
           background: "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)", 
@@ -1397,8 +1683,8 @@ const Charts = () => {
   } else if (selectedChart === "wind") {
     chartComponent = (
       <BarChart
-        xAxis={[{ id: 'months', data: xLabels ?? [], scaleType: 'band', label: 'Month' }]}
-        series={[{ data: windCapSeries ?? [], label: 'Wind Energy (kWp)', color: theme.palette.info.dark }]}
+        xAxis={[{ id: 'months', data: safeXLabels, scaleType: 'band', label: 'Month' }]}
+        series={[{ data: safeWindCapSeries, label: 'Wind Energy (kWp)', color: theme.palette.info.dark }]}
         height={500}
         sx={{ 
           background: "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)", 
@@ -1413,8 +1699,8 @@ const Charts = () => {
   } else if (selectedChart === "hydro") {
     chartComponent = (
       <BarChart
-        xAxis={[{ id: 'months', data: xLabels ?? [], scaleType: 'band', label: 'Month' }]}
-        series={[{ data: hydroCapSeries ?? [], label: 'Hydropower (kWp)', color: theme.palette.primary.light }]}
+        xAxis={[{ id: 'months', data: safeXLabels, scaleType: 'band', label: 'Month' }]}
+        series={[{ data: safeHydroCapSeries, label: 'Hydropower (kWp)', color: theme.palette.primary.light }]}
         height={500}
         sx={{ 
           background: "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)", 
@@ -1429,8 +1715,8 @@ const Charts = () => {
   } else if (selectedChart === "biomass") {
     chartComponent = (
       <BarChart
-        xAxis={[{ id: 'months', data: xLabels ?? [], scaleType: 'band', label: 'Month' }]}
-        series={[{ data: biomassCapSeries ?? [], label: 'Biomass (kWp)', color: theme.palette.success.dark }]}
+        xAxis={[{ id: 'months', data: safeXLabels, scaleType: 'band', label: 'Month' }]}
+        series={[{ data: safeBiomassCapSeries, label: 'Biomass (kWp)', color: theme.palette.success.dark }]}
         height={500}
         sx={{ 
           background: "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)", 
@@ -1445,8 +1731,8 @@ const Charts = () => {
   } else if (selectedChart === "powerGenAEP") {
     chartComponent = (
       <LineChart
-        xAxis={[{ id: 'months', data: xLabels ?? [], scaleType: 'point', label: 'Month' }]}
-        series={[{ data: powerGenAEPSeries ?? [], label: 'Annual Energy Production (kWh)', color: theme.palette.success.main }]}
+        xAxis={[{ id: 'months', data: safeXLabels, scaleType: 'point', label: 'Month' }]}
+        series={[{ data: safePowerGenAEPSeries, label: 'Annual Energy Production (kWh)', color: theme.palette.success.main }]}
         height={500}
         sx={{ 
           background: "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)", 
@@ -1461,8 +1747,8 @@ const Charts = () => {
   } else if (selectedChart === "count") {
     chartComponent = (
       <LineChart
-        xAxis={[{ id: 'months', data: xLabels ?? [], scaleType: 'point', label: 'Month' }]}
-        series={[{ data: countSeries ?? [], label: 'Inventories Added', color: theme.palette.error.main }]}
+        xAxis={[{ id: 'months', data: safeXLabels, scaleType: 'point', label: 'Month' }]}
+        series={[{ data: safeCountSeries, label: 'Inventories Added', color: theme.palette.error.main }]}
         height={500}
         sx={{ 
           background: "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)", 
@@ -1477,8 +1763,8 @@ const Charts = () => {
   } else if (selectedChart === "totalCap") {
     chartComponent = (
       <BarChart
-        xAxis={[{ id: 'months', data: xLabels ?? [], scaleType: 'band', label: 'Month' }]}
-        series={[{ data: totalCapacitySeries ?? [], label: "Total Capacity (kWp)", color: theme.palette.secondary.main }]}
+        xAxis={[{ id: 'months', data: safeXLabels, scaleType: 'band', label: 'Month' }]}
+        series={[{ data: safeTotalCapacitySeries, label: "Total Capacity (kWp)", color: theme.palette.secondary.main }]}
         height={500}
         sx={{ 
           background: "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)", 
@@ -1539,11 +1825,7 @@ const Charts = () => {
     realTotalCapacity,
   });
 
-  const cardFadeProps = {
-    timeout: 800,
-    in: true,
-    appear: true,
-  };
+
 
   const noData = selectedChart && filteredInventories.length === 0;
   const needUploaderSelection = isAdminOrManager && uploaderFilter.length === 0;
@@ -1629,95 +1911,298 @@ const Charts = () => {
                 </Alert>
               ) : (
             <>
-              {/* Chart Section - Show Immediately */}
+              {/* Chart and Overview Side by Side */}
               {selectedChart && (
-                <>
-                  <Typography align="center" sx={{ 
-                    mb: 2, 
-                    fontWeight: 700, 
-                    color: theme.palette.grey[800], 
-                    fontSize: 18,
-                    background: "linear-gradient(135deg, #1e293b 0%, #475569 100%)",
-                    backgroundClip: "text",
-                    WebkitBackgroundClip: "text",
-                    WebkitTextFillColor: "transparent"
-                  }}>
-                    {chartSubtitle}
-                  </Typography>
-                  
-                  {/* Enhanced Chart Container */}
-                  <Box
-                    sx={{
-                      height: { xs: 350, md: 450 },
-                      background: "linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)",
-                      borderRadius: 3,
-                      p: { xs: 1, md: 2 },
-                      border: "2px solid rgba(255, 255, 255, 0.3)",
-                      boxShadow: "inset 0 2px 8px rgba(0, 0, 0, 0.05)",
-                      position: "relative",
-                      overflow: "hidden",
-                      mb: 3,
-                      "&::before": {
-                        content: '""',
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        height: "3px",
-                        background: "linear-gradient(90deg, #3b82f6, #8b5cf6, #06b6d4)",
-                        borderRadius: "3px 3px 0 0"
-                      }
+                <Grid container spacing={2} sx={{ mb: 2 }}>
+                  {/* Chart Section - Left Side */}
+                  <Grid item xs={12} lg={8}>
+                    <Typography align="center" sx={{ 
+                      mb: 1.5, 
+                      fontWeight: 700, 
+                      color: theme.palette.grey[800], 
+                      fontSize: 18,
+                      background: "linear-gradient(135deg, #1e293b 0%, #475569 100%)",
+                      backgroundClip: "text",
+                      WebkitBackgroundClip: "text",
+                      WebkitTextFillColor: "transparent"
                     }}>
-                    {isLoading ? (
-                      <Box sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        height: "100%"
+                      {chartSubtitle}
+                    </Typography>
+                    
+                    {/* Enhanced Chart Container */}
+                    <Box
+                      sx={{
+                        height: { xs: 350, md: 420 },
+                        background: "linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)",
+                        borderRadius: 3,
+                        p: { xs: 1, md: 2 },
+                        border: "2px solid rgba(255, 255, 255, 0.3)",
+                        boxShadow: "inset 0 2px 8px rgba(0, 0, 0, 0.05)",
+                        position: "relative",
+                        overflow: "hidden",
+                        "&::before": {
+                          content: '""',
+                          position: "absolute",
+                          top: 0,
+                          left: 0,
+                          right: 0,
+                          height: "3px",
+                          background: "linear-gradient(90deg, #3b82f6, #3b82f6, #06b6d4)",
+                          borderRadius: "3px 3px 0 0"
+                        }
                       }}>
-                        <CircularProgress size={60} thickness={4} sx={{ color: theme.palette.primary.main, mb: 2 }} />
-                        <Typography variant="h6" color="text.secondary" sx={{ fontWeight: 500 }}>
-                          📊 Loading chart data...
-                        </Typography>
+                      {isLoading ? (
+                        <Box sx={{
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          height: "100%"
+                        }}>
+                          <CircularProgress size={60} thickness={4} sx={{ color: theme.palette.primary.main, mb: 2 }} />
+                          <Typography variant="h6" color="text.secondary" sx={{ fontWeight: 500 }}>
+                            📊 Loading chart data...
+                          </Typography>
+                        </Box>
+                      ) : shouldShowNoData ? (
+                        <Box sx={{
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          height: "100%",
+                          textAlign: "center",
+                          p: 3
+                        }}>
+                          <Typography variant="h6" color="text.secondary" gutterBottom>
+                            📊 No Data Available
+                          </Typography>
+                          <Typography variant="body1" color="text.secondary" paragraph>
+                            No data found for the selected chart and filters
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            Try adjusting your filters below
+                          </Typography>
+                        </Box>
+                      ) : (
+                                              <Box sx={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        {chartComponent && safeXLabels.length > 0 ? (
+                          chartComponent
+                        ) : (
+                          <Box sx={{
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            height: "100%",
+                            textAlign: "center",
+                            p: 3
+                          }}>
+                            <Typography variant="h6" color="text.secondary" gutterBottom>
+                              📊 No Chart Data Available
+                            </Typography>
+                            <Typography variant="body1" color="text.secondary" paragraph>
+                              No data found for the selected chart and filters
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              Try adjusting your filters or selecting a different chart type
+                            </Typography>
+                          </Box>
+                        )}
                       </Box>
-                    ) : shouldShowNoData ? (
-                      <Box sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        height: "100%",
-                        textAlign: "center",
-                        p: 3
+                      )}
+                    </Box>
+                  </Grid>
+
+                  {/* Overview Section - Right Side */}
+                  <Grid item xs={12} lg={4}>
+                    <Typography variant="h6" sx={{ 
+                      mb: 1.5, 
+                      fontWeight: 600, 
+                      color: theme.palette.grey[800],
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1
+                    }}>
+                      📊 System Overview
+                    </Typography>
+                    
+                    <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1.5 }}>
+                      {/* Total Systems */}
+                      <Paper elevation={3} sx={{
+                        p: 2,
+                        borderRadius: 3,
+                        background: "linear-gradient(135deg, #ffffff 0%, #fafafa 100%)",
+                        border: "1px solid rgba(0, 0, 0, 0.08)",
+                        textAlign: 'center',
+                        transition: 'all 0.2s ease',
+                        '&:hover': {
+                          transform: 'translateY(-2px)',
+                          boxShadow: '0 8px 25px rgba(0, 0, 0, 0.12)',
+                          border: "1px solid rgba(0, 0, 0, 0.12)"
+                        }
                       }}>
-                        <Typography variant="h6" color="text.secondary" gutterBottom>
-                          📊 No Data Available
+                        <Typography variant="h3" sx={{ 
+                          fontWeight: 800, 
+                          color: theme.palette.grey[800], 
+                          mb: 1,
+                          fontSize: { xs: '1.8rem', md: '2.2rem' }
+                        }}>
+                          {overviewTotalSystems.toLocaleString()}
                         </Typography>
-                        <Typography variant="body1" color="text.secondary" paragraph>
-                          No data found for the selected chart and filters
+                        <Typography variant="h6" color="text.primary" sx={{ 
+                          fontWeight: 600, 
+                          mb: 0.5,
+                          fontSize: { xs: '0.9rem', md: '1rem' }
+                        }}>
+                          Total Systems
                         </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          Try adjusting your filters below
+                        <Typography variant="body2" color="text.secondary" sx={{ 
+                          fontWeight: 500,
+                          fontSize: { xs: '0.75rem', md: '0.8rem' }
+                        }}>
+                          {overviewOperationalCount.toLocaleString()} Operational
                         </Typography>
-                      </Box>
-                    ) : (
-                      <Box sx={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        {chartComponent}
-                      </Box>
-                    )}
-                  </Box>
-                </>
+                      </Paper>
+
+                      {/* Total Capacity */}
+                      <Paper elevation={3} sx={{
+                        p: 2,
+                        borderRadius: 3,
+                        background: "linear-gradient(135deg, #ffffff 0%, #fafafa 100%)",
+                        border: "1px solid rgba(0, 0, 0, 0.08)",
+                        textAlign: 'center',
+                        transition: 'all 0.2s ease',
+                        '&:hover': {
+                          transform: 'translateY(-2px)',
+                          boxShadow: '0 8px 25px rgba(0, 0, 0, 0.12)',
+                          border: "1px solid rgba(0, 0, 0, 0.12)"
+                        }
+                      }}>
+                        <Typography variant="h3" sx={{ 
+                          fontWeight: 800, 
+                          color: theme.palette.grey[800], 
+                          mb: 1,
+                          fontSize: { xs: '1.8rem', md: '2.2rem' }
+                        }}>
+                          {formatLargeNumber(overviewTotalCapacity)}
+                        </Typography>
+                        <Typography variant="h6" color="text.primary" sx={{ 
+                          fontWeight: 600, 
+                          mb: 0.5,
+                          fontSize: { xs: '0.9rem', md: '1rem' }
+                        }}>
+                          Total Capacity
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary" sx={{ 
+                          fontWeight: 500,
+                          fontSize: { xs: '0.75rem', md: '0.8rem' }
+                        }}>
+                          {formatLargeNumber(overviewTotalCapacityMW)} MW
+                        </Typography>
+                      </Paper>
+
+                      {/* Annual Energy */}
+                      <Paper elevation={3} sx={{
+                        p: 2,
+                        borderRadius: 3,
+                        background: "linear-gradient(135deg, #ffffff 0%, #fafafa 100%)",
+                        border: "1px solid rgba(0, 0, 0, 0.08)",
+                        textAlign: 'center',
+                        transition: 'all 0.2s ease',
+                        '&:hover': {
+                          transform: 'translateY(-2px)',
+                          boxShadow: '0 8px 25px rgba(0, 0, 0, 0.12)',
+                          border: "1px solid rgba(0, 0, 0, 0.12)"
+                        }
+                      }}>
+                        <Typography variant="h3" sx={{ 
+                          fontWeight: 800, 
+                          color: theme.palette.grey[800], 
+                          mb: 1,
+                          fontSize: { xs: '1.8rem', md: '2.2rem' }
+                        }}>
+                          {formatLargeNumber(overviewEstimatedAnnualEnergy)}
+                        </Typography>
+                        <Typography variant="h6" color="text.primary" sx={{ 
+                          fontWeight: 600, 
+                          mb: 0.5,
+                          fontSize: { xs: '0.9rem', md: '1rem' }
+                        }}>
+                          Annual Energy
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary" sx={{ 
+                          fontWeight: 500,
+                          fontSize: { xs: '0.75rem', md: '0.8rem' }
+                        }}>
+                          {formatLargeNumber(overviewEstimatedAnnualEnergy / 1000)} MWh
+                        </Typography>
+                      </Paper>
+
+                      {/* CO2 Saved */}
+                      <Paper elevation={3} sx={{
+                        p: 2,
+                        borderRadius: 3,
+                        background: "linear-gradient(135deg, #ffffff 0%, #fafafa 100%)",
+                        border: "1px solid rgba(0, 0, 0, 0.08)",
+                        textAlign: 'center',
+                        transition: 'all 0.2s ease',
+                        '&:hover': {
+                          transform: 'translateY(-2px)',
+                          boxShadow: '0 8px 25px rgba(0, 0, 0, 0.12)',
+                          border: "1px solid rgba(0, 0, 0, 0.12)"
+                        }
+                      }}>
+                        <Typography variant="h3" sx={{ 
+                          fontWeight: 800, 
+                          color: theme.palette.grey[800], 
+                          mb: 1,
+                          fontSize: { xs: '1.8rem', md: '2.2rem' }
+                        }}>
+                          {formatLargeNumber(overviewCo2Saved)}
+                        </Typography>
+                        <Typography variant="h6" color="text.primary" sx={{ 
+                          fontWeight: 600, 
+                          mb: 0.5,
+                          fontSize: { xs: '0.9rem', md: '1rem' }
+                        }}>
+                          CO₂ Emissions Saved
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary" sx={{ 
+                          fontWeight: 500,
+                          fontSize: { xs: '0.75rem', md: '0.8rem' }
+                        }}>
+                          {formatLargeNumber(overviewTreesEquivalent)} trees equivalent
+                        </Typography>
+                      </Paper>
+                    </Box>
+                  </Grid>
+                </Grid>
               )}
             </>
           )}
+
+          {/* Informational Note */}
+          <Box sx={{ 
+            mb: 1.5, 
+            p: 1.5, 
+            borderRadius: 2, 
+            backgroundColor: 'rgba(25, 118, 210, 0.08)', 
+            border: '1px solid rgba(25, 118, 210, 0.2)',
+            textAlign: 'center'
+          }}>
+            <Typography variant="body2" color="primary.main" sx={{ fontWeight: 500 }}>
+              ℹ️ System Overview displays <strong>Non-Commercial</strong> renewable energy data by default. 
+              Use the filters below to view Commercial data or adjust other parameters.
+            </Typography>
+          </Box>
 
           {/* Collapsible Filters */}
           <MultiFilter
             chartOptions={chartOptions}
             selectedChart={selectedChart}
             setSelectedChart={setSelectedChart}
-            showOtherFilters={!!selectedChart && (isAdminOrManager ? (uploaderFilter.length === 0 || uploaderFilter.includes("all") ? true : uploaderFilter.length > 0) : true)}
+            showOtherFilters={!!selectedChart}
             regionOptions={regionOptions}
             regionValue={regionValue}
             setRegionValue={setRegionValue}
@@ -1735,6 +2220,12 @@ const Charts = () => {
             setUploaderFilter={setUploaderFilter}
             statusFilter={statusFilter}
             setStatusFilter={setStatusFilter}
+            ownUseFilter={ownUseFilter}
+            setOwnUseFilter={setOwnUseFilter}
+            netMeteredFilter={netMeteredFilter}
+            setNetMeteredFilter={setNetMeteredFilter}
+            fitFilter={fitFilter}
+            setFitFilter={setFitFilter}
             isAdminOrManager={isAdminOrManager}
             username={username}
             usersByAffiliation={usersByAffiliation}
@@ -1743,7 +2234,7 @@ const Charts = () => {
           />
 
           {/* Quick Reset Button */}
-          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 1, mb: 2 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 1, mb: 1.5 }}>
             <Button
               variant="outlined"
               size="small"
@@ -1751,7 +2242,7 @@ const Charts = () => {
                 setSelectedChart("totalCap");
                 setRegionValue("");
                 setYearValue("");
-                setSelectedReClass("all");
+                setSelectedReClass("Non-Commercial");
                 setSelectedReCat("all");
                 setUploaderFilter(isAdminOrManager ? [] : ["all"]);
                 setStatusFilter(["Operational", "For Repair", "Condemable"]);
@@ -1773,107 +2264,7 @@ const Charts = () => {
             </Button>
           </Box>
 
-          {/* Compact Metrics Section */}
-          {selectedChart && !needUploaderSelection && !shouldShowNoData && (
-            <>
-                  <Divider sx={{ 
-                my: 3, 
-                height: 1,
-                    background: "linear-gradient(90deg, #e2e8f0, #cbd5e1, #e2e8f0)",
-                    borderRadius: 1
-                  }} />
-                  
-              <Typography variant="h6" align="center" sx={{ 
-                mb: 3, 
-                    fontWeight: 600, 
-                    color: theme.palette.grey[700],
-                fontSize: 18
-                  }}>
-                📊 Key Metrics
-                  </Typography>
-                  
-              <Grid container spacing={2} justifyContent="center" sx={{ mb: 2 }}>
-                {metricCards.slice(0, 4).map((card, i) => (
-                  <Grid item xs={6} sm={3} key={card.label}>
-                    <Fade {...cardFadeProps} style={{ transitionDelay: `${i * 80}ms` }}>
-                          <Tooltip title={card.tooltip} placement="top" arrow>
-                            <Card
-                          elevation={3}
-                              sx={{
-                            minHeight: 120,
-                            borderRadius: 3,
-                                display: "flex",
-                                flexDirection: "column",
-                                alignItems: "center",
-                                background: "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)",
-                            boxShadow: "0 4px 16px rgba(0, 0, 0, 0.06)",
-                            border: "1px solid rgba(255, 255, 255, 0.3)",
-                            transition: "all 0.2s ease",
-                                "&:hover": {
-                              transform: "translateY(-4px)",
-                              boxShadow: "0 8px 24px rgba(0, 0, 0, 0.1)"
-                                }
-                              }}
-                            >
-                              <CardContent sx={{ 
-                                width: "100%", 
-                                textAlign: "center", 
-                            p: 2,
-                                display: "flex",
-                                flexDirection: "column",
-                                justifyContent: "center",
-                                height: "100%"
-                              }}>
-                                <Box sx={{ 
-                                  display: "flex", 
-                                  justifyContent: "center", 
-                              mb: 1,
-                              color: theme.palette.primary.main,
-                              '& svg': { fontSize: '2rem' }
-                                }}>
-                                  {card.icon}
-                                </Box>
-                            <Typography variant="caption" sx={{ 
-                                  fontWeight: 600, 
-                                  color: theme.palette.grey[700], 
-                              fontSize: 11,
-                              mb: 1,
-                              lineHeight: 1.2
-                                }}>
-                                  {card.label}
-                                </Typography>
-                            <Typography variant="h6" sx={{ 
-                              fontWeight: 700, 
-                                  background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
-                                  backgroundClip: "text",
-                                  WebkitBackgroundClip: "text",
-                                  WebkitTextFillColor: "transparent",
-                              fontSize: "1.1rem"
-                                }}>
-                                  {card.key === "uptimeRate"
-                                    ? (card.renderValue
-                                        ? card.renderValue(uptimeRate, { operationalSystems, totalSystems })
-                                        : `${uptimeRate.toFixed(1)}%`)
-                                    : numberFormat(
-                                        card.key === "realTotalCapacity" ? realTotalCapacity :
-                                        card.key === "totalUnits" ? totalUnits :
-                                        card.key === "coalSavedKg" ? coalSavedKg :
-                                        card.key === "co2SavedKg" ? co2SavedKg :
-                                        card.key === "treesEquivalent" ? treesEquivalent :
-                                        card.key === "uptimeRate" ? uptimeRate : 0,
-                                        card.unit
-                                      )
-                                  }
-                                </Typography>
-                              </CardContent>
-                            </Card>
-                          </Tooltip>
-                        </Fade>
-                      </Grid>
-                    ))}
-                  </Grid>
-            </>
-          )}
+          
         </Paper>
       </Box>
       

@@ -121,34 +121,10 @@ const updateAffiliation = async (req, res) => {
     res.json({ message: `${updatedAffiliation.name} updated` })
 }
 
-// @desc Delete an affiliation
-// @route DELETE /affiliations
-// @access Private
-const deleteAffiliation = async (req, res) => {
-    const { id } = req.body
-
-    // Confirm data
-    if (!id) {
-        return res.status(400).json({ message: 'Affiliation ID required' })
-    }
-
-    // Does the affiliation exist to delete?
-    const affiliation = await Affiliation.findById(id).exec()
-
-    if (!affiliation) {
-        return res.status(400).json({ message: 'Affiliation not found' })
-    }
-
-    const result = await affiliation.deleteOne()
-
-    const reply = `Affiliation '${result.name}' with ID ${result._id} deleted`
-
-    res.json(reply)
-}
+// Delete functionality removed - affiliations can only be set to active/inactive
 
 module.exports = {
     getAllAffiliations,
     createNewAffiliation,
-    updateAffiliation,
-    deleteAffiliation
+    updateAffiliation
 };
