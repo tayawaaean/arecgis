@@ -30,6 +30,10 @@ import {
   Alert,
   Paper,
   Divider,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem as MuiMenuItem,
 } from '@mui/material'
 import {
   Upload as UploadFileIcon,
@@ -450,6 +454,13 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
       setIsOwnUse("No");
     }
   }, [reClass]);
+
+  // Clear establishment type when solar power generation is selected to prevent conflicts
+  useEffect(() => {
+    if (reCat === "Solar Energy" && establishmentType) {
+      setEstablishmentType("");
+    }
+  }, [reCat, establishmentType]);
 
   const openDelAlert = (index) => {
     setDelAlert({ bool: true, value: index })
@@ -1420,32 +1431,38 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
                   </Alert>
                 )}
 
-                {/* Establishment Type - Only when Own Use is Yes and DER is No */}
-                {reClass === "Non-Commercial" && isOwnUse === "Yes" && isDer === "No" && (
-                  <>
-                    <Typography sx={{ fontWeight: 700, mb: 1 }} component="label">
+                {/* Establishment Type - Only when Own Use is Yes and DER is No, but NOT for Solar Power Generation */}
+                {reClass === "Non-Commercial" && isOwnUse === true && isDer === false && reCat !== "Solar Energy" && (
+                  <Box sx={{ mb: 3 }}>
+                    <Typography sx={{ fontStyle: 'italic', mb: 2 }} component="h1" variant="subtitle2">
                       Establishment Type
                     </Typography>
-                    <TextField
-                      fullWidth
-                      size="small"
-                      id="establishmentType"
-                      select
-                      name="establishmentType"
-                      label="Select Establishment Type"
-                      value={establishmentType || ""}
-                      onChange={(e) => {
-                        if (isReadOnly) return;
-                        setEstablishmentType(e.target.value);
-                      }}
-                      disabled={isReadOnly}
-                      sx={{ mb: 2 }}
-                    >
-                      <MenuItem value="Residential Establishment">Residential Establishment</MenuItem>
-                      <MenuItem value="Commercial Establishment">Commercial Establishment</MenuItem>
-                      <MenuItem value="Industrial Establishment">Industrial Establishment</MenuItem>
-                    </TextField>
-                  </>
+                    <FormControl fullWidth size="small">
+                      <InputLabel id="establishmentType-label">Select Establishment Type</InputLabel>
+                      <Select
+                        id="establishmentType"
+                        name="establishmentType"
+                        label="Select Establishment Type"
+                        value={establishmentType || ""}
+                        onChange={(e) => setEstablishmentType(e.target.value)}
+                      >
+                        <MuiMenuItem value="Residential Establishment">Residential Establishment</MuiMenuItem>
+                        <MuiMenuItem value="Commercial Establishment">Commercial Establishment</MuiMenuItem>
+                        <MuiMenuItem value="Industrial Establishment">Industrial Establishment</MuiMenuItem>
+                      </Select>
+                    </FormControl>
+                  </Box>
+                )}
+                
+                {/* Info message for Solar Power Generation - Establishment Type is handled by subcategories */}
+                {reClass === "Non-Commercial" && isOwnUse === true && isDer === false && reCat === "Solar Energy" && (
+                  <Box sx={{ mb: 3 }}>
+                    <Alert severity="info">
+                      <Typography variant="body2">
+                        <strong>Note:</strong> For Solar Power Generation systems, establishment type information is captured through the detailed subcategories (Residential/Commercial/Industrial rooftop, etc.) rather than a separate establishment type field.
+                      </Typography>
+                    </Alert>
+                  </Box>
                 )}
               </Box>
             </Box>
@@ -1636,7 +1653,7 @@ const EditInventoryForm = ({ reItems, allUsers }) => {
               />
             </Box>
             {reCat === null ? null :
-              reCat === 'Solar Energy' ? <EditSolar setEditSolar={setEditSolar} reItems={reItems} allUsers={allUsers} reClass={reClass} readOnly={isReadOnly} /> :
+              reCat === 'Solar Energy' ? <EditSolar setEditSolar={setEditSolar} reItems={reItems} allUsers={allUsers} reClass={reClass} readOnly={isReadOnly} isNetMetered={isNetMetered} isDer={isDer} isOwnUse={isOwnUse} /> :
                 reCat === 'Wind Energy' ? <EditWind setEditWind={setEditWind} reItems={reItems} allUsers={allUsers} reClass={reClass} readOnly={isReadOnly} /> :
                   reCat === 'Biomass' ? <EditBiomass setEditBiomass={setEditBiomass} reItems={reItems} allUsers={allUsers} readOnly={isReadOnly} /> :
                     reCat === 'Hydropower' ? <EditHydropower setEditHydropower={setEditHydropower} reItems={reItems} allUsers={allUsers} readOnly={isReadOnly} /> : ''}

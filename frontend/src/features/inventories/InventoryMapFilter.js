@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useInventoryFilter } from './inventoryFilterContext';
 import { reCats } from '../../config/reCats';
-import { rawSolarUsage, rawBiomassPriUsage, rawWindUsage, Status } from '../../config/techAssesment';
+import { rawSolarUsage, rawBiomassPriUsage, rawWindUsage, Status, rawSolarSysTypes } from '../../config/techAssesment';
 import {
   Drawer,
   Box,
@@ -59,6 +59,7 @@ const InventoryMapFilter = () => {
     usersByAffiliation,
     availableAffiliations,
     commercialFilter,
+    capacityFilter,
     installersGroup,
     
     setQuery,
@@ -74,6 +75,7 @@ const InventoryMapFilter = () => {
     setBioProvFilter,
     setWindProvFilter,
     setCommercialFilter,
+    setCapacityFilter,
     
     clearAllFilters,
     handleCategoryChange,
@@ -107,7 +109,11 @@ const InventoryMapFilter = () => {
 
   const onSolarChecked = (event) => {
     const { target: { value } } = event;
-    setSolarUsageFilter(typeof value === 'string' ? value.split(',') : value);
+    const newValue = typeof value === 'string' ? value.split(',') : value;
+    
+    // Filter out "all" value since we handle it in the onClick
+    const filteredValue = newValue.filter(v => v !== "all");
+    setSolarUsageFilter(filteredValue);
   };
   
   const onSolarSystemTypeChecked = (event) => {
@@ -117,12 +123,20 @@ const InventoryMapFilter = () => {
   
   const onBiomassChecked = (event) => {
     const { target: { value } } = event;
-    setBiomassUsageFilter(typeof value === 'string' ? value.split(',') : value);
+    const newValue = typeof value === 'string' ? value.split(',') : value;
+    
+    // Filter out "all" value since we handle it in the onClick
+    const filteredValue = newValue.filter(v => v !== "all");
+    setBiomassUsageFilter(filteredValue);
   };
   
   const onWindChecked = (event) => {
     const { target: { value } } = event;
-    setWindUsageFilter(typeof value === 'string' ? value.split(',') : value);
+    const newValue = typeof value === 'string' ? value.split(',') : value;
+    
+    // Filter out "all" value since we handle it in the onClick
+    const filteredValue = newValue.filter(v => v !== "all");
+    setWindUsageFilter(filteredValue);
   };
   
   const onStatusFilterChanged = (event) => {
@@ -499,6 +513,89 @@ const InventoryMapFilter = () => {
               </Typography>
             </FormControl>
             
+            {/* Capacity Filter */}
+            <FormControl size="small" sx={{ width: 350 }}>
+              <Tooltip 
+                title="Filter by system capacity range in kilowatts (kW)" 
+                placement="top" 
+                arrow
+              >
+                <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 'bold' }}>
+                  ⚡ Capacity Range (kW)
+                </Typography>
+              </Tooltip>
+              <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                <TextField
+                  size="small"
+                  label="Min Capacity"
+                  type="number"
+                  variant="outlined"
+                  value={capacityFilter.min}
+                  onChange={(e) => setCapacityFilter(prev => ({ ...prev, min: e.target.value }))}
+                  inputProps={{ 
+                    min: 0, 
+                    step: 0.1,
+                    placeholder: "0.0"
+                  }}
+                  sx={{ 
+                    width: 150,
+                    "& .MuiOutlinedInput-root": {
+                      "&:hover fieldset": { borderColor: theme.palette.primary.main },
+                      "&.Mui-focused fieldset": { borderColor: theme.palette.primary.main }
+                    }
+                  }}
+                />
+                <Typography variant="body2" color="text.secondary">
+                  to
+                </Typography>
+                <TextField
+                  size="small"
+                  label="Max Capacity"
+                  type="number"
+                  variant="outlined"
+                  value={capacityFilter.max}
+                  onChange={(e) => setCapacityFilter(prev => ({ ...prev, max: e.target.value }))}
+                  inputProps={{ 
+                    min: 0, 
+                    step: 0.1,
+                    placeholder: "1000.0"
+                  }}
+                  sx={{ 
+                    width: 150,
+                    "& .MuiOutlinedInput-root": {
+                      "&:hover fieldset": { borderColor: theme.palette.primary.main },
+                      "&.Mui-focused fieldset": { borderColor: theme.palette.primary.main }
+                    }
+                  }}
+                />
+              </Box>
+              <Typography 
+                variant="caption" 
+                color="text.secondary" 
+                sx={{ 
+                  mt: 0.5, 
+                  display: 'block',
+                  fontSize: '0.7rem',
+                  fontStyle: 'italic'
+                }}
+              >
+                ⚡ Filter by system capacity range (leave empty for no limit)
+              </Typography>
+              <Typography 
+                variant="caption" 
+                color="warning.main" 
+                sx={{ 
+                  mt: 0.5, 
+                  display: 'block',
+                  fontSize: '0.7rem',
+                  fontStyle: 'italic',
+                  fontWeight: 'medium'
+                }}
+              >
+                ⚠️ Note: Capacity filter only applies to Solar Energy systems used for Power Generation
+              </Typography>
+            </FormControl>
+            
             <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
               RE categories
             </Typography>
@@ -559,7 +656,15 @@ const InventoryMapFilter = () => {
                                   "&:hover": { borderColor: theme.palette.primary.main }
                                 }}
                               />}
-                              renderValue={selected => selected.join(', ')}
+                              renderValue={selected => {
+                                if (selected.length === rawSolarUsage.length) {
+                                  return "All Usage Types";
+                                } else if (selected.length === 0) {
+                                  return "Select Usage Types";
+                                } else {
+                                  return `${selected.length} types selected`;
+                                }
+                              }}
                               MenuProps={{
                                 ...MenuProps,
                                 PaperProps: {
@@ -577,6 +682,28 @@ const InventoryMapFilter = () => {
                                 }
                               }}
                             >
+                              {/* All Usage Types Option */}
+                              <MenuItem value="all">
+                                <Checkbox 
+                                  checked={solarUsageFilter.length === rawSolarUsage.length} 
+                                  indeterminate={solarUsageFilter.length > 0 && solarUsageFilter.length < rawSolarUsage.length}
+                                  color="primary"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (solarUsageFilter.length === rawSolarUsage.length) {
+                                      setSolarUsageFilter([]);
+                                    } else {
+                                      setSolarUsageFilter(rawSolarUsage.map(item => item.name));
+                                    }
+                                  }}
+                                />
+                                <ListItemText primary="All Usage Types" />
+                              </MenuItem>
+                              
+                              {/* Divider */}
+                              <Divider sx={{ my: 1, borderColor: '#e0e0e0' }} />
+                              
+                              {/* Individual Usage Types */}
                               {rawSolarUsage.map((value, idx) => (
                                 <MenuItem key={idx} value={value.name}>
                                   <Checkbox checked={solarUsageFilter.indexOf(value.name) > -1} color="primary" />
@@ -598,31 +725,41 @@ const InventoryMapFilter = () => {
                             </Typography>
                           </FormControl>
 
-                          {/* Net Metered Filter */}
+                          {/* Solar System Type Filter */}
                           <FormControl sx={{ marginTop: 2, width: 250 }}>
                             <Tooltip 
-                              title="Filter by net metering status" 
+                              title="Filter by solar system type" 
                               placement="top" 
                               arrow
                             >
-                              <InputLabel id="net-metered-label">⚡ Net Metered</InputLabel>
+                              <InputLabel id="solar-system-type-label">🔧 System Type</InputLabel>
                             </Tooltip>
                             <Select
                               size="small"
-                              id="net-metered-checkbox"
+                              id="solar-system-type-checkbox"
                               multiple
-                              value={netMeteredFilter}
-                              onChange={e =>
-                                setNetMeteredFilter(typeof e.target.value === 'string' ? e.target.value.split(',') : e.target.value)
-                              }
+                              value={solarSystemTypeFilter}
+                              onChange={e => {
+                                const value = typeof e.target.value === 'string' ? e.target.value.split(',') : e.target.value;
+                                const filteredValue = value.filter(v => v !== "all");
+                                setSolarSystemTypeFilter(filteredValue);
+                              }}
                               input={<OutlinedInput 
-                                label="⚡ Net Metered" 
+                                label="🔧 System Type" 
                                 sx={{ 
                                   borderRadius: 2,
                                   "&:hover": { borderColor: theme.palette.primary.main }
                                 }}
                               />}
-                              renderValue={selected => selected.length > 0 ? selected.join(', ') : 'All'}
+                              renderValue={selected => {
+                                if (selected.length === rawSolarSysTypes.length) {
+                                  return "All System Types";
+                                } else if (selected.length === 0) {
+                                  return "Select System Types";
+                                } else {
+                                  return `${selected.length} types selected`;
+                                }
+                              }}
                               MenuProps={{
                                 ...MenuProps,
                                 PaperProps: {
@@ -640,6 +777,123 @@ const InventoryMapFilter = () => {
                                 }
                               }}
                             >
+                              {/* All System Types Option */}
+                              <MenuItem value="all">
+                                <Checkbox 
+                                  checked={solarSystemTypeFilter.length === rawSolarSysTypes.length} 
+                                  indeterminate={solarSystemTypeFilter.length > 0 && solarSystemTypeFilter.length < rawSolarSysTypes.length}
+                                  color="primary"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (solarSystemTypeFilter.length === rawSolarSysTypes.length) {
+                                      setSolarSystemTypeFilter([]);
+                                    } else {
+                                      setSolarSystemTypeFilter(rawSolarSysTypes.map(item => item.name));
+                                    }
+                                  }}
+                                />
+                                <ListItemText primary="All System Types" />
+                              </MenuItem>
+                              
+                              {/* Divider */}
+                              <Divider sx={{ my: 1, borderColor: '#e0e0e0' }} />
+                              
+                              {/* Individual System Types */}
+                              {rawSolarSysTypes.map((value, idx) => (
+                                <MenuItem key={idx} value={value.name}>
+                                  <Checkbox checked={solarSystemTypeFilter.indexOf(value.name) > -1} color="primary" />
+                                  <ListItemText primary={value.name} />
+                                </MenuItem>
+                              ))}
+                            </Select>
+                            <Typography 
+                              variant="caption" 
+                              color="text.secondary" 
+                              sx={{ 
+                                mt: 0.5, 
+                                display: 'block',
+                                fontSize: '0.7rem',
+                                fontStyle: 'italic'
+                              }}
+                            >
+                              🔧 Filter by solar system type
+                            </Typography>
+                          </FormControl>
+
+                          {/* Net Metered Filter */}
+                          <FormControl sx={{ marginTop: 2, width: 250 }}>
+                            <Tooltip 
+                              title="Filter by net metering status" 
+                              placement="top" 
+                              arrow
+                            >
+                              <InputLabel id="net-metered-label">⚡ Net Metered</InputLabel>
+                            </Tooltip>
+                            <Select
+                              size="small"
+                              id="net-metered-checkbox"
+                              multiple
+                              value={netMeteredFilter}
+                              onChange={e => {
+                                const value = typeof e.target.value === 'string' ? e.target.value.split(',') : e.target.value;
+                                const filteredValue = value.filter(v => v !== "all");
+                                setNetMeteredFilter(filteredValue);
+                              }}
+                              input={<OutlinedInput 
+                                label="⚡ Net Metered" 
+                                sx={{ 
+                                  borderRadius: 2,
+                                  "&:hover": { borderColor: theme.palette.primary.main }
+                                }}
+                              />}
+                              renderValue={selected => {
+                                if (selected.length === 2) {
+                                  return "All Options";
+                                } else if (selected.length === 0) {
+                                  return "Select Options";
+                                } else {
+                                  return `${selected.length} options selected`;
+                                }
+                              }}
+                              MenuProps={{
+                                ...MenuProps,
+                                PaperProps: {
+                                  style: {
+                                    maxHeight: 300,
+                                    width: 300,
+                                  },
+                                },
+                              }}
+                              sx={{
+                                borderRadius: 2,
+                                "& .MuiOutlinedInput-root": {
+                                  "&:hover fieldset": { borderColor: theme.palette.primary.main },
+                                  "&.Mui-focused fieldset": { borderColor: theme.palette.primary.main }
+                                }
+                              }}
+                            >
+                              {/* All Options */}
+                              <MenuItem value="all">
+                                <Checkbox 
+                                  checked={netMeteredFilter.length === 2} 
+                                  indeterminate={netMeteredFilter.length === 1}
+                                  color="primary"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (netMeteredFilter.length === 2) {
+                                      setNetMeteredFilter([]);
+                                    } else {
+                                      setNetMeteredFilter(["Yes", "No"]);
+                                    }
+                                  }}
+                                />
+                                <ListItemText primary="All Options" />
+                              </MenuItem>
+                              
+                              {/* Divider */}
+                              <Divider sx={{ my: 1, borderColor: '#e0e0e0' }} />
+                              
+                              {/* Individual Options */}
                               <MenuItem value="Yes">
                                 <Checkbox checked={netMeteredFilter.includes("Yes")} color="primary" />
                                 <ListItemText primary="Yes" />
@@ -677,9 +931,11 @@ const InventoryMapFilter = () => {
                               id="own-use-checkbox"
                               multiple
                               value={ownUseFilter}
-                              onChange={e =>
-                                setOwnUseFilter(typeof e.target.value === 'string' ? e.target.value.split(',') : e.target.value)
-                              }
+                              onChange={e => {
+                                const value = typeof e.target.value === 'string' ? e.target.value.split(',') : e.target.value;
+                                const filteredValue = value.filter(v => v !== "all");
+                                setOwnUseFilter(filteredValue);
+                              }}
                               input={<OutlinedInput 
                                 label="🏠 Own Use" 
                                 sx={{ 
@@ -687,7 +943,15 @@ const InventoryMapFilter = () => {
                                   "&:hover": { borderColor: theme.palette.primary.main }
                                 }}
                               />}
-                              renderValue={selected => selected.length > 0 ? selected.join(', ') : 'All'}
+                              renderValue={selected => {
+                                if (selected.length === 2) {
+                                  return "All Options";
+                                } else if (selected.length === 0) {
+                                  return "Select Options";
+                                } else {
+                                  return `${selected.length} options selected`;
+                                }
+                              }}
                               MenuProps={{
                                 ...MenuProps,
                                 PaperProps: {
@@ -705,6 +969,28 @@ const InventoryMapFilter = () => {
                                 }
                               }}
                             >
+                              {/* All Options */}
+                              <MenuItem value="all">
+                                <Checkbox 
+                                  checked={ownUseFilter.length === 2} 
+                                  indeterminate={ownUseFilter.length === 1}
+                                  color="primary"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (ownUseFilter.length === 2) {
+                                      setOwnUseFilter([]);
+                                    } else {
+                                      setOwnUseFilter(["Yes", "No"]);
+                                    }
+                                  }}
+                                />
+                                <ListItemText primary="All Options" />
+                              </MenuItem>
+                              
+                              {/* Divider */}
+                              <Divider sx={{ my: 1, borderColor: '#e0e0e0' }} />
+                              
+                              {/* Individual Options */}
                               <MenuItem value="Yes">
                                 <Checkbox checked={ownUseFilter.includes("Yes")} color="primary" />
                                 <ListItemText primary="Yes" />
@@ -742,9 +1028,11 @@ const InventoryMapFilter = () => {
                               id="status-checkbox"
                               multiple
                               value={statusFilter}
-                              onChange={e =>
-                                setStatusFilter(typeof e.target.value === 'string' ? e.target.value.split(',') : e.target.value)
-                              }
+                              onChange={e => {
+                                const value = typeof e.target.value === 'string' ? e.target.value.split(',') : e.target.value;
+                                const filteredValue = value.filter(v => v !== "all");
+                                setStatusFilter(filteredValue);
+                              }}
                               input={<OutlinedInput 
                                 label="🔧 System Status" 
                                 sx={{ 
@@ -752,7 +1040,15 @@ const InventoryMapFilter = () => {
                                   "&:hover": { borderColor: theme.palette.primary.main }
                                 }}
                               />}
-                              renderValue={selected => selected.length > 0 ? selected.join(', ') : 'All'}
+                              renderValue={selected => {
+                                if (selected.length === Status.length) {
+                                  return "All Statuses";
+                                } else if (selected.length === 0) {
+                                  return "Select Statuses";
+                                } else {
+                                  return `${selected.length} statuses selected`;
+                                }
+                              }}
                               MenuProps={{
                                 ...MenuProps,
                                 PaperProps: {
@@ -770,6 +1066,28 @@ const InventoryMapFilter = () => {
                                 }
                               }}
                             >
+                              {/* All Statuses Option */}
+                              <MenuItem value="all">
+                                <Checkbox 
+                                  checked={statusFilter.length === Status.length} 
+                                  indeterminate={statusFilter.length > 0 && statusFilter.length < Status.length}
+                                  color="primary"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (statusFilter.length === Status.length) {
+                                      setStatusFilter([]);
+                                    } else {
+                                      setStatusFilter(Status.map(item => item.name));
+                                    }
+                                  }}
+                                />
+                                <ListItemText primary="All Statuses" />
+                              </MenuItem>
+                              
+                              {/* Divider */}
+                              <Divider sx={{ my: 1, borderColor: '#e0e0e0' }} />
+                              
+                              {/* Individual Statuses */}
                               <MenuItem value="Operational">
                                 <Checkbox checked={statusFilter.includes("Operational")} color="primary" />
                                 <ListItemText primary="Operational" />
@@ -819,7 +1137,15 @@ const InventoryMapFilter = () => {
                                   "&:hover": { borderColor: theme.palette.primary.main }
                                 }}
                               />}
-                              renderValue={selected => selected.join(', ')}
+                              renderValue={selected => {
+                                if (selected.length === rawBiomassPriUsage.length) {
+                                  return "All Usage Types";
+                                } else if (selected.length === 0) {
+                                  return "Select Usage Types";
+                                } else {
+                                  return `${selected.length} types selected`;
+                                }
+                              }}
                               MenuProps={{
                                 ...MenuProps,
                                 PaperProps: {
@@ -837,6 +1163,28 @@ const InventoryMapFilter = () => {
                                 }
                               }}
                             >
+                              {/* All Usage Types Option */}
+                              <MenuItem value="all">
+                                <Checkbox 
+                                  checked={biomassUsageFilter.length === rawBiomassPriUsage.length} 
+                                  indeterminate={biomassUsageFilter.length > 0 && biomassUsageFilter.length < rawBiomassPriUsage.length}
+                                  color="primary"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (biomassUsageFilter.length === rawBiomassPriUsage.length) {
+                                      setBiomassUsageFilter([]);
+                                    } else {
+                                      setBiomassUsageFilter(rawBiomassPriUsage.map(item => item.name));
+                                    }
+                                  }}
+                                />
+                                <ListItemText primary="All Usage Types" />
+                              </MenuItem>
+                              
+                              {/* Divider */}
+                              <Divider sx={{ my: 1, borderColor: '#e0e0e0' }} />
+                              
+                              {/* Individual Usage Types */}
                               {rawBiomassPriUsage.map((value, idx) => (
                                 <MenuItem key={idx} value={value.name}>
                                   <Checkbox checked={biomassUsageFilter.indexOf(value.name) > -1} color="primary" />
@@ -879,7 +1227,15 @@ const InventoryMapFilter = () => {
                                   "&:hover": { borderColor: theme.palette.primary.main }
                                 }}
                               />}
-                              renderValue={selected => selected.join(', ')}
+                              renderValue={selected => {
+                                if (selected.length === rawWindUsage.length) {
+                                  return "All Usage Types";
+                                } else if (selected.length === 0) {
+                                  return "Select Usage Types";
+                                } else {
+                                  return `${selected.length} types selected`;
+                                }
+                              }}
                               MenuProps={{
                                 ...MenuProps,
                                 PaperProps: {
@@ -897,6 +1253,28 @@ const InventoryMapFilter = () => {
                                 }
                               }}
                             >
+                              {/* All Usage Types Option */}
+                              <MenuItem value="all">
+                                <Checkbox 
+                                  checked={windUsageFilter.length === rawWindUsage.length} 
+                                  indeterminate={windUsageFilter.length > 0 && windUsageFilter.length < rawWindUsage.length}
+                                  color="primary"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (windUsageFilter.length === rawWindUsage.length) {
+                                      setWindUsageFilter([]);
+                                    } else {
+                                      setWindUsageFilter(rawWindUsage.map(item => item.name));
+                                    }
+                                  }}
+                                />
+                                <ListItemText primary="All Usage Types" />
+                              </MenuItem>
+                              
+                              {/* Divider */}
+                              <Divider sx={{ my: 1, borderColor: '#e0e0e0' }} />
+                              
+                              {/* Individual Usage Types */}
                               {rawWindUsage.map((value, idx) => (
                                 <MenuItem key={idx} value={value.name}>
                                   <Checkbox checked={windUsageFilter.indexOf(value.name) > -1} color="primary" />

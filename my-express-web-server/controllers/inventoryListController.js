@@ -11,7 +11,7 @@ const buildFilterQuery = (parsedFilters, username, isAdmin) => {
   }
   
   // Apply filters from the frontend
-  if (parsedFilters.reClass) {
+  if (parsedFilters.reClass && parsedFilters.reClass !== 'All') {
     query['properties.reClass'] = parsedFilters.reClass
   }
   

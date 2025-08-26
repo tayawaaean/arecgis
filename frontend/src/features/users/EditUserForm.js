@@ -103,6 +103,8 @@ const EditUserForm = ({ user }) => {
     const { id, isAdmin, isManager } = useAuth()
     const [username, setUsername] = useState(user.username)
     const [validUsername, setValidUsername] = useState(false)
+    const [email, setEmail] = useState(user.email || '')
+    const [validEmail, setValidEmail] = useState(true)
     const [password, setPassword] = useState('')
     const [validPassword, setValidPassword] = useState(false)
     const [roles, setRoles] = useState(user.roles)
@@ -115,6 +117,9 @@ const EditUserForm = ({ user }) => {
     const [companyContactNumber, setCompanyContactNumber] = useState(user.companyContactNumber || '')
     const [delAlert, setDelAlert] = useState(false)
 
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
     // Phone validations: must start with +63 and contain digits only
     const [validContactNumber, setValidContactNumber] = useState(true)
     const [validCompanyContactNumber, setValidCompanyContactNumber] = useState(true)
@@ -124,6 +129,12 @@ const EditUserForm = ({ user }) => {
     }, [username])
 
     useEffect(() => {
+        // Email validation
+        const isValid = email === '' || emailRegex.test(email)
+        setValidEmail(isValid)
+    }, [email])
+
+    useEffect(() => {
         setValidPassword(PWD_REGEX.test(password))
     }, [password])
 
@@ -131,6 +142,7 @@ const EditUserForm = ({ user }) => {
 
         if (isSuccess || isDelSuccess) {
             setUsername('')
+            setEmail('')
             setPassword('')
             setRoles([])
             setFullName('')
@@ -145,6 +157,7 @@ const EditUserForm = ({ user }) => {
     }, [isSuccess, isDelSuccess, navigate])
 
     const onUsernameChanged = e => setUsername(e.target.value)
+    const onEmailChanged = e => setEmail(e.target.value)
     const onPasswordChanged = e => setPassword(e.target.value)
     const onFullNameChanged = e => setFullName(e.target.value)
     const onAddressChanged = e => setAddress(e.target.value)
@@ -194,6 +207,7 @@ const EditUserForm = ({ user }) => {
             await updateUser({ 
                 id: user.id, 
                 username, 
+                email,
                 password, 
                 roles, 
                 active, 
@@ -210,6 +224,7 @@ const EditUserForm = ({ user }) => {
             await updateUser({ 
                 id: user.id, 
                 username, 
+                email,
                 roles, 
                 active, 
                 fullName, 
@@ -229,10 +244,10 @@ const EditUserForm = ({ user }) => {
     let canSave
     if (password) {
         const companyContactOk = roles.includes('Installer') ? validCompanyContactNumber : true
-        canSave = [roles.length, validUsername, validPassword, validContactNumber, companyContactOk].every(Boolean) && !isLoading
+        canSave = [roles.length, validUsername, validEmail, validPassword, validContactNumber, companyContactOk].every(Boolean) && !isLoading
     } else {
         const companyContactOk = roles.includes('Installer') ? validCompanyContactNumber : true
-        canSave = [roles.length, validUsername, validContactNumber, companyContactOk].every(Boolean) && !isLoading
+        canSave = [roles.length, validUsername, validEmail, validContactNumber, companyContactOk].every(Boolean) && !isLoading
     }
 
     const errClass = (isError || isDelError) ? "errmsg" : "offscreen"
@@ -314,6 +329,20 @@ const EditUserForm = ({ user }) => {
                                         onChange={onUsernameChanged}
                                         size="small"
                                         sx={{ mb: 2 }}
+                                    />
+                                    
+                                    <TextField
+                                        margin="normal"
+                                        fullWidth
+                                        id="email"
+                                        label="Email"
+                                        value={email}
+                                        onChange={onEmailChanged}
+                                        placeholder="Enter email address"
+                                        size="small"
+                                        sx={{ mb: 2 }}
+                                        error={!validEmail}
+                                        helperText={!validEmail ? 'Please enter a valid email address' : ''}
                                     />
                                     
                                     <TextField

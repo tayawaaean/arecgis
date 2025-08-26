@@ -121,12 +121,27 @@ const getAllInventories = async (req, res) => {
 const createNewInventory = async (req, res) => {
     let { type, user, coordinates, properties, assessment, forceCreate } = req.body;
 
+    // Debug logging for assessment data
+    console.log('Backend - Raw assessment data received:', {
+        assessment,
+        assessmentType: typeof assessment,
+        hasSolarSubcategory: assessment?.solarPowerGenSubcategory ? 'Yes' : 'No'
+    });
+
     if (typeof properties === 'string') {
         try { properties = JSON.parse(properties); } catch { properties = {}; }
     }
     if (typeof assessment === 'string') {
         try { assessment = JSON.parse(assessment); } catch { assessment = {}; }
     }
+
+    // Debug logging after parsing
+    console.log('Backend - Parsed assessment data:', {
+        assessment,
+        assessmentType: typeof assessment,
+        hasSolarSubcategory: assessment?.solarPowerGenSubcategory ? 'Yes' : 'No',
+        solarSubcategoryDetails: assessment?.solarPowerGenSubcategory
+    });
 
     // Validate required fields
     if (!user
@@ -232,6 +247,25 @@ const createNewInventory = async (req, res) => {
         if (assessment.solarSystemTypes && !allowedTypes.includes(assessment.solarSystemTypes)) {
             return res.status(400).json({ message: 'Invalid solarSystemTypes value.' });
         }
+        
+        // Validate that Off-grid systems cannot be net-metered
+        if (assessment.solarSystemTypes === 'Off-grid' && properties.isNetMetered === 'Yes') {
+            return res.status(400).json({ 
+                message: 'Off-grid solar systems cannot be net-metered. Net-metered systems must be connected to the grid.' 
+            });
+        }
+    }
+    
+    // Validate that Solar Street Lights and Solar Pump cannot be selected for power generation systems
+    if (assessment && assessment.solarUsage) {
+        const powerGenerationUsages = ['Solar Street Lights', 'Solar Pump'];
+        const isPowerGenerationSystem = properties.isNetMetered === 'Yes' || properties.isDer === 'Yes' || properties.ownUse === 'Yes';
+        
+        if (isPowerGenerationSystem && powerGenerationUsages.includes(assessment.solarUsage)) {
+            return res.status(400).json({ 
+                message: 'Solar Street Lights and Solar Pump cannot be selected for power generation systems (Net-metered, DER, or Own-use). These systems must use Power Generation.' 
+            });
+        }
     }
 
     // Handle files/images - Process them properly with GridFS
@@ -274,6 +308,13 @@ const createNewInventory = async (req, res) => {
     properties.isNetMetered = properties.isNetMetered || "No";
     properties.isDer = properties.isDer || "No";
     properties.ownUse = properties.ownUse || "No";
+
+    // Remove establishment type for solar power generation to prevent conflicts with solar subcategories
+    if (assessment && assessment.solarUsage === "Power Generation") {
+        if (properties.establishmentType) {
+            delete properties.establishmentType;
+        }
+    }
 
     if (!forceCreate) {
         const possibleDuplicates = await Inventory.find({
@@ -444,6 +485,32 @@ const updateInventory = async (req, res) => {
         if (assessment.solarSystemTypes && !allowedTypes.includes(assessment.solarSystemTypes)) {
             return res.status(400).json({ message: 'Invalid solarSystemTypes value.' });
         }
+        
+        // Validate that Off-grid systems cannot be net-metered
+        if (assessment.solarSystemTypes === 'Off-grid' && properties.isNetMetered === 'Yes') {
+            return res.status(400).json({ 
+                message: 'Off-grid solar systems cannot be net-metered. Net-metered systems must be connected to the grid.' 
+            });
+        }
+    }
+    
+    // Validate that Solar Street Lights and Solar Pump cannot be selected for power generation systems
+    if (assessment && assessment.solarUsage) {
+        const powerGenerationUsages = ['Solar Street Lights', 'Solar Pump'];
+        const isPowerGenerationSystem = properties.isNetMetered === 'Yes' || properties.isDer === 'Yes' || properties.ownUse === 'Yes';
+        
+        if (isPowerGenerationSystem && powerGenerationUsages.includes(assessment.solarUsage)) {
+            return res.status(400).json({ 
+                message: 'Solar Street Lights and Solar Pump cannot be selected for power generation systems (Net-metered, DER, or Own-use). These systems must use Power Generation.' 
+            });
+        }
+    }
+
+    // Remove establishment type for solar power generation to prevent conflicts with solar subcategories
+    if (assessment && assessment.solarUsage === "Power Generation") {
+        if (properties.establishmentType) {
+            delete properties.establishmentType;
+        }
     }
 
     // Handle files/images - Process them properly with GridFS
@@ -592,8 +659,15 @@ const updateInventory = async (req, res) => {
     if (properties && Object.prototype.hasOwnProperty.call(properties, 'ownUse')) {
         inventory.properties.ownUse = properties.ownUse;
     }
-    if (properties && Object.prototype.hasOwnProperty.call(properties, 'establishmentType')) {
+    // Only save establishment type if not solar power generation (to prevent conflicts with solar subcategories)
+    if (properties && Object.prototype.hasOwnProperty.call(properties, 'establishmentType') && 
+        (!assessment || assessment.solarUsage !== "Power Generation")) {
         inventory.properties.establishmentType = properties.establishmentType;
+    }
+    
+    // Clear establishment type if solar power generation is selected (to prevent conflicts with solar subcategories)
+    if (assessment && assessment.solarUsage === "Power Generation" && inventory.properties.establishmentType) {
+        delete inventory.properties.establishmentType;
     }
 
     // Save FIT only if commercial, else remove

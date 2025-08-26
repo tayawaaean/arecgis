@@ -1,6 +1,5 @@
 import { Outlet } from 'react-router-dom'
 import DashHeader from './DashHeader'
-import DashFooter from './DashFooter'
 import PublicAppbar from '../config/PublicAppbar'
 
 const PublicDashLayout = () => {
@@ -10,7 +9,7 @@ const PublicDashLayout = () => {
                 <div className="">
                     <Outlet />
                 </div>
-            {/* <DashFooter /> */}
+
         </>
     )
 }

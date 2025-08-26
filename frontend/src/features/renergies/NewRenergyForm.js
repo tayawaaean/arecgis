@@ -32,6 +32,8 @@ import {
   RadioGroup,
   FormControlLabel,
   Radio,
+  Snackbar,
+  Alert,
 } from "@mui/material"
 import PropTypes from 'prop-types'
 import { boxwrapstyle } from '../../config/style'
@@ -170,6 +172,9 @@ const NewRenergyForm = ({ allUsers }) => {
   // Radio group state for Net Metered and Own Use
   const [isNetMetered, setIsNetMetered] = useState("No")
   const [isOwnUse, setIsOwnUse] = useState("No")
+  
+  // Success message state
+  const [successMessage, setSuccessMessage] = useState("")
 
   const markerEventHandler = useMemo(
     () => ({
@@ -328,13 +333,25 @@ const NewRenergyForm = ({ allUsers }) => {
     }
 
     if (canSave) {
-      await addNewRenergy(data)
+      try {
+        await addNewRenergy(data).unwrap();
+        setSuccessMessage("Technical assessment saved successfully!");
+        // Clear success message after 3 seconds
+        setTimeout(() => setSuccessMessage(""), 3000);
+      } catch (err) {
+        // Error handling is already done by the mutation
+      }
     }
   }
 
   const content = (
     <>
-      <p>{error?.data?.message}</p>
+      {error?.data?.message && <p>{error?.data?.message}</p>}
+      {isSuccess && (
+        <Alert severity="success" sx={{ mb: 2 }}>
+          Technical assessment created successfully! You can now view it on the map.
+        </Alert>
+      )}
       <Container maxWidth="sm" sx={{ bgcolor: 'primary' }}>
         <form onSubmit={onSaveRenergyClicked}>
           <Box sx={{ minHeight: "100vh", maxWidth: "100%", "& .MuiTextField-root": { my: 1 } }}>
@@ -603,6 +620,22 @@ const NewRenergyForm = ({ allUsers }) => {
           />
         </form>
       </Container>
+      
+      {/* Success Message Snackbar */}
+      <Snackbar
+        open={!!successMessage}
+        autoHideDuration={3000}
+        onClose={() => setSuccessMessage("")}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert 
+          onClose={() => setSuccessMessage("")} 
+          severity="success" 
+          sx={{ width: '100%' }}
+        >
+          {successMessage}
+        </Alert>
+      </Snackbar>
     </>
   )
   return content

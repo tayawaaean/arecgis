@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react"
 import { useTheme } from '@mui/material/styles'
 import { useNavigate } from "react-router-dom"
+import { useDispatch } from "react-redux"
+import { setCredentials, updateProfileCompletion } from "../auth/authSlice"
 import {
     Button,
     CssBaseline,
@@ -39,6 +41,7 @@ const PWD_REGEX = /^[A-z0-9!@#$%]{4,12}$/
 const UserProfileForm = ({ user }) => {
     const theme = useTheme()
     const navigate = useNavigate()
+    const dispatch = useDispatch()
     const { userId: currentUserId, isAdmin, isManager } = useAuth()
 
     const [updateUser, {
@@ -68,12 +71,17 @@ const UserProfileForm = ({ user }) => {
     } = useGetAffiliationsQuery()
 
     // Form state
+    const [email, setEmail] = useState(user.email || '')
     const [fullName, setFullName] = useState(user.fullName || '')
     const [address, setAddress] = useState(user.address || '')
     const [contactNumber, setContactNumber] = useState(user.contactNumber || '')
     const [affiliation, setAffiliation] = useState(user.affiliation || '')
     const [companyName, setCompanyName] = useState(user.companyName || '')
     const [companyContactNumber, setCompanyContactNumber] = useState(user.companyContactNumber || '')
+
+    // Email validation
+    const [validEmail, setValidEmail] = useState(true)
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
     // Phone validations: must start with +63 and contain digits only
     const [validContactNumber, setValidContactNumber] = useState(true)
@@ -93,6 +101,33 @@ const UserProfileForm = ({ user }) => {
     useEffect(() => {
         setValidNewPassword(PWD_REGEX.test(newPassword))
     }, [newPassword])
+
+    // Handle successful profile update
+    useEffect(() => {
+        if (isSuccess && currentUserId === user.id) {
+            // Check if profile is now complete
+            const isProfileComplete = !!(email && fullName && address && contactNumber);
+            
+            if (isProfileComplete) {
+                // Update profile completion status
+                dispatch(updateProfileCompletion({
+                    isProfileComplete: true,
+                    profileCompletionPercentage: 100
+                }));
+                
+                // Show success message and redirect to dashboard
+                setTimeout(() => {
+                    navigate('/dashboard');
+                }, 1500);
+            }
+        }
+    }, [isSuccess, currentUserId, user.id, email, fullName, address, contactNumber, dispatch, navigate])
+
+    useEffect(() => {
+        // Email validation
+        const isValid = email === '' || emailRegex.test(email)
+        setValidEmail(isValid)
+    }, [email])
 
     useEffect(() => {
         // Allow empty (optional). When provided, must match +63 followed by at least one digit
@@ -120,6 +155,7 @@ const UserProfileForm = ({ user }) => {
     }, [isSuccess])
 
     const onFullNameChanged = e => setFullName(e.target.value)
+    const onEmailChanged = e => setEmail(e.target.value)
     const onAddressChanged = e => setAddress(e.target.value)
     const onContactNumberChanged = e => {
         const value = e.target.value
@@ -151,7 +187,7 @@ const UserProfileForm = ({ user }) => {
     }
 
     const companyContactOk = user.roles.includes('Installer') ? validCompanyContactNumber : true
-    const canSaveProfile = !isLoading && validContactNumber && companyContactOk
+    const canSaveProfile = !isLoading && validEmail && validContactNumber && companyContactOk
     const canSavePassword = [validNewPassword, passwordsMatch, currentPassword].every(Boolean) && !isLoading
 
     const onSaveProfileClicked = async (e) => {
@@ -160,6 +196,7 @@ const UserProfileForm = ({ user }) => {
             // If user is updating their own profile, use updateOwnProfile
             if (currentUserId === user.id) {
                 await updateOwnProfile({
+                    email,
                     fullName,
                     address,
                     contactNumber,
@@ -172,6 +209,7 @@ const UserProfileForm = ({ user }) => {
                 await updateUser({
                     id: user.id,
                     username: user.username,
+                    email,
                     roles: user.roles,
                     active: user.active,
                     fullName,
@@ -220,6 +258,21 @@ const UserProfileForm = ({ user }) => {
     const content = (
         <>
             <p className={errClass}>{error?.data?.message}</p>
+            
+            {/* Success Message */}
+            {isSuccess && currentUserId === user.id && (
+                <Alert 
+                    severity="success" 
+                    sx={{ mb: 2 }}
+                    action={
+                        <Button color="inherit" size="small" onClick={() => navigate('/dashboard')}>
+                            Go to Dashboard
+                        </Button>
+                    }
+                >
+                    Profile updated successfully! Redirecting to dashboard...
+                </Alert>
+            )}
             <Container maxWidth="md">
                 <Box sx={boxmain}>
                     <Box sx={boxpaper}>
@@ -281,6 +334,22 @@ const UserProfileForm = ({ user }) => {
 
                                 <form onSubmit={onSaveProfileClicked}>
                                     <Grid container spacing={2}>
+                                        <Grid item xs={12}>
+                                            <Typography sx={{ fontStyle: 'italic' }} component="h2" variant="subtitle2">
+                                                Email:
+                                            </Typography>
+                                            <TextField
+                                                size='small'
+                                                fullWidth
+                                                id="email"
+                                                value={email}
+                                                onChange={onEmailChanged}
+                                                placeholder="Enter email"
+                                                disabled={!editMode}
+                                                error={editMode && !validEmail}
+                                                helperText={editMode && !validEmail ? 'Invalid email format' : ' '}
+                                            />
+                                        </Grid>
                                         <Grid item xs={12}>
                                             <Typography sx={{ fontStyle: 'italic' }} component="h2" variant="subtitle2">
                                                 Full Name:
@@ -432,6 +501,7 @@ const UserProfileForm = ({ user }) => {
                                                 onClick={() => {
                                                     setEditMode(false)
                                                     // Reset form values
+                                                    setEmail(user.email || '')
                                                     setFullName(user.fullName || '')
                                                     setAddress(user.address || '')
                                                     setContactNumber(user.contactNumber || '')
@@ -457,6 +527,14 @@ const UserProfileForm = ({ user }) => {
                                 {/* Read-only display when not in edit mode */}
                                 {!editMode && (
                                     <Grid container spacing={2} sx={{ mt: 2 }}>
+                                        <Grid item xs={12} sm={6}>
+                                            <Typography variant="body2" color="textSecondary">
+                                                Email
+                                            </Typography>
+                                            <Typography variant="body1" gutterBottom>
+                                                {email || 'Not provided'}
+                                            </Typography>
+                                        </Grid>
                                         <Grid item xs={12} sm={6}>
                                             <Typography variant="body2" color="textSecondary">
                                                 Full Name

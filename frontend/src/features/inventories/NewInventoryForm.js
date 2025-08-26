@@ -22,6 +22,10 @@ import {
   List,
   ListItem,
   ListItemText,
+  Snackbar,
+  FormControl,
+  InputLabel,
+  Select,
 } from "@mui/material";
 import { boxstyle } from "../../config/style";
 import useAuth from "../../hooks/useAuth";
@@ -96,6 +100,9 @@ const NewInventoryForm = ({ allUsers }) => {
 
   // HELP MODAL STATE
   const [openHelpModal, setOpenHelpModal] = useState(false);
+  
+  // SUCCESS MESSAGE STATE
+  const [successMessage, setSuccessMessage] = useState("");
 
 
 
@@ -193,6 +200,13 @@ const NewInventoryForm = ({ allUsers }) => {
       setProvince(''); // Reset province when region changes
     }
   }, [region]);
+
+  // Clear establishment type when solar power generation is selected to prevent conflicts
+  useEffect(() => {
+    if (reCat === "Solar Energy" && establishmentType) {
+      setEstablishmentType("");
+    }
+  }, [reCat, establishmentType]);
 
   const onOwnerNameChanged = (e) => setOwnerName(e.target.value);
   const onCountryChanged = (e) => setCountry(e.target.value);
@@ -497,6 +511,22 @@ const NewInventoryForm = ({ allUsers }) => {
             solar.annualEnergyProduction
           );
         }
+        // ---- Add solar power generation subcategories if provided ----
+        if (solar.solarPowerGenSubcategory?.mainCategory) {
+          // Send as JSON string to avoid FormData parsing issues
+          data.append("assessment[solarPowerGenSubcategory]", JSON.stringify(solar.solarPowerGenSubcategory));
+          
+          // Debug logging
+          console.log('NewInventoryForm - Adding solar subcategories to FormData:', {
+            mainCategory: solar.solarPowerGenSubcategory.mainCategory,
+            mainCategoryId: solar.solarPowerGenSubcategory.mainCategoryId,
+            subcategory: solar.solarPowerGenSubcategory.subcategory,
+            subcategoryId: solar.solarPowerGenSubcategory.subcategoryId,
+            jsonString: JSON.stringify(solar.solarPowerGenSubcategory)
+          });
+        } else {
+          console.log('NewInventoryForm - No solar subcategories to add:', solar.solarPowerGenSubcategory);
+        }
       }
       data.append("assessment[remarks]", solar.remarks);
       data.append("assessment[status]", solar.status);
@@ -540,6 +570,9 @@ const NewInventoryForm = ({ allUsers }) => {
     try {
       await addNewInventory(data).unwrap();
       setForceCreate(false);
+      setSuccessMessage("Inventory saved successfully!");
+      // Clear success message after 3 seconds
+      setTimeout(() => setSuccessMessage(""), 3000);
     } catch (err) {
       if (err?.status === 409 && err?.data?.duplicates) {
         setPotentialDuplicates(err.data.duplicates);
@@ -557,6 +590,9 @@ const NewInventoryForm = ({ allUsers }) => {
       try {
         await addNewInventory(lastFormData).unwrap();
         setForceCreate(false);
+        setSuccessMessage("Inventory saved successfully!");
+        // Clear success message after 3 seconds
+        setTimeout(() => setSuccessMessage(""), 3000);
       } catch (err) {
         // Handle errors if needed
       }
@@ -585,6 +621,9 @@ const NewInventoryForm = ({ allUsers }) => {
           <Box sx={boxstyle}>
             <Collapse timeout={{ exit: 1 }} in={isError}>
               <Alert severity="error">{error?.data?.message}</Alert>
+            </Collapse>
+            <Collapse timeout={{ exit: 1 }} in={isSuccess}>
+              <Alert severity="success">Inventory created successfully! You can now view it on the map.</Alert>
             </Collapse>
             <Grid container>
               <Grid item xs key="1">
@@ -941,28 +980,38 @@ const NewInventoryForm = ({ allUsers }) => {
                 </Alert>
               )}
 
-              {/* Establishment Type - Only when Own Use is Yes and DER is No */}
-              {reClass === "Non-Commercial" && isOwnUse === true && isDer === false && (
-                <>
-                  <Typography sx={{ fontWeight: 700, mb: 1 }} component="label">
+              {/* Establishment Type - Only when Own Use is Yes and DER is No, but NOT for Solar Power Generation */}
+              {reClass === "Non-Commercial" && isOwnUse === true && isDer === false && reCat !== "Solar Energy" && (
+                <Box sx={{ mb: 3 }}>
+                  <Typography sx={{ fontStyle: 'italic', mb: 2 }} component="h1" variant="subtitle2">
                     Establishment Type
                   </Typography>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    id="establishmentType"
-                    select
-                    name="establishmentType"
-                    label="Select Establishment Type"
-                    value={establishmentType || ""}
-                    onChange={(e) => setEstablishmentType(e.target.value)}
-                    sx={{ mb: 2 }}
-                  >
-                    <MenuItem value="Residential Establishment">Residential Establishment</MenuItem>
-                    <MenuItem value="Commercial Establishment">Commercial Establishment</MenuItem>
-                    <MenuItem value="Industrial Establishment">Industrial Establishment</MenuItem>
-                  </TextField>
-                </>
+                  <FormControl fullWidth size="small">
+                    <InputLabel id="establishmentType-label">Select Establishment Type</InputLabel>
+                    <Select
+                      id="establishmentType"
+                      name="establishmentType"
+                      label="Select Establishment Type"
+                      value={establishmentType || ""}
+                      onChange={(e) => setEstablishmentType(e.target.value)}
+                    >
+                      <MenuItem value="Residential Establishment">Residential Establishment</MenuItem>
+                      <MenuItem value="Commercial Establishment">Commercial Establishment</MenuItem>
+                      <MenuItem value="Industrial Establishment">Industrial Establishment</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Box>
+              )}
+              
+              {/* Info message for Solar Power Generation - Establishment Type is handled by subcategories */}
+              {reClass === "Non-Commercial" && isOwnUse === true && isDer === false && reCat === "Solar Energy" && (
+                <Box sx={{ mb: 3 }}>
+                  <Alert severity="info">
+                    <Typography variant="body2">
+                      <strong>Note:</strong> For Solar Power Generation systems, establishment type information is captured through the detailed subcategories (Residential/Commercial/Industrial rooftop, etc.) rather than a separate establishment type field.
+                    </Typography>
+                  </Alert>
+                </Box>
               )}
             </Box>
           </Box>
@@ -1102,7 +1151,7 @@ const NewInventoryForm = ({ allUsers }) => {
 
           {/* Pass reClass prop to component */}
           {reCat === null ? null : reCat === "Solar Energy" ? (
-            <Solar setSolar={setSolar} reClass={reClass} />
+            <Solar setSolar={setSolar} reClass={reClass} isNetMetered={isNetMetered} isDer={isDer} isOwnUse={isOwnUse} />
           ) : reCat === "Wind Energy" ? (
             <Wind setWind={setWind} reClass={reClass} />
           ) : reCat === "Biomass" ? (
@@ -1299,6 +1348,22 @@ const NewInventoryForm = ({ allUsers }) => {
         onClose={() => setOpenHelpModal(false)}
         formType="new"
       />
+      
+      {/* Success Message Snackbar */}
+      <Snackbar
+        open={!!successMessage}
+        autoHideDuration={3000}
+        onClose={() => setSuccessMessage("")}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert 
+          onClose={() => setSuccessMessage("")} 
+          severity="success" 
+          sx={{ width: '100%' }}
+        >
+          {successMessage}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 };

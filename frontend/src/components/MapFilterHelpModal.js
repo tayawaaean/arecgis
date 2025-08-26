@@ -34,7 +34,8 @@ import {
   Business as BusinessIcon,
   Category as CategoryIcon,
   Search as SearchIcon,
-  ClearAll as ClearAllIcon
+  ClearAll as ClearAllIcon,
+  Bolt as BoltIcon
 } from '@mui/icons-material';
 
 const MapFilterHelpModal = ({ open, onClose }) => {
@@ -146,9 +147,9 @@ const MapFilterHelpModal = ({ open, onClose }) => {
             </Grid>
           </Grid>
 
-          <Alert severity="info" sx={{ mt: 2 }}>
-            <strong>Pro Tip:</strong> Start with broad filters and gradually narrow down your search for better results. Solar Energy category now includes specialized filters for net metering, own use, and system status.
-          </Alert>
+                     <Alert severity="info" sx={{ mt: 2 }}>
+             <strong>Pro Tip:</strong> Start with broad filters and gradually narrow down your search for better results. Solar Energy category now includes specialized filters for net metering, own use, and system status. Use the capacity filter to find solar power generation systems within specific power ranges.
+           </Alert>
         </Box>
       )
     },
@@ -313,9 +314,81 @@ const MapFilterHelpModal = ({ open, onClose }) => {
             </Grid>
           </Grid>
 
-          <Alert severity="info" sx={{ mt: 2 }}>
-            <strong>Tip:</strong> Use classification filters to focus on specific types of installations or operational statuses.
-          </Alert>
+          {/* Capacity Filter Section */}
+          <Grid container spacing={2} sx={{ mt: 2 }}>
+            <Grid item xs={12}>
+              <Card variant="outlined" sx={{ borderColor: theme.palette.primary.main }}>
+                <CardContent>
+                                     <Typography variant="subtitle1" gutterBottom>
+                     <BoltIcon color="primary" sx={{ mr: 1, verticalAlign: 'middle' }} />
+                     ⚡ Capacity Range Filter (Solar Power Generation Only)
+                   </Typography>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} md={6}>
+                      <Typography variant="subtitle2" gutterBottom color="primary">
+                        How It Works
+                      </Typography>
+                      <List dense>
+                        <ListItem>
+                          <ListItemText 
+                            primary="Range Selection" 
+                            secondary="Set minimum and/or maximum capacity values in kilowatts (kW)"
+                          />
+                        </ListItem>
+                        <ListItem>
+                          <ListItemText 
+                            primary="Flexible Input" 
+                            secondary="Leave either field empty for no upper or lower limit"
+                          />
+                        </ListItem>
+                                                 <ListItem>
+                           <ListItemText 
+                             primary="Precise Control" 
+                             secondary="Use decimal values (e.g., 0.5 kW for 500W systems)"
+                           />
+                         </ListItem>
+                         <ListItem>
+                           <ListItemText 
+                             primary="Solar Power Generation Only" 
+                             secondary="Capacity filter only applies to solar systems used for power generation"
+                           />
+                         </ListItem>
+                       </List>
+                     </Grid>
+                    <Grid item xs={12} md={6}>
+                      <Typography variant="subtitle2" gutterBottom color="primary">
+                        Common Use Cases
+                      </Typography>
+                      <List dense>
+                        <ListItem>
+                          <ListItemText 
+                            primary="Residential Systems" 
+                            secondary="0.1 - 10 kW (small home installations)"
+                          />
+                        </ListItem>
+                        <ListItem>
+                          <ListItemText 
+                            primary="Commercial Systems" 
+                            secondary="10 - 100 kW (business installations)"
+                          />
+                        </ListItem>
+                        <ListItem>
+                          <ListItemText 
+                            primary="Utility Scale" 
+                            secondary="100+ kW (large solar farms)"
+                          />
+                        </ListItem>
+                      </List>
+                    </Grid>
+                  </Grid>
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
+
+                     <Alert severity="info" sx={{ mt: 2 }}>
+             <strong>Tip:</strong> Use classification filters to focus on specific types of installations or operational statuses. The capacity filter helps you find solar power generation systems within specific power ranges, from small residential installations to large utility-scale projects. Note: Capacity filtering only applies to solar systems used for power generation.
+           </Alert>
         </Box>
       )
     },

@@ -195,6 +195,93 @@ const InventoryHelpModal = ({ open, onClose, formType = 'new' }) => {
               </Box>
             </AccordionSummary>
             <AccordionDetails>
+              <Typography variant="subtitle2" gutterBottom color="primary" sx={{ fontWeight: 'bold' }}>
+                Primary Usage Types
+              </Typography>
+              <List dense>
+                <ListItem>
+                  <ListItemText 
+                    primary="Power Generation" 
+                    secondary="Grid-connected systems for electricity production"
+                  />
+                </ListItem>
+                <ListItem>
+                  <ListItemText 
+                    primary="Solar Street Lights" 
+                    secondary="Standalone lighting systems (not available for power generation systems)"
+                  />
+                </ListItem>
+                <ListItem>
+                  <ListItemText 
+                    primary="Solar Pump" 
+                    secondary="Water pumping systems (not available for power generation systems)"
+                  />
+                </ListItem>
+                <ListItem>
+                  <ListItemText 
+                    primary="Other" 
+                    secondary="Custom solar applications"
+                  />
+                </ListItem>
+              </List>
+
+              <Alert severity="info" sx={{ mt: 2, mb: 2 }}>
+                <Typography variant="body2">
+                  <strong>Power Generation Systems:</strong> When "Power Generation" is selected, additional subcategories become available for detailed classification.
+                </Typography>
+              </Alert>
+
+              <Typography variant="subtitle2" gutterBottom color="primary" sx={{ fontWeight: 'bold', mt: 2 }}>
+                Power Generation Subcategories
+              </Typography>
+              <List dense>
+                <ListItem>
+                  <ListItemText 
+                    primary="Rooftop Solar PV" 
+                    secondary="Residential, Commercial, or Industrial rooftop installations"
+                  />
+                </ListItem>
+                <ListItem>
+                  <ListItemText 
+                    primary="Ground-mounted Solar PV" 
+                    secondary="Solar farms, captive plants, or floating solar installations"
+                  />
+                </ListItem>
+                <ListItem>
+                  <ListItemText 
+                    primary="Building-integrated PV (BIPV)" 
+                    secondary="Integrated into walls, windows, facades, or roofing materials"
+                  />
+                </ListItem>
+              </List>
+
+              <Typography variant="subtitle2" gutterBottom color="primary" sx={{ fontWeight: 'bold', mt: 2 }}>
+                System Configuration
+              </Typography>
+              <List dense>
+                <ListItem>
+                  <ListItemText 
+                    primary="Grid-tied" 
+                    secondary="Connected to the electrical grid (required for Commercial systems)"
+                  />
+                </ListItem>
+                <ListItem>
+                  <ListItemText 
+                    primary="Off-grid" 
+                    secondary="Standalone system (not available for net-metered systems)"
+                  />
+                </ListItem>
+                <ListItem>
+                  <ListItemText 
+                    primary="Hybrid" 
+                    secondary="Combination of grid and battery storage"
+                  />
+                </ListItem>
+              </List>
+
+              <Typography variant="subtitle2" gutterBottom color="primary" sx={{ fontWeight: 'bold', mt: 2 }}>
+                Technical Specifications
+              </Typography>
               <List dense>
                 <ListItem>
                   <ListItemText 
@@ -205,22 +292,48 @@ const InventoryHelpModal = ({ open, onClose, formType = 'new' }) => {
                 <ListItem>
                   <ListItemText 
                     primary="Annual Energy Production (kWh)" 
-                    secondary="Expected or actual annual energy generation"
+                    secondary="Expected or actual annual energy generation (required for Power Generation)"
                   />
                 </ListItem>
                 <ListItem>
                   <ListItemText 
-                    primary="System Type" 
-                    secondary="Grid-tied, Off-grid, or Hybrid system"
+                    primary="Status" 
+                    secondary="Operational, For Repair, or Condemnable"
                   />
                 </ListItem>
                 <ListItem>
                   <ListItemText 
-                    primary="Usage Type" 
-                    secondary="Power generation, street lighting, water pumping, etc."
+                    primary="Remarks" 
+                    secondary="Additional notes or special considerations"
                   />
                 </ListItem>
               </List>
+
+              <Alert severity="warning" sx={{ mt: 2 }}>
+                <Typography variant="body2">
+                  <strong>Important Constraints:</strong>
+                </Typography>
+                <List dense sx={{ mt: 1 }}>
+                  <ListItem sx={{ py: 0 }}>
+                    <ListItemText 
+                      primary="• Net-metered systems cannot be Off-grid"
+                      secondary="Net-metered systems must be connected to the grid"
+                    />
+                  </ListItem>
+                  <ListItem sx={{ py: 0 }}>
+                    <ListItemText 
+                      primary="• Power generation systems (Net-metered/DER/Own-use) must use Power Generation"
+                      secondary="Solar Street Lights and Solar Pump are not available for these systems"
+                    />
+                  </ListItem>
+                  <ListItem sx={{ py: 0 }}>
+                    <ListItemText 
+                      primary="• Commercial systems automatically use Grid-tied configuration"
+                      secondary="Other system types are disabled for Commercial installations"
+                    />
+                  </ListItem>
+                </List>
+              </Alert>
             </AccordionDetails>
           </Accordion>
 
@@ -323,8 +436,150 @@ const InventoryHelpModal = ({ open, onClose, formType = 'new' }) => {
       )
     },
     {
+      label: 'Solar Power Generation Subcategories',
+      description: 'Detailed classification for solar power generation systems.',
+      content: (
+        <Box>
+          <Typography variant="h6" gutterBottom color="primary">
+            ☀️ Solar Power Generation Classification
+          </Typography>
+          
+          <Alert severity="info" sx={{ mb: 2 }}>
+            <strong>Note:</strong> This section is only available when "Power Generation" is selected as the primary usage type for Solar Energy systems.
+          </Alert>
+
+          <Grid container spacing={2}>
+            <Grid item xs={12} md={4}>
+              <Card variant="outlined">
+                <CardContent>
+                  <Typography variant="subtitle1" gutterBottom color="primary">
+                    🏠 Rooftop Solar PV
+                  </Typography>
+                  <List dense>
+                    <ListItem>
+                      <ListItemText 
+                        primary="Residential Rooftop" 
+                        secondary="Installed on homes and residential buildings"
+                      />
+                    </ListItem>
+                    <ListItem>
+                      <ListItemText 
+                        primary="Commercial Rooftop" 
+                        secondary="Malls, offices, warehouses, and commercial buildings"
+                      />
+                    </ListItem>
+                    <ListItem>
+                      <ListItemText 
+                        primary="Industrial Rooftop" 
+                        secondary="Factories, plants, and industrial facilities"
+                      />
+                    </ListItem>
+                  </List>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <Card variant="outlined">
+                <CardContent>
+                  <Typography variant="subtitle1" gutterBottom color="primary">
+                    🌍 Ground-mounted Solar PV
+                  </Typography>
+                  <List dense>
+                    <ListItem>
+                      <ListItemText 
+                        primary="Solar Farms/Parks" 
+                        secondary="Utility-scale installations on large open land"
+                      />
+                    </ListItem>
+                    <ListItem>
+                      <ListItemText 
+                        primary="Captive Solar Plants" 
+                        secondary="Private land installations for self-use (industries, institutions)"
+                      />
+                    </ListItem>
+                    <ListItem>
+                      <ListItemText 
+                        primary="Floating Solar Farms" 
+                        secondary="Installations on reservoirs, lakes, or dams"
+                      />
+                    </ListItem>
+                  </List>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <Card variant="outlined">
+                <CardContent>
+                  <Typography variant="subtitle1" gutterBottom color="primary">
+                    🏗️ Building-integrated PV (BIPV)
+                  </Typography>
+                  <List dense>
+                    <ListItem>
+                      <ListItemText 
+                        primary="Integrated Systems" 
+                        secondary="Integrated into walls, windows, facades, or roofing materials"
+                      />
+                    </ListItem>
+                    <ListItem>
+                      <ListItemText 
+                        primary="Architectural Integration" 
+                        secondary="Seamlessly integrated into building design"
+                      />
+                    </ListItem>
+                  </List>
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
+
+          <Typography variant="h6" gutterBottom color="primary" sx={{ mt: 3 }}>
+            📊 Data Requirements
+          </Typography>
+          
+          <Alert severity="info" sx={{ mb: 2 }}>
+            <Typography variant="body2">
+              <strong>Required Fields for Power Generation:</strong>
+            </Typography>
+            <List dense sx={{ mt: 1 }}>
+              <ListItem sx={{ py: 0 }}>
+                <ListItemText 
+                  primary="• Capacity (kW)" 
+                  secondary="Total installed capacity"
+                />
+              </ListItem>
+              <ListItem sx={{ py: 0 }}>
+                <ListItemText 
+                  primary="• Annual Energy Production (kWh)" 
+                  secondary="Expected or actual annual generation"
+                />
+              </ListItem>
+              <ListItem sx={{ py: 0 }}>
+                <ListItemText 
+                  primary="• Main Category" 
+                  secondary="Rooftop, Ground-mounted, or BIPV"
+                />
+              </ListItem>
+              <ListItem sx={{ py: 0 }}>
+                <ListItemText 
+                  primary="• Subcategory" 
+                  secondary="Specific type within the main category"
+                />
+              </ListItem>
+            </List>
+          </Alert>
+
+          <Alert severity="success" sx={{ mt: 2 }}>
+            <Typography variant="body2">
+              <strong>Benefits of Detailed Classification:</strong> This system provides comprehensive data for analysis, 
+              policy development, and renewable energy planning while maintaining logical consistency and preventing data conflicts.
+            </Typography>
+          </Alert>
+        </Box>
+      )
+    },
+    {
       label: 'Commercial Details',
-      description: 'Additional information required for commercial systems.',
+      description: 'Additional information required for commercial systems and power generation validation.',
       content: (
         <Box>
           <Typography variant="h6" gutterBottom color="primary">
@@ -388,6 +643,12 @@ const InventoryHelpModal = ({ open, onClose, formType = 'new' }) => {
                     </ListItem>
                     <ListItem>
                       <ListItemText 
+                        primary="DER (Distributed Energy Resource)" 
+                        secondary="Whether the system is classified as a distributed energy resource"
+                      />
+                    </ListItem>
+                    <ListItem>
+                      <ListItemText 
                         primary="Own Use" 
                         secondary="Whether the energy is used by the owner or sold to the grid"
                       />
@@ -403,6 +664,82 @@ const InventoryHelpModal = ({ open, onClose, formType = 'new' }) => {
               </Card>
             </Grid>
           </Grid>
+
+          <Typography variant="h6" gutterBottom color="primary" sx={{ mt: 3 }}>
+            🔒 Power Generation System Validation
+          </Typography>
+          
+          <Alert severity="warning" sx={{ mb: 2 }}>
+            <strong>Important:</strong> The following validation rules are automatically enforced to ensure logical consistency.
+          </Alert>
+
+          <Grid container spacing={2}>
+            <Grid item xs={12} md={6}>
+              <Card variant="outlined">
+                <CardContent>
+                  <Typography variant="subtitle1" gutterBottom color="error">
+                    ⚠️ System Type Constraints
+                  </Typography>
+                  <List dense>
+                    <ListItem>
+                      <ListItemText 
+                        primary="Net-metered Systems" 
+                        secondary="Cannot be Off-grid - must be Grid-tied or Hybrid"
+                      />
+                    </ListItem>
+                    <ListItem>
+                      <ListItemText 
+                        primary="Commercial Systems" 
+                        secondary="Automatically use Grid-tied configuration"
+                      />
+                    </ListItem>
+                    <ListItem>
+                      <ListItemText 
+                        primary="Power Generation Systems" 
+                        secondary="Must use Power Generation usage type"
+                      />
+                    </ListItem>
+                  </List>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Card variant="outlined">
+                <CardContent>
+                  <Typography variant="subtitle1" gutterBottom color="error">
+                    ⚠️ Usage Type Restrictions
+                  </Typography>
+                  <List dense>
+                    <ListItem>
+                      <ListItemText 
+                        primary="Solar Street Lights" 
+                        secondary="Not available for Net-metered/DER/Own-use systems"
+                      />
+                    </ListItem>
+                    <ListItem>
+                      <ListItemText 
+                        primary="Solar Pump" 
+                        secondary="Not available for Net-metered/DER/Own-use systems"
+                      />
+                    </ListItem>
+                    <ListItem>
+                      <ListItemText 
+                        primary="Establishment Type" 
+                        secondary="Not required for Solar Power Generation (handled by subcategories)"
+                      />
+                    </ListItem>
+                  </List>
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
+
+          <Alert severity="info" sx={{ mt: 2 }}>
+            <Typography variant="body2">
+              <strong>Smart Validation:</strong> The system automatically prevents invalid combinations and guides you to make appropriate selections. 
+              When constraints are active, affected options are disabled and explanatory messages are displayed.
+            </Typography>
+          </Alert>
         </Box>
       )
     },
@@ -486,7 +823,7 @@ const InventoryHelpModal = ({ open, onClose, formType = 'new' }) => {
     },
     {
       label: 'Review & Submit',
-      description: 'Final review and submission of your inventory entry.',
+      description: 'Final review and submission of your inventory entry with validation checks.',
       content: (
         <Box>
           <Typography variant="h6" gutterBottom color="primary">
@@ -532,13 +869,86 @@ const InventoryHelpModal = ({ open, onClose, formType = 'new' }) => {
             </ListItem>
           </List>
 
+          <Typography variant="h6" gutterBottom color="primary" sx={{ mt: 3 }}>
+            🔍 Validation Checklist
+          </Typography>
+          
+          <Alert severity="info" sx={{ mb: 2 }}>
+            <Typography variant="body2">
+              <strong>System Validation:</strong> The following checks are automatically performed to ensure data consistency.
+            </Typography>
+          </Alert>
+
+          <Grid container spacing={2}>
+            <Grid item xs={12} md={6}>
+              <Card variant="outlined">
+                <CardContent>
+                  <Typography variant="subtitle1" gutterBottom color="primary">
+                    ⚡ Solar System Validation
+                  </Typography>
+                  <List dense>
+                    <ListItem>
+                      <ListItemText 
+                        primary="✓ Net-metered ≠ Off-grid" 
+                        secondary="Net-metered systems must be grid-connected"
+                      />
+                    </ListItem>
+                    <ListItem>
+                      <ListItemText 
+                        primary="✓ Power Generation Systems" 
+                        secondary="Must use Power Generation usage type"
+                      />
+                    </ListItem>
+                    <ListItem>
+                      <ListItemText 
+                        primary="✓ Commercial = Grid-tied" 
+                        secondary="Commercial systems use grid-tied configuration"
+                      />
+                    </ListItem>
+                  </List>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Card variant="outlined">
+                <CardContent>
+                  <Typography variant="subtitle1" gutterBottom color="primary">
+                    🏗️ Data Consistency Checks
+                  </Typography>
+                  <List dense>
+                    <ListItem>
+                      <ListItemText 
+                        primary="✓ Solar Subcategories" 
+                        secondary="Power Generation requires main category and subcategory"
+                      />
+                    </ListItem>
+                    <ListItem>
+                      <ListItemText 
+                        primary="✓ Establishment Type" 
+                        secondary="Not required for Solar Power Generation"
+                      />
+                    </ListItem>
+                    <ListItem>
+                      <ListItemText 
+                        primary="✓ Annual Energy Production" 
+                        secondary="Required for Power Generation systems"
+                      />
+                    </ListItem>
+                  </List>
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
+
           <Alert severity="success" sx={{ mt: 2 }}>
-            <strong>Ready to Submit!</strong> Once you're satisfied with all the information, click the "Save Inventory" button to create your entry.
+            <strong>Ready to Submit!</strong> Once you're satisfied with all the information and validation checks pass, 
+            click the "Save Inventory" button to create your entry.
           </Alert>
 
           {formType === 'edit' && (
             <Alert severity="info" sx={{ mt: 2 }}>
               <strong>Editing Mode:</strong> You're updating an existing inventory. Changes will be saved when you click "Update Inventory".
+              All validation rules still apply to ensure data consistency.
             </Alert>
           )}
         </Box>

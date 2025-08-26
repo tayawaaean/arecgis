@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { reCats } from '../../config/reCats';
-import { rawSolarUsage, rawBiomassPriUsage, rawWindUsage, Status } from '../../config/techAssesment';
+import { rawSolarUsage, rawBiomassPriUsage, rawWindUsage, Status, rawSolarSysTypes, rawSolarPowerGenSubcategories } from '../../config/techAssesment';
 import { useSelector } from 'react-redux';
 import { selectAllInventories } from './inventoriesApiSlice';
 import { selectAllUsers } from '../users/usersApiSlice';
@@ -33,8 +33,10 @@ export const InventoryFilterProvider = ({ children }) => {
   const [windUsageFilter, setWindUsageFilter] = useState(rawWindUsage.map(item => item.name));
   const [netMeteredFilter, setNetMeteredFilter] = useState([]);
   const [ownUseFilter, setOwnUseFilter] = useState([]);
-  const [solarSystemTypeFilter, setSolarSystemTypeFilter] = useState(["Hybrid", "Off-grid", "Grid-tied"]);
+  const [solarSystemTypeFilter, setSolarSystemTypeFilter] = useState(rawSolarSysTypes.map(item => item.name));
+  const [solarPowerGenSubcategoryFilter, setSolarPowerGenSubcategoryFilter] = useState([]);
   const [commercialFilter, setCommercialFilter] = useState("All"); // "All", "Commercial", "Non-Commercial"
+  const [capacityFilter, setCapacityFilter] = useState({ min: '', max: '' }); // Capacity filter in kW
   
   // Extract unique uploader names from inventory data
   const uploaderOptions = React.useMemo(() => {
@@ -133,8 +135,10 @@ export const InventoryFilterProvider = ({ children }) => {
     setWindUsageFilter(rawWindUsage.map(item => item.name));
     setNetMeteredFilter([]);
     setOwnUseFilter([]);
-    setSolarSystemTypeFilter(["Hybrid", "Off-grid", "Grid-tied"]);
+    setSolarSystemTypeFilter(rawSolarSysTypes.map(item => item.name));
+    setSolarPowerGenSubcategoryFilter([]);
     setCommercialFilter("All");
+    setCapacityFilter({ min: '', max: '' });
   };
 
   const handleCategoryChange = (type, index) => {
@@ -170,63 +174,6 @@ export const InventoryFilterProvider = ({ children }) => {
     };
     
     // Apply all filters
-    const filtered = searchFilter(inventories).filter((inventory) => {
-      // Make sure we have valid inventory data
-      if (!inventory.properties || !inventory.properties.reCat) return false;
-      
-      // Uploader filter (treat "all" as no restriction)
-      if (
-        uploaderFilter.length > 0 &&
-        !uploaderFilter.includes('all') &&
-        !uploaderFilter.includes(inventory.username)
-      ) return false;
-      
-      // Category filter - include only checked categories; if none selected, show none
-      if (filters.contNames.length === 0) return false;
-      if (!filters.contNames.includes(inventory.properties.reCat)) return false;
-      
-      // Commercial filter
-      if (commercialFilter !== "All") {
-        const inventoryClass = inventory.properties.reClass;
-        // Only filter if reClass is explicitly set and doesn't match
-        if (inventoryClass && commercialFilter !== inventoryClass) return false;
-      }
-
-      if (inventory.properties.reCat === 'Solar Energy') {
-        const isPowerGen = solarUsageFilter.includes("Power Generation");
-        return (
-          solarUsageFilter.includes(inventory.assessment.solarUsage) &&
-          statusFilter.includes(inventory.assessment.status) &&
-          (netMeteredFilter.length === 0 || netMeteredFilter.includes(inventory.properties.isNetMetered)) &&
-          (ownUseFilter.length === 0 || ownUseFilter.includes(inventory.properties.ownUse)) &&
-          (!isPowerGen ||
-            (isPowerGen && (
-              solarSystemTypeFilter.length === 0 || 
-              solarSystemTypeFilter.includes(inventory.assessment.solarSystemTypes)
-            ))
-          )
-        );
-      }
-      if (inventory.properties.reCat === 'Biomass') {
-        return (
-          (!inventory.assessment.biomassPriUsage || biomassUsageFilter.includes(inventory.assessment.biomassPriUsage)) &&
-          statusFilter.includes(inventory.assessment.status)
-        );
-      }
-      if (inventory.properties.reCat === 'Wind Energy') {
-        return (
-          (!inventory.assessment.windUsage || windUsageFilter.includes(inventory.assessment.windUsage)) &&
-          statusFilter.includes(inventory.assessment.status)
-        );
-      }
-      if (inventory.properties.reCat === 'Hydropower') {
-        return (
-          statusFilter.includes(inventory.assessment.status)
-        );
-      }
-      return false;
-    });
-    
     return searchFilter(inventories).filter((inventory) => {
       // Make sure we have valid inventory data
       if (!inventory.properties || !inventory.properties.reCat) return false;
@@ -249,35 +196,59 @@ export const InventoryFilterProvider = ({ children }) => {
         if (inventoryClass && commercialFilter !== inventoryClass) return false;
       }
 
+      // Capacity filter (only for Solar Energy Power Generation systems)
+      if (capacityFilter.min !== '' || capacityFilter.max !== '') {
+        const inventoryCapacity = inventory.assessment?.capacity;
+        const isSolarPowerGen = inventory.properties.reCat === 'Solar Energy' && 
+                               inventory.assessment?.solarUsage === 'Power Generation';
+        
+        // Only apply capacity filter to solar power generation systems
+        if (isSolarPowerGen && inventoryCapacity !== undefined && inventoryCapacity !== null) {
+          const capacityInKw = inventoryCapacity / 1000; // Convert W to kW
+          
+          if (capacityFilter.min !== '' && capacityInKw < parseFloat(capacityFilter.min)) return false;
+          if (capacityFilter.max !== '' && capacityInKw > parseFloat(capacityFilter.max)) return false;
+        }
+        // For non-solar power generation systems, capacity filter is ignored
+      }
+
       if (inventory.properties.reCat === 'Solar Energy') {
-        const isPowerGen = solarUsageFilter.includes("Power Generation");
+        const inventoryIsPowerGen = inventory.assessment?.solarUsage === "Power Generation";
         return (
-          solarUsageFilter.includes(inventory.assessment.solarUsage) &&
-          statusFilter.includes(inventory.assessment.status) &&
-          (netMeteredFilter.length === 0 || netMeteredFilter.includes(inventory.properties.isNetMetered)) &&
-          (ownUseFilter.length === 0 || ownUseFilter.includes(inventory.properties.ownUse)) &&
-          (!isPowerGen ||
-            (isPowerGen && (
-              solarSystemTypeFilter.includes(inventory.assessment.solarSystemTypes)
+          solarUsageFilter.includes(inventory.assessment?.solarUsage) &&
+          statusFilter.includes(inventory.assessment?.status) &&
+          (netMeteredFilter.length === 0 || netMeteredFilter.includes(inventory.properties?.isNetMetered)) &&
+          (ownUseFilter.length === 0 || ownUseFilter.includes(inventory.properties?.ownUse)) &&
+          (!inventoryIsPowerGen ||
+            (inventoryIsPowerGen && (
+              solarSystemTypeFilter.length === 0 || 
+              solarSystemTypeFilter.includes(inventory.assessment?.solarSystemTypes)
+            ))
+          ) &&
+          (!inventoryIsPowerGen ||
+            (inventoryIsPowerGen && (
+              solarPowerGenSubcategoryFilter.length === 0 || 
+              (inventory.assessment?.solarPowerGenSubcategory && 
+               solarPowerGenSubcategoryFilter.includes(inventory.assessment?.solarPowerGenSubcategory.mainCategory))
             ))
           )
         );
       }
       if (inventory.properties.reCat === 'Biomass') {
         return (
-          (!inventory.assessment.biomassPriUsage || biomassUsageFilter.includes(inventory.assessment.biomassPriUsage)) &&
-          statusFilter.includes(inventory.assessment.status)
+          (!inventory.assessment?.biomassPriUsage || biomassUsageFilter.includes(inventory.assessment?.biomassPriUsage)) &&
+          statusFilter.includes(inventory.assessment?.status)
         );
       }
       if (inventory.properties.reCat === 'Wind Energy') {
         return (
-          (!inventory.assessment.windUsage || windUsageFilter.includes(inventory.assessment.windUsage)) &&
-          statusFilter.includes(inventory.assessment.status)
+          (!inventory.assessment?.windUsage || windUsageFilter.includes(inventory.assessment?.windUsage)) &&
+          statusFilter.includes(inventory.assessment?.status)
         );
       }
       if (inventory.properties.reCat === 'Hydropower') {
         return (
-          statusFilter.includes(inventory.assessment.status)
+          statusFilter.includes(inventory.assessment?.status)
         );
       }
       return false;
@@ -303,7 +274,9 @@ export const InventoryFilterProvider = ({ children }) => {
     netMeteredFilter,
     ownUseFilter,
     solarSystemTypeFilter,
+    solarPowerGenSubcategoryFilter,
     commercialFilter,
+    capacityFilter,
     
     // Available options
     uploaderOptions,
@@ -327,7 +300,9 @@ export const InventoryFilterProvider = ({ children }) => {
     setNetMeteredFilter,
     setOwnUseFilter,
     setSolarSystemTypeFilter,
+    setSolarPowerGenSubcategoryFilter,
     setCommercialFilter,
+    setCapacityFilter,
     
     // Helper functions
     clearAllFilters,

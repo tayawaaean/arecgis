@@ -26,7 +26,9 @@ import {
   DialogContent,
   DialogActions,
   IconButton,
-  Grid
+  Grid,
+  Checkbox,
+  FormGroup
 } from '@mui/material';
 import {
   CloudUpload as CloudUploadIcon,
@@ -45,6 +47,7 @@ import { useAddNewRequestMutation } from './requestsApiSlice';
 import { useSelector } from 'react-redux';
 import { selectAllInventories } from '../inventories/inventoriesApiSlice';
 import RequestHelpModal from '../../components/RequestHelpModal';
+import { sendRequestNotification } from '../../config/emailjs';
 
 const steps = ['Select Request Type', 'Choose Transfer Type', 'Fill Details', 'Upload Documents', 'Review & Submit'];
 
@@ -225,7 +228,7 @@ const RequestForm = () => {
 
   // Form submission
   const handleSubmit = async () => {
-    if (!validateStep(2)) return;
+    if (!validateStep(3)) return;
 
     const formData = new FormData();
     formData.append('requestType', requestType);
@@ -248,10 +251,68 @@ const RequestForm = () => {
       formData.append('documents', file);
     });
 
-    if (requestType === 'transfer' && transferType === 'bulk') {
-      await addBulkTransferRequest(formData);
-    } else {
-      await addNewRequest(formData);
+    try {
+      let result;
+      if (requestType === 'transfer' && transferType === 'bulk') {
+        result = await addBulkTransferRequest(formData);
+      } else {
+        result = await addNewRequest(formData);
+      }
+
+      // If request was successful, send email notification to AREC
+      if (result.data) {
+        // Prepare inventory details for email
+        let inventoryDetails = 'N/A';
+        if (requestType === 'transfer') {
+          if (transferType === 'single' && selectedInventoryId) {
+            const inventory = allInventories.find(inv => inv._id === selectedInventoryId);
+            if (inventory) {
+              // Debug: Log the inventory structure to see where capacity is stored
+              console.log('Inventory object structure:', inventory);
+              console.log('Inventory properties:', inventory.properties);
+              console.log('Inventory assessment:', inventory.assessment);
+              
+              // Get capacity from the correct location in the inventory object
+              const capacity = inventory.assessment?.capacity || inventory.properties?.capacity || 'N/A';
+              const ownerName = inventory.properties?.ownerName || 'Unknown Owner';
+              const reCat = inventory.properties?.reCat || 'Unknown Category';
+              
+              console.log('Extracted values:', { capacity, ownerName, reCat });
+              
+              inventoryDetails = `${ownerName} - ${reCat} (${capacity} kW)`;
+            }
+          } else if (transferType === 'bulk') {
+            const selectedInventories = allInventories.filter(inv => selectedInventoryIds.includes(inv._id));
+            inventoryDetails = `${selectedInventories.length} inventories: ${selectedInventories.map(inv => {
+              const capacity = inv.assessment?.capacity || inv.properties?.capacity || 'N/A';
+              const ownerName = inv.properties?.ownerName || 'Unknown Owner';
+              const reCat = inv.properties?.reCat || 'Unknown Category';
+              
+              return `${ownerName} - ${reCat} (${capacity} kW)`;
+            }).join(', ')}`;
+          }
+        }
+
+        // Send email notification to AREC
+        const emailData = {
+          requestType: requestType === 'transfer' ? 
+            (transferType === 'single' ? 'Single Transfer' : 'Bulk Transfer') : 
+            'Account Deletion',
+          requesterName: username,
+          requesterUsername: username,
+          reason: reason,
+          inventoryDetails: inventoryDetails
+        };
+
+        const emailResult = await sendRequestNotification(emailData);
+        if (emailResult.success) {
+          console.log('Email notification sent to AREC successfully');
+        } else {
+          console.warn('Failed to send email notification to AREC:', emailResult.error);
+        }
+      }
+    } catch (error) {
+      console.error('Error submitting request:', error);
     }
   };
 
@@ -693,6 +754,95 @@ const RequestForm = () => {
         );
 
       case 3:
+        return (
+          <Box sx={{ mt: 2 }}>
+            <Typography variant="h6" gutterBottom>
+              Supporting Documents
+              {requestType === 'transfer' && (
+                <Typography component="span" color="error"> *</Typography>
+              )}
+            </Typography>
+            
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              {requestType === 'transfer'
+                ? 'Upload supporting documents for your transfer request (required)'
+                : 'Upload any supporting documents for your account deletion request (optional)'
+              }
+            </Typography>
+
+            {/* Password Confirmation */}
+            <TextField
+              fullWidth
+              type="password"
+              label="Confirm Your Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              error={!!validationErrors.password}
+              helperText={validationErrors.password || 'Enter your password to confirm this request'}
+              placeholder="Enter your password"
+              sx={{ mb: 3 }}
+            />
+
+            <Box
+              sx={{
+                border: 2,
+                borderColor: isDragActive ? 'primary.main' : 'grey.300',
+                borderStyle: 'dashed',
+                borderRadius: 1,
+                p: 3,
+                textAlign: 'center',
+                backgroundColor: isDragActive ? 'action.hover' : 'background.paper',
+                cursor: 'pointer',
+                mb: 2,
+              }}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              onClick={() => document.getElementById('file-upload').click()}
+            >
+              <input
+                id="file-upload"
+                type="file"
+                multiple
+                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                style={{ display: 'none' }}
+                onChange={(e) => handleFileUpload(e.target.files)}
+              />
+              <CloudUploadIcon sx={{ fontSize: 48, color: 'grey.400', mb: 1 }} />
+              <Typography variant="h6" gutterBottom>
+                Drop files here or click to upload
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Supported formats: PDF, DOC, DOCX, JPG, PNG (Max 5 files)
+              </Typography>
+            </Box>
+
+            {validationErrors.documents && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {validationErrors.documents}
+              </Alert>
+            )}
+
+            {documents.length > 0 && (
+              <Box>
+                <Typography variant="subtitle1" gutterBottom>
+                  Uploaded Files ({documents.length}/5)
+                </Typography>
+                {documents.map((file, index) => (
+                  <Chip
+                    key={index}
+                    label={`${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`}
+                    onDelete={() => handleFileRemove(index)}
+                    deleteIcon={<DeleteIcon />}
+                    sx={{ m: 0.5 }}
+                  />
+                ))}
+              </Box>
+            )}
+          </Box>
+        );
+
+      case 4:
         const selectedInventory = allInventories.find(inv => inv.id === selectedInventoryId);
         return (
           <Box sx={{ mt: 2 }}>

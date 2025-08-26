@@ -53,8 +53,25 @@ const login = async (req, res) => {
         maxAge: 7 * 24 * 60 * 60 * 1000 // cookie expiry: set to match rT
     })
 
-    // Send accessToken containing username and roles 
-    res.json({ accessToken })
+    // Check if profile is complete
+    const isProfileComplete = foundUser.isProfileComplete();
+    const profileCompletionPercentage = foundUser.profileCompletionPercentage;
+
+    // Send accessToken containing username and roles, plus profile completion status
+    res.json({ 
+        accessToken,
+        isProfileComplete,
+        profileCompletionPercentage,
+        user: {
+            id: foundUser.id,
+            username: foundUser.username,
+            roles: foundUser.roles,
+            fullName: foundUser.fullName,
+            email: foundUser.email,
+            address: foundUser.address,
+            contactNumber: foundUser.contactNumber
+        }
+    })
 }
 
 // @desc Refresh

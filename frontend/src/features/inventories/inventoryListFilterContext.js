@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { reCats } from '../../config/reCats';
-import { rawSolarUsage, rawBiomassPriUsage, rawWindUsage, Status } from '../../config/techAssesment';
+import { rawSolarUsage, rawBiomassPriUsage, rawWindUsage, Status, rawSolarPowerGenSubcategories } from '../../config/techAssesment';
 import { useSelector } from 'react-redux';
 import { useGetInventoryListSummaryQuery } from './inventoryListApiSlice';
 import useAuth from '../../hooks/useAuth';
@@ -39,6 +39,7 @@ export const InventoryFilterProvider = ({ children }) => {
   const [netMeteredFilter, setNetMeteredFilter] = useState([]);
   const [ownUseFilter, setOwnUseFilter] = useState([]);
   const [solarSystemTypeFilter, setSolarSystemTypeFilter] = useState(["Hybrid", "Off-grid", "Grid-tied"]);
+  const [solarPowerGenSubcategoryFilter, setSolarPowerGenSubcategoryFilter] = useState([]);
   const [commercialFilter, setCommercialFilter] = useState("All"); // "All", "Commercial", "Non-Commercial"
   
   // Extract unique uploader names from inventory data
@@ -139,6 +140,7 @@ export const InventoryFilterProvider = ({ children }) => {
     setNetMeteredFilter([]);
     setOwnUseFilter([]);
     setSolarSystemTypeFilter(["Hybrid", "Off-grid", "Grid-tied"]);
+    setSolarPowerGenSubcategoryFilter([]);
     setCommercialFilter("All");
   };
 
@@ -208,6 +210,13 @@ export const InventoryFilterProvider = ({ children }) => {
               solarSystemTypeFilter.length === 0 || 
               solarSystemTypeFilter.includes(inventory.assessment.solarSystemTypes)
             ))
+          ) &&
+          (!isPowerGen ||
+            (isPowerGen && (
+              solarPowerGenSubcategoryFilter.length === 0 || 
+              (inventory.assessment.solarPowerGenSubcategory && 
+               solarPowerGenSubcategoryFilter.includes(inventory.assessment.solarPowerGenSubcategory.mainCategory))
+            ))
           )
         );
       }
@@ -249,6 +258,7 @@ export const InventoryFilterProvider = ({ children }) => {
     netMeteredFilter,
     ownUseFilter,
     solarSystemTypeFilter,
+    solarPowerGenSubcategoryFilter,
     commercialFilter,
     
     // Available options
@@ -273,6 +283,7 @@ export const InventoryFilterProvider = ({ children }) => {
     setNetMeteredFilter,
     setOwnUseFilter,
     setSolarSystemTypeFilter,
+    setSolarPowerGenSubcategoryFilter,
     setCommercialFilter,
     
     // Helper functions

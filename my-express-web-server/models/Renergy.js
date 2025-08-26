@@ -18,7 +18,14 @@ const renergySchema = new mongoose.Schema({
         type: Array
     },
     assessment:{
-        type: mongoose.Schema.Types.Mixed
+        type: mongoose.Schema.Types.Mixed,
+        // Solar subcategories for power generation
+        solarPowerGenSubcategory: {
+            mainCategory: { type: String }, // e.g., "Rooftop Solar PV", "Ground-mounted Solar PV", "Building-integrated PV (BIPV)"
+            subcategory: { type: String }, // e.g., "Residential rooftop – installed on homes"
+            mainCategoryId: { type: Number },
+            subcategoryId: { type: Number }
+        }
     },
     properties: {
         ownerName: {

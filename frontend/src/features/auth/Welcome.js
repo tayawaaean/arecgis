@@ -60,7 +60,33 @@ const Welcome = () => {
   // Calculate summary statistics (non-commercial only)
   const totalSystems = nonCommercialInventories?.length || 0
   const totalCapacity = nonCommercialInventories?.reduce((sum, inv) => {
-    return sum + (Number(inv.assessment?.capacity) || 0)
+    let capacity = 0;
+    const reCat = inv.properties?.reCat;
+    
+    if (reCat === 'Solar Energy') {
+      if (inv.assessment?.solarStreetLights) {
+        // Handle solar street lights with multiple items
+        capacity = inv.assessment.solarStreetLights.reduce((solarSum, solar) => {
+          const cap = (parseFloat(solar.capacity) || 0) / 1000; // Convert W to kW
+          const pcs = parseInt(solar.pcs, 10) || 0;
+          return solarSum + (cap * pcs);
+        }, 0);
+      } else if (inv.assessment?.solarUsage === 'Power Generation') {
+        capacity = (parseFloat(inv.assessment.capacity) || 0) / 1000; // Convert W to kW
+      } else if (inv.assessment?.solarUsage === 'Solar Pump') {
+        capacity = (parseFloat(inv.assessment.capacity) || 0) / 1000; // Convert W to kW
+      } else if (inv.assessment?.solarUsage === 'Other') {
+        capacity = (parseFloat(inv.assessment.capacity) || 0) / 1000; // Convert W to kW
+      }
+    } else if (reCat === 'Wind Energy') {
+      capacity = (parseFloat(inv.assessment?.capacity) || 0) / 1000; // Convert W to kW
+    } else if (reCat === 'Biomass') {
+      capacity = (parseFloat(inv.assessment?.capacity) || 0) / 1000; // Convert W to kW
+    } else if (reCat === 'Hydropower') {
+      capacity = (parseFloat(inv.assessment?.capacity) || 0) / 1000; // Convert W to kW
+    }
+    
+    return sum + capacity;
   }, 0) || 0
   
   const systemsByCategory = nonCommercialInventories?.reduce((acc, inv) => {
@@ -75,6 +101,43 @@ const Welcome = () => {
   
   const recentInventories = nonCommercialInventories?.slice(-3) || []
   const totalUsers = users?.length || 0
+  
+  // Debug logging for capacity calculation
+  console.log('Welcome - Non-commercial capacity calculation:', {
+    totalInventories: nonCommercialInventories?.length || 0,
+    totalCapacity: totalCapacity,
+    capacityBreakdown: nonCommercialInventories?.reduce((acc, inv) => {
+      const reCat = inv.properties?.reCat;
+      const reClass = inv.properties?.reClass;
+      let capacity = 0;
+      
+      if (reCat === 'Solar Energy') {
+        if (inv.assessment?.solarStreetLights) {
+          capacity = inv.assessment.solarStreetLights.reduce((solarSum, solar) => {
+            const cap = (parseFloat(solar.capacity) || 0) / 1000; // Convert W to kW
+            const pcs = parseInt(solar.pcs, 10) || 0;
+            return solarSum + (cap * pcs);
+          }, 0);
+        } else if (inv.assessment?.solarUsage === 'Power Generation') {
+          capacity = (parseFloat(inv.assessment.capacity) || 0) / 1000; // Convert W to kW
+        } else if (inv.assessment?.solarUsage === 'Solar Pump') {
+          capacity = (parseFloat(inv.assessment.capacity) || 0) / 1000; // Convert W to kW
+        } else if (inv.assessment?.solarUsage === 'Other') {
+          capacity = (parseFloat(inv.assessment.capacity) || 0) / 1000; // Convert W to kW
+        }
+      } else if (reCat === 'Wind Energy') {
+        capacity = (parseFloat(inv.assessment?.capacity) || 0) / 1000; // Convert W to kW
+      } else if (reCat === 'Biomass') {
+        capacity = (parseFloat(inv.assessment?.capacity) || 0) / 1000; // Convert W to kW
+      } else if (reCat === 'Hydropower') {
+        capacity = (parseFloat(inv.assessment?.capacity) || 0) / 1000; // Convert W to kW
+      }
+      
+      if (!acc[reCat]) acc[reCat] = [];
+      acc[reCat].push({ capacity, reClass, id: inv._id });
+      return acc;
+    }, {})
+  });
   
   const getCategoryIcon = (category) => {
     switch(category) {

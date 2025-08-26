@@ -54,7 +54,7 @@ const getUserById = async (req, res) => {
 // @route POST /users
 // @access Private
 const createNewUser = async (req, res) => {
-    const { username, password, roles, fullName, address, contactNumber, affiliation, companyName, companyContactNumber } = req.body
+    const { username, email, password, roles, fullName, address, contactNumber, affiliation, companyName, companyContactNumber } = req.body
 
     //confirm data
     if (!username || !password) {
@@ -62,10 +62,18 @@ const createNewUser = async (req, res) => {
     }
 
     //check for duplicates
-    const duplicates = await User.findOne({ username }).collation({ locale: 'en', strength: 2 }).lean().exec()
+    const duplicates = await User.findOne({ username }).collation({ locale: 'en', strength: 2 }).lean()
 
     if (duplicates) {
         return res.status(409).json({ message: 'Duplicate username' })
+    }
+
+    // Check for duplicate email if provided
+    if (email) {
+        const emailDuplicate = await User.findOne({ email }).collation({ locale: 'en', strength: 2 }).lean()
+        if (emailDuplicate) {
+            return res.status(409).json({ message: 'Email address already in use' })
+        }
     }
 
     // Hash password 
@@ -73,6 +81,7 @@ const createNewUser = async (req, res) => {
 
     const userObject = {
         username,
+        email: email || '',
         password: hashedPwd,
         roles: (!Array.isArray(roles) || !roles.length) ? ['Employee'] : roles,
         fullName: fullName || '',
@@ -98,7 +107,7 @@ const createNewUser = async (req, res) => {
 // @route PATCH /users
 // @access Private
 const updateUser = async (req, res) => {
-    const { id, username, roles, active, password, currPW, isAdmin, isManager, fullName, address, contactNumber, affiliation, companyName, companyContactNumber } = req.body
+    const { id, username, email, roles, active, password, currPW, isAdmin, isManager, fullName, address, contactNumber, affiliation, companyName, companyContactNumber } = req.body
 
     // Confirm data 
     if (!id || !username || !Array.isArray(roles) || !roles.length || typeof active !== 'boolean') {
@@ -112,7 +121,7 @@ const updateUser = async (req, res) => {
         return res.status(400).json({ message: 'User not found' })
     }
 
-    // Check for duplicate 
+    // Check for duplicate username
     const duplicate = await User.findOne({ username }).collation({ locale: 'en', strength: 2 }).lean().exec()
 
     // Allow updates to the original user 
@@ -120,7 +129,16 @@ const updateUser = async (req, res) => {
         return res.status(409).json({ message: 'Duplicate username' })
     }
 
+    // Check for duplicate email if provided
+    if (email && email !== user.email) {
+        const emailDuplicate = await User.findOne({ email }).collation({ locale: 'en', strength: 2 }).lean().exec()
+        if (emailDuplicate) {
+            return res.status(409).json({ message: 'Email address already in use' })
+        }
+    }
+
     user.username = username
+    if (email !== undefined) user.email = email
     user.roles = roles
     user.active = active
     
@@ -154,7 +172,7 @@ const updateUser = async (req, res) => {
 // @access Private - Users can update their own profile
 const updateOwnProfile = async (req, res) => {
     const { user: currentUsername, roles: currentRoles } = req // from JWT middleware
-    const { fullName, address, contactNumber, affiliation, companyName, companyContactNumber, password, currPW } = req.body
+    const { email, fullName, address, contactNumber, affiliation, companyName, companyContactNumber, password, currPW } = req.body
 
     // Get the current user from the database
     const currentUser = await User.findOne({ username: currentUsername }).exec()
@@ -162,7 +180,16 @@ const updateOwnProfile = async (req, res) => {
         return res.status(404).json({ message: 'User not found' })
     }
 
+    // Check for duplicate email if provided
+    if (email && email !== currentUser.email) {
+        const emailDuplicate = await User.findOne({ email }).collation({ locale: 'en', strength: 2 }).lean().exec()
+        if (emailDuplicate) {
+            return res.status(409).json({ message: 'Email address already in use' })
+        }
+    }
+
     // Update profile fields if provided
+    if (email !== undefined) currentUser.email = email
     if (fullName !== undefined) currentUser.fullName = fullName
     if (address !== undefined) currentUser.address = address
     if (contactNumber !== undefined) currentUser.contactNumber = contactNumber

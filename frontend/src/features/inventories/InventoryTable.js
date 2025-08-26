@@ -59,7 +59,7 @@ const InventoryTable = ({ setClearVal, clearVal, onFlyTo }) => {
   
   // Build filters for API
   const filters = {
-    reClass: REClass === "All" ? undefined : 
+    reClass: REClass === "All" ? "All" : 
              REClass === "Commercial" ? "Commercial" : 
              REClass === "gencompany" ? "gencompany" : "Non-Commercial",
     quickSearch: quickSearchValue || undefined
@@ -91,6 +91,19 @@ const InventoryTable = ({ setClearVal, clearVal, onFlyTo }) => {
   const inventories = paginatedData?.data || [];
   const meta = paginatedData?.meta || { page: 1, total: 0, limit: 20, totalPages: 0 };
   const allInventories = summaryData; // For calculations
+  
+  // Debug: Check if summary data is being filtered correctly
+  console.log('InventoryTable - API data check:', {
+    paginatedDataCount: inventories.length,
+    summaryDataCount: allInventories?.length || 0,
+    reClassFilter: REClass,
+    filters: filters,
+    summaryDataSample: allInventories?.slice(0, 2).map(inv => ({
+      id: inv._id,
+      reClass: inv.properties?.reClass,
+      reCat: inv.properties?.reCat
+    }))
+  });
   
   // Summary stats
   const [solarStTotal, setSolarStTotal] = useState(0);
@@ -169,6 +182,65 @@ const InventoryTable = ({ setClearVal, clearVal, onFlyTo }) => {
   // Calculate summary statistics from all inventories
   useEffect(() => {
     if (!allInventories || allInventories.length === 0) return;
+    
+    // Additional safety check: Ensure allInventories is a valid array
+    if (!Array.isArray(allInventories)) {
+      console.log('InventoryTable - allInventories is not an array:', typeof allInventories);
+      return;
+    }
+    
+    // Debug logging
+    console.log('InventoryTable - Data received:', {
+      totalInventories: allInventories.length,
+      reClassFilter: REClass,
+      filters: filters,
+      sampleInventories: allInventories.slice(0, 3).map(inv => ({
+        id: inv._id,
+        reClass: inv.properties?.reClass,
+        reCat: inv.properties?.reCat,
+        capacity: inv.assessment?.capacity
+      }))
+    });
+    
+    // Debug: Count inventories by classification
+    const classificationCounts = allInventories.reduce((acc, inv) => {
+      const reClass = inv.properties?.reClass || 'Unknown';
+      acc[reClass] = (acc[reClass] || 0) + 1;
+      return acc;
+    }, {});
+    console.log('InventoryTable - Classification counts:', classificationCounts);
+    
+    // Debug: Show some capacity values by classification
+    const capacityByClass = allInventories.reduce((acc, inv) => {
+      const reClass = inv.properties?.reClass || 'Unknown';
+      const reCat = inv.properties?.reCat;
+      let capacity = 0;
+      
+      if (reCat === 'Solar Energy') {
+        if (inv.assessment?.solarStreetLights) {
+          capacity = inv.assessment.solarStreetLights.reduce((sum, solar) => {
+            const cap = (parseFloat(solar.capacity) || 0) / 1000; // Convert W to kW
+            const pcs = parseInt(solar.pcs, 10) || 0;
+            return sum + (cap * pcs);
+          }, 0);
+        } else if (inv.assessment?.solarUsage === 'Power Generation') {
+          capacity = (parseFloat(inv.assessment.capacity) || 0) / 1000; // Convert W to kW
+        } else if (inv.assessment?.solarUsage === 'Solar Pump') {
+          capacity = (parseFloat(inv.assessment.capacity) || 0) / 1000; // Convert W to kW
+        }
+      } else if (reCat === 'Wind Energy') {
+        capacity = (parseFloat(inv.assessment?.capacity) || 0) / 1000; // Convert W to kW
+      } else if (reCat === 'Biomass') {
+        capacity = (parseFloat(inv.assessment?.capacity) || 0) / 1000; // Convert W to kW
+      } else if (reCat === 'Hydropower') {
+        capacity = (parseFloat(inv.assessment?.capacity) || 0) / 1000; // Convert W to kW
+      }
+      
+      if (!acc[reClass]) acc[reClass] = [];
+      acc[reClass].push({ reCat, capacity, id: inv._id });
+      return acc;
+    }, {});
+    console.log('InventoryTable - Capacity by classification:', capacityByClass);
 
     let rawSolarPowerGen = [];
     let rawSolarValue = [];
@@ -202,9 +274,9 @@ const InventoryTable = ({ setClearVal, clearVal, onFlyTo }) => {
 
       if (inventory.assessment.solarStreetLights) {
         const rawSolarItems = inventory.assessment.solarStreetLights;
-        // Safe conversion for capacity and pcs
+        // Safe conversion for capacity and pcs - Convert W to kW
         const product = rawSolarItems.map(solar => {
-          const cap = parseFloat(solar.capacity);
+          const cap = (parseFloat(solar.capacity) || 0) / 1000; // Convert W to kW
           const pcs = parseInt(solar.pcs, 10);
           return (isNaN(cap) ? 0 : cap) * (isNaN(pcs) ? 0 : pcs);
         });
@@ -220,30 +292,32 @@ const InventoryTable = ({ setClearVal, clearVal, onFlyTo }) => {
         const rawSolarStUnt = units.reduce((accumulator, currentValue) =>
           accumulator + currentValue, initialUnitValue
         );
-        const rawGen = Math.round((rawSolarStreet / 1000) * sunHour * noOfDays);
+        const rawGen = Math.round(rawSolarStreet * sunHour * noOfDays); // rawSolarStreet is now in kW
         rawSolarValue.push(rawGen);
         rawSolarValueCap.push(rawSolarStreet);
         rawSolarStUnits.push(rawSolarStUnt);
       }
 
       if (inventory.assessment.solarUsage === 'Power Generation') {
-        const rawGen = Math.round((inventory.assessment.capacity / 1000) * sunHour * noOfDays);
+        const capacityInKW = (inventory.assessment.capacity || 0) / 1000; // Convert W to kW
+        const rawGen = Math.round(capacityInKW * sunHour * noOfDays);
         rawSolarPowerGen.push(rawGen);
-        rawSolarPowerGenCap.push(Math.round(inventory.assessment.capacity));
+        rawSolarPowerGenCap.push(Math.round(capacityInKW));
         rawSolarPowerGenUnits.push(inventory.assessment.solarUsage);
       }
       
       if (inventory.assessment.solarUsage === 'Solar Pump') {
-        const rawGen = Math.round((inventory.assessment.capacity / 1000) * sunHour * noOfDays);
+        const capacityInKW = (inventory.assessment.capacity || 0) / 1000; // Convert W to kW
+        const rawGen = Math.round(capacityInKW * sunHour * noOfDays);
         rawSolarPumpValue.push(rawGen);
-        rawSolarPumpValueCap.push(Math.round(inventory.assessment.capacity));
+        rawSolarPumpValueCap.push(Math.round(capacityInKW));
         rawSolarPumpUnits.push(inventory.assessment.solarUsage);
       }
       
       // Calculate Wind Energy
       if (inventory.properties.reCat === 'Wind Energy') {
-        const windCap = parseFloat(inventory.assessment.capacity) || 0;
-        const windGen = Math.round((windCap / 1000) * 24 * 365 * 0.3); // Assuming 30% capacity factor
+        const windCap = (parseFloat(inventory.assessment.capacity) || 0) / 1000; // Convert W to kW
+        const windGen = Math.round(windCap * 24 * 365 * 0.3); // Assuming 30% capacity factor
         rawWindTotal.push(windGen);
         rawWindTotalCap.push(windCap);
         rawWindTotalUnit.push(1);
@@ -251,7 +325,7 @@ const InventoryTable = ({ setClearVal, clearVal, onFlyTo }) => {
       
       // Calculate Biomass
       if (inventory.properties.reCat === 'Biomass') {
-        const bioCap = parseFloat(inventory.assessment.capacity) || 0;
+        const bioCap = (parseFloat(inventory.assessment.capacity) || 0) / 1000; // Convert W to kW
         const bioGen = Math.round((bioCap * 365 * 24 * 0.7)); // Assuming 70% capacity factor
         rawBiomassTotal.push(bioGen);
         rawBiomassTotalCap.push(bioCap);
@@ -260,7 +334,7 @@ const InventoryTable = ({ setClearVal, clearVal, onFlyTo }) => {
       
       // Calculate Hydropower
       if (inventory.properties.reCat === 'Hydropower') {
-        const hydroCap = parseFloat(inventory.assessment.capacity) || 0;
+        const hydroCap = (parseFloat(inventory.assessment.capacity) || 0) / 1000; // Convert W to kW
         const hydroGen = Math.round((hydroCap * 365 * 24 * 0.6)); // Assuming 60% capacity factor
         rawHydropowerTotal.push(hydroGen);
         rawHydropowerTotalCap.push(hydroCap);
@@ -282,41 +356,102 @@ const InventoryTable = ({ setClearVal, clearVal, onFlyTo }) => {
 
     setTotalAnnualEnergyProduction(totalAnnualEnergyProduction);
 
-    // Calculate totals
-    const solarStCaptotal = rawSolarValueCap.reduce((a, b) => a + b, 0);
-    const powerGenCapTotal = rawSolarPowerGenCap.reduce((a, b) => a + b, 0);
-    const solarPumpCapTotal = rawSolarPumpValueCap.reduce((a, b) => a + b, 0);
+    // Calculate totals - Add safety checks for empty arrays
+    const solarStCaptotal = rawSolarValueCap.length > 0 ? rawSolarValueCap.reduce((a, b) => a + b, 0) : 0;
+    const powerGenCapTotal = rawSolarPowerGenCap.length > 0 ? rawSolarPowerGenCap.reduce((a, b) => a + b, 0) : 0;
+    const solarPumpCapTotal = rawSolarPumpValueCap.length > 0 ? rawSolarPumpValueCap.reduce((a, b) => a + b, 0) : 0;
 
-    const solarSttotal = rawSolarValue.reduce((a, b) => a + b, 0);
-    const powerGenTotal = rawSolarPowerGen.reduce((a, b) => a + b, 0);
-    const solarPumpTotal = rawSolarPumpValue.reduce((a, b) => a + b, 0);
+    const solarSttotal = rawSolarValue.length > 0 ? rawSolarValue.reduce((a, b) => a + b, 0) : 0;
+    const powerGenTotal = rawSolarPowerGen.length > 0 ? rawSolarPowerGen.reduce((a, b) => a + b, 0) : 0;
+    const solarPumpTotal = rawSolarPumpValue.length > 0 ? rawSolarPumpValue.reduce((a, b) => a + b, 0) : 0;
 
-    const solarStUnitTotal = rawSolarStUnits.reduce((a, b) => a + b, 0);
+    const solarStUnitTotal = rawSolarStUnits.length > 0 ? rawSolarStUnits.reduce((a, b) => a + b, 0) : 0;
 
     setSolarStTotalUnit(solarStUnitTotal);
     setSolarPowerGenTotalUnit(rawSolarPowerGenUnits.length);
     setSolarPumpTotalUnit(rawSolarPumpUnits.length);
 
-    setSolarStTotalCap(solarStCaptotal / 1000);
-    setSolarPowerGenTotalCap(powerGenCapTotal / 1000);
-    setSolarPumpTotalCap(solarPumpCapTotal / 1000);
+    setSolarStTotalCap(solarStCaptotal);
+    setSolarPowerGenTotalCap(powerGenCapTotal);
+    setSolarPumpTotalCap(solarPumpCapTotal);
 
     setSolarStTotal(solarSttotal);
     setSolarPowerGenTotal(powerGenTotal);
     setSolarPumpTotal(solarPumpTotal);
     
-    // Set other energy type totals
-    setWindTotal(rawWindTotal.reduce((a, b) => a + b, 0));
-    setWindTotalCap(rawWindTotalCap.reduce((a, b) => a + b, 0));
-    setWindTotalUnit(rawWindTotalUnit.reduce((a, b) => a + b, 0));
+    // Set other energy type totals - Add safety checks for empty arrays
+    setWindTotal(rawWindTotal.length > 0 ? rawWindTotal.reduce((a, b) => a + b, 0) : 0);
+    setWindTotalCap(rawWindTotalCap.length > 0 ? rawWindTotalCap.reduce((a, b) => a + b, 0) : 0);
+    setWindTotalUnit(rawWindTotalUnit.length > 0 ? rawWindTotalUnit.reduce((a, b) => a + b, 0) : 0);
     
-    setBiomassTotal(rawBiomassTotal.reduce((a, b) => a + b, 0));
-    setBiomassTotalCap(rawBiomassTotalCap.reduce((a, b) => a + b, 0));
-    setBiomassTotalUnit(rawBiomassTotalUnit.reduce((a, b) => a + b, 0));
+    setBiomassTotal(rawBiomassTotal.length > 0 ? rawBiomassTotal.reduce((a, b) => a + b, 0) : 0);
+    setBiomassTotalCap(rawBiomassTotalCap.length > 0 ? rawBiomassTotalCap.reduce((a, b) => a + b, 0) : 0);
+    setBiomassTotalUnit(rawBiomassTotalUnit.length > 0 ? rawBiomassTotalUnit.reduce((a, b) => a + b, 0) : 0);
     
-    setHydropowerTotal(rawHydropowerTotal.reduce((a, b) => a + b, 0));
-    setHydropowerTotalCap(rawHydropowerTotalCap.reduce((a, b) => a + b, 0));
-    setHydropowerTotalUnit(rawHydropowerTotalUnit.reduce((a, b) => a + b, 0));
+    setHydropowerTotal(rawHydropowerTotal.length > 0 ? rawHydropowerTotal.reduce((a, b) => a + b, 0) : 0);
+    setHydropowerTotalCap(rawHydropowerTotalCap.length > 0 ? rawHydropowerTotalCap.reduce((a, b) => a + b, 0) : 0);
+    setHydropowerTotalUnit(rawHydropowerTotalUnit.length > 0 ? rawHydropowerTotalUnit.reduce((a, b) => a + b, 0) : 0);
+    
+    // Debug logging for calculated totals
+    console.log('InventoryTable - Calculated totals:', {
+      solarStTotalCap: solarStCaptotal,
+      solarPowerGenTotalCap: powerGenCapTotal,
+      solarPumpTotalCap: solarPumpCapTotal,
+      windTotalCap: rawWindTotalCap.length > 0 ? rawWindTotalCap.reduce((a, b) => a + b, 0) : 0,
+      biomassTotalCap: rawBiomassTotalCap.length > 0 ? rawBiomassTotalCap.reduce((a, b) => a + b, 0) : 0,
+      hydropowerTotalCap: rawHydropowerTotalCap.length > 0 ? rawHydropowerTotalCap.reduce((a, b) => a + b, 0) : 0,
+      totalCapacity: (solarStCaptotal + powerGenCapTotal + solarPumpCapTotal + 
+                     (rawWindTotalCap.length > 0 ? rawWindTotalCap.reduce((a, b) => a + b, 0) : 0) + 
+                     (rawBiomassTotalCap.length > 0 ? rawBiomassTotalCap.reduce((a, b) => a + b, 0) : 0) + 
+                     (rawHydropowerTotalCap.length > 0 ? rawHydropowerTotalCap.reduce((a, b) => a + b, 0) : 0))
+    });
+    
+    // Debug: Show raw array contents
+    console.log('InventoryTable - Raw arrays:', {
+      rawSolarValueCap: rawSolarValueCap,
+      rawSolarPowerGenCap: rawSolarPowerGenCap,
+      rawSolarPumpValueCap: rawSolarPumpValueCap,
+      rawWindTotalCap: rawWindTotalCap,
+      rawBiomassTotalCap: rawBiomassTotalCap,
+      rawHydropowerTotalCap: rawHydropowerTotalCap
+    });
+    
+    // Debug: Simple capacity sum test
+    const simpleCapacitySum = allInventories && allInventories.length > 0 ? allInventories.reduce((sum, inv) => {
+      let capacity = 0;
+      const reCat = inv.properties?.reCat;
+      
+      if (reCat === 'Solar Energy') {
+        if (inv.assessment?.solarStreetLights) {
+          capacity = inv.assessment.solarStreetLights.reduce((solarSum, solar) => {
+            const cap = (parseFloat(solar.capacity) || 0) / 1000; // Convert W to kW
+            const pcs = parseInt(solar.pcs, 10) || 0;
+            return solarSum + (cap * pcs);
+          }, 0);
+        } else if (inv.assessment?.solarUsage === 'Power Generation') {
+          capacity = (parseFloat(inv.assessment.capacity) || 0) / 1000; // Convert W to kW
+        } else if (inv.assessment?.solarUsage === 'Solar Pump') {
+          capacity = (parseFloat(inv.assessment.capacity) || 0) / 1000; // Convert W to kW
+        }
+      } else if (reCat === 'Wind Energy') {
+        capacity = (parseFloat(inv.assessment?.capacity) || 0) / 1000; // Convert W to kW
+      } else if (reCat === 'Biomass') {
+        capacity = (parseFloat(inv.assessment?.capacity) || 0) / 1000; // Convert W to kW
+      } else if (reCat === 'Hydropower') {
+        capacity = (parseFloat(inv.assessment?.capacity) || 0) / 1000; // Convert W to kW
+      }
+      
+      return sum + capacity;
+    }, 0) : 0;
+    
+    console.log('InventoryTable - Simple capacity sum test:', {
+      simpleCapacitySum: simpleCapacitySum, // Raw capacity in kW (converted from W)
+      simpleCapacitySumMW: simpleCapacitySum / 1000, // Convert to MW
+      simpleCapacitySumGW: simpleCapacitySum / 1000000, // Convert to GW
+      expectedTotal: 151.90 + 0.2147, // Commercial + Non-Commercial in GW
+      difference: (simpleCapacitySum / 1000000) - (151.90 + 0.2147),
+      note: 'Capacity values converted from W to kW in database'
+    });
   }, [allInventories, REClass]);
 
   const dateNow = new Date();
@@ -1179,15 +1314,9 @@ const InventoryTable = ({ setClearVal, clearVal, onFlyTo }) => {
                              )}
                            </TableCell>
                            <TableCell align="right">
-                             {Math.ceil(Math.log10(solarStTotalCap + 1)) >= 4 ? (
-                               <>
-                                 <b>{(solarStTotalCap / 1000).toFixed(2)}</b> MW
-                               </>
-                             ) : (
-                               <>
-                                 <b>{solarStTotalCap.toFixed(2)}</b> kW
-                               </>
-                             )}
+                             <Tooltip title={`${solarStTotalCap.toLocaleString()} kW (full value)`} placement="top" arrow>
+                               <b style={{ cursor: 'help' }}>{formatCapacity(solarStTotalCap)}</b>
+                             </Tooltip>
                            </TableCell>
                            <TableCell align="right"></TableCell>
                          </TableRow>

@@ -74,6 +74,63 @@ export const rawSolarUsage = [{
 },
 ]
 
+export const rawSolarPowerGenSubcategories = [{
+    id: 0,
+    name: "Rooftop Solar PV",
+    checked: false,
+    subcategories: [
+        {
+            id: 0,
+            name: "Residential rooftop – installed on homes",
+            checked: false,
+        },
+        {
+            id: 1,
+            name: "Commercial rooftop – malls, offices, warehouses",
+            checked: false,
+        },
+        {
+            id: 2,
+            name: "Industrial rooftop – factories, plants",
+            checked: false,
+        }
+    ]
+},
+{
+    id: 1,
+    name: "Ground-mounted Solar PV",
+    checked: false,
+    subcategories: [
+        {
+            id: 0,
+            name: "Solar farms / Solar parks – utility-scale, large open land",
+            checked: false,
+        },
+        {
+            id: 1,
+            name: "Captive solar plants – installed on private land for self-use (industries, institutions)",
+            checked: false,
+        },
+        {
+            id: 2,
+            name: "Floating solar farms – installed on reservoirs, lakes, or dams",
+            checked: false,
+        }
+    ]
+},
+{
+    id: 2,
+    name: "Building-integrated PV (BIPV)",
+    checked: false,
+    subcategories: [
+        {
+            id: 0,
+            name: "Integrated into walls, windows, facades, or roofing materials",
+            checked: false,
+        }
+    ]
+}]
+
 export const rawSolarSysTypes = [{
     id: 0,
     name: "Off-grid",

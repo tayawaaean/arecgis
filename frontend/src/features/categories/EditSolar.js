@@ -1,16 +1,26 @@
 import React, { useState, useEffect } from 'react'
 import { FormLabel, TextField, Input, InputAdornment, Box, Checkbox, FormControlLabel, FormGroup, Typography, Grid, Button, Alert } from '@mui/material'
-import { rawSolarUsage, rawSolarSysTypes, Status } from "../../config/techAssesment"
+import { rawSolarUsage, rawSolarSysTypes, Status, rawSolarPowerGenSubcategories } from "../../config/techAssesment"
 import { boxstyle } from '../../config/style'
 import HighlightOffSharpIcon from '@mui/icons-material/HighlightOffSharp'
 
 export const EditSolar = (props) => {
   // Check if this is a commercial RE installation
   const isCommercial = props.reClass === "Commercial";
+  // Check if the system is net-metered
+  const isNetMetered = props.isNetMetered === true;
+  // Check if the system is a Distributed Energy Resource
+  const isDer = props.isDer === true;
+  // Check if the system is for own use
+  const isOwnUse = props.isOwnUse === true;
   
   // Find indexes for auto-selection
   const powerGenerationIndex = rawSolarUsage.findIndex(usage => usage.name === "Power Generation");
   const gridTiedIndex = rawSolarSysTypes.findIndex(type => type.name === "Grid-tied");
+  const offGridIndex = rawSolarSysTypes.findIndex(type => type.name === "Off-grid");
+  
+  // Check if any power generation related option is selected
+  const isPowerGenerationRelated = isNetMetered || isDer || isOwnUse;
   
   const [formValues, setFormValues] = useState(
     props.reItems.assessment.solarUsage === 'Solar Street Lights'
@@ -43,6 +53,12 @@ export const EditSolar = (props) => {
     value: props?.reItems?.assessment?.status || '',
     otherVal: ''
   })
+  const [solarPowerGenSubcategory, setSolarPowerGenSubcategory] = useState({
+    mainCategory: props?.reItems?.assessment?.solarPowerGenSubcategory?.mainCategory || '',
+    subcategory: props?.reItems?.assessment?.solarPowerGenSubcategory?.subcategory || '',
+    mainCategoryId: props?.reItems?.assessment?.solarPowerGenSubcategory?.mainCategoryId || null,
+    subcategoryId: props?.reItems?.assessment?.solarPowerGenSubcategory?.subcategoryId || null
+  })
 
   const [remarks, setRemarks] = useState(props?.reItems?.assessment?.remarks || '')
   const [flowRate, setFlowRate] = useState(props?.reItems?.assessment?.flowRate || '')
@@ -71,6 +87,34 @@ export const EditSolar = (props) => {
     }
   }, [isCommercial, powerGenerationIndex, gridTiedIndex]);
 
+  // Auto-clear Off-grid selection when system becomes net-metered
+  useEffect(() => {
+    if (isNetMetered && solarSystemTypes?.value === 'Off-grid') {
+      setSolarSysTypes({ index: '', value: '', otherVal: '' });
+    }
+  }, [isNetMetered, solarSystemTypes?.value]);
+
+  // Auto-clear Solar Street Lights and Solar Pump when power generation related options are selected
+  useEffect(() => {
+    if (isPowerGenerationRelated) {
+      const solarStreetLightsIndex = rawSolarUsage.findIndex(usage => usage.name === "Solar Street Lights");
+      const solarPumpIndex = rawSolarUsage.findIndex(usage => usage.name === "Solar Pump");
+      
+      if (solarUsage?.value === "Solar Street Lights" || solarUsage?.value === "Solar Pump") {
+        setSolarUsage({ index: '', value: '', otherVal: '' });
+      }
+      
+      // Auto-select Power Generation if not already selected
+      if (solarUsage?.value !== "Power Generation" && powerGenerationIndex !== -1) {
+        setSolarUsage({ 
+          index: powerGenerationIndex, 
+          value: rawSolarUsage[powerGenerationIndex].name,
+          otherVal: ''
+        });
+      }
+    }
+  }, [isPowerGenerationRelated, solarUsage?.value, powerGenerationIndex]);
+
   useEffect(() => {
     setData({
       ...data,
@@ -83,6 +127,7 @@ export const EditSolar = (props) => {
       status: status?.value,
       remarks: remarks,
       annualEnergyProduction: solarUsage?.value === "Power Generation" ? annualEnergyProduction : undefined,
+      solarPowerGenSubcategory: solarUsage?.value === "Power Generation" ? solarPowerGenSubcategory : undefined,
     })
     // eslint-disable-next-line
   }, [
@@ -94,11 +139,22 @@ export const EditSolar = (props) => {
     solarSystemTypes,
     status,
     remarks,
-    annualEnergyProduction
+    annualEnergyProduction,
+    solarPowerGenSubcategory
   ])
 
   useEffect(() => {
     props.setEditSolar(data)
+    
+    // Debug logging for solar subcategories
+    if (solarUsage?.value === "Power Generation") {
+      console.log('EditSolar component - Setting solar data:', {
+        solarUsage: solarUsage?.value,
+        solarPowerGenSubcategory,
+        fullData: data
+      });
+    }
+    
     // eslint-disable-next-line
   }, [data])
 
@@ -119,13 +175,23 @@ export const EditSolar = (props) => {
   }
 
   const valuesOfSolarUsage = (index) => (e) => {
-    // If Commercial, only allow Power Generation (index should match Power Generation)
+    // If Commercial, only allow Power Generation
     if (isCommercial && index !== powerGenerationIndex) {
       return;
     }
     
+    // If power generation related (net-metered, DER, or own-use), don't allow Solar Street Lights or Solar Pump
+    if (isPowerGenerationRelated) {
+      const solarStreetLightsIndex = rawSolarUsage.findIndex(usage => usage.name === "Solar Street Lights");
+      const solarPumpIndex = rawSolarUsage.findIndex(usage => usage.name === "Solar Pump");
+      
+      if (index === solarStreetLightsIndex || index === solarPumpIndex) {
+        return;
+      }
+    }
+    
     if (rawSolarUsage[index].name === 'Other' && e.target.value !== 'on' && e.target.value !== '') {
-      setSolarUsage({ index: index, value: rawSolarUsage[index].name, otherVal: e.target.value })
+      setSolarUsage({ index: index, value: '', otherVal: e.target.value })
     }
     else if (index === solarUsage?.index) {
       // If commercial, don't allow deselecting Power Generation
@@ -137,12 +203,16 @@ export const EditSolar = (props) => {
     else {
       setSolarUsage({ index: index, value: rawSolarUsage[index].name, otherVal: '' })
     }
-    if (rawSolarUsage[index].name !== "Power Generation") setAnnualEnergyProduction('');
   }
 
   const valuesOfSolarSystem = (index) => (e) => {
     // If Commercial, only allow Grid-tied (index should match Grid-tied)
     if (isCommercial && index !== gridTiedIndex) {
+      return;
+    }
+    
+    // If net-metered, don't allow Off-grid (index should not match Off-grid)
+    if (isNetMetered && index === offGridIndex) {
       return;
     }
     
@@ -186,26 +256,56 @@ export const EditSolar = (props) => {
           </Alert>
         )}
         
-        {rawSolarUsage.map((type, index) => (
-          <FormGroup key={index}>
-            <FormControlLabel
-              sx={{ ml: 2 }}
-              control={
-                <Checkbox
-                  onChange={valuesOfSolarUsage(index)}
-                  checked={type.name === solarUsage?.value}
-                  disabled={isCommercial && index !== powerGenerationIndex} // Disable all except Power Generation if Commercial
-                />
-              }
-              label={type.name === 'Other' ? <Input
-                onChange={valuesOfSolarUsage(index)}
-                disabled={(type.name !== solarUsage?.value) || isCommercial}
-                value={solarUsage?.otherVal}
-                startAdornment={<InputAdornment position="start">Other:</InputAdornment>}
-              /> : type.name}
-            />
-          </FormGroup>
-        ))}
+        {isPowerGenerationRelated && (
+          <Alert severity="info" sx={{ mb: 2 }}>
+            Power generation systems (Net-metered, DER, or Own-use) must use Power Generation. Solar Street Lights and Solar Pump options are disabled.
+          </Alert>
+        )}
+        
+        {rawSolarUsage.map((type, index) => {
+          // Find indexes for specific usage types
+          const solarStreetLightsIndex = rawSolarUsage.findIndex(usage => usage.name === "Solar Street Lights");
+          const solarPumpIndex = rawSolarUsage.findIndex(usage => usage.name === "Solar Pump");
+          
+          // Disable Solar Street Lights and Solar Pump if power generation related
+          const isDisabled = (isCommercial && index !== powerGenerationIndex) || // Commercial constraint
+                           (isPowerGenerationRelated && (index === solarStreetLightsIndex || index === solarPumpIndex)); // Power generation constraint
+          
+          return (
+            <FormGroup key={index}>
+              <FormControlLabel
+                sx={{ ml: 2 }}
+                control={
+                  <Checkbox
+                    onChange={valuesOfSolarUsage(index)}
+                    checked={type.name === solarUsage?.value}
+                    disabled={isDisabled}
+                  />
+                }
+                label={
+                  <Typography 
+                    sx={{ 
+                      color: isDisabled ? 'text.disabled' : 'inherit',
+                      fontStyle: isDisabled ? 'italic' : 'normal'
+                    }}
+                  >
+                    {type.name === 'Other' ? <Input
+                      onChange={valuesOfSolarUsage(index)}
+                      disabled={(type.name !== solarUsage?.value) || isCommercial}
+                      value={solarUsage?.otherVal}
+                      startAdornment={<InputAdornment position="start">Other:</InputAdornment>}
+                    /> : type.name}
+                    {isPowerGenerationRelated && (index === solarStreetLightsIndex || index === solarPumpIndex) && (
+                      <Typography component="span" variant="caption" sx={{ ml: 1, color: 'text.secondary' }}>
+                        (Not available for power generation systems)
+                      </Typography>
+                    )}
+                  </Typography>
+                }
+              />
+            </FormGroup>
+          );
+        })}
       </Box>
 
       <Box sx={boxstyle}>
@@ -345,6 +445,73 @@ export const EditSolar = (props) => {
               endAdornment: <InputAdornment position="end">kWh</InputAdornment>,
             }}
           />
+          
+          {/* Solar Power Generation Subcategories */}
+          <Typography sx={{ fontStyle: 'italic', mt: 2, mb: 1 }} component="h1" variant="subtitle2">
+            Solar Power Generation Subcategory:
+          </Typography>
+          
+          {rawSolarPowerGenSubcategories.map((mainCat, mainIndex) => (
+            <Box key={mainIndex} sx={{ ml: 2, mb: 2 }}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSolarPowerGenSubcategory({
+                          mainCategory: mainCat.name,
+                          subcategory: '',
+                          mainCategoryId: mainCat.id,
+                          subcategoryId: null
+                        });
+                      } else {
+                        setSolarPowerGenSubcategory({
+                          mainCategory: '',
+                          subcategory: '',
+                          mainCategoryId: null,
+                          subcategoryId: null
+                        });
+                      }
+                    }}
+                    checked={solarPowerGenSubcategory.mainCategory === mainCat.name}
+                  />
+                }
+                label={<Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>{mainCat.name}</Typography>}
+              />
+              
+              {solarPowerGenSubcategory.mainCategory === mainCat.name && (
+                <Box sx={{ ml: 3 }}>
+                  {mainCat.subcategories.map((subCat, subIndex) => (
+                    <FormControlLabel
+                      key={subIndex}
+                      control={
+                        <Checkbox
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSolarPowerGenSubcategory(prev => ({
+                                ...prev,
+                                subcategory: subCat.name,
+                                subcategoryId: subCat.id
+                              }));
+                            } else {
+                              setSolarPowerGenSubcategory(prev => ({
+                                ...prev,
+                                subcategory: '',
+                                subcategoryId: null
+                              }));
+                            }
+                          }}
+                          checked={solarPowerGenSubcategory.subcategory === subCat.name}
+                        />
+                      }
+                      label={subCat.name}
+                    />
+                  ))}
+                </Box>
+              )}
+            </Box>
+          ))}
+          
           <Typography sx={{ fontStyle: 'italic' }} component="h1" variant="subtitle2">
             Solar Energy System Types:
           </Typography>
@@ -352,6 +519,12 @@ export const EditSolar = (props) => {
           {isCommercial && (
             <Alert severity="info" sx={{ mb: 2 }}>
               Commercial RE systems must use Grid-tied configuration. Other options are disabled.
+            </Alert>
+          )}
+          
+          {isNetMetered && (
+            <Alert severity="info" sx={{ mb: 2 }}>
+              Net-metered systems must be connected to the grid. Off-grid option is disabled.
             </Alert>
           )}
           
@@ -363,10 +536,27 @@ export const EditSolar = (props) => {
                   <Checkbox
                     onChange={valuesOfSolarSystem(index)}
                     checked={type.name === solarSystemTypes?.value}
-                    disabled={isCommercial && index !== gridTiedIndex} // Disable all except Grid-tied if Commercial
+                    disabled={
+                      (isCommercial && index !== gridTiedIndex) || // Disable all except Grid-tied if Commercial
+                      (isNetMetered && index === offGridIndex) // Disable Off-grid if net-metered
+                    }
                   />
                 }
-                label={type.name}
+                label={
+                  <Typography 
+                    sx={{ 
+                      color: (isNetMetered && index === offGridIndex) ? 'text.disabled' : 'inherit',
+                      fontStyle: (isNetMetered && index === offGridIndex) ? 'italic' : 'normal'
+                    }}
+                  >
+                    {type.name}
+                    {(isNetMetered && index === offGridIndex) && (
+                      <Typography component="span" variant="caption" sx={{ ml: 1, color: 'text.secondary' }}>
+                        (Not available for net-metered systems)
+                      </Typography>
+                    )}
+                  </Typography>
+                }
               />
             </FormGroup>
           ))}

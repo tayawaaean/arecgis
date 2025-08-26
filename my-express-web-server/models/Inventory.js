@@ -17,6 +17,13 @@ const assessmentSchema = new mongoose.Schema({
   solarSystemTypes: { type: String },
   remarks: { type: String },
   status: { type: String },
+  // Solar subcategories for power generation
+  solarPowerGenSubcategory: {
+    mainCategory: { type: String }, // e.g., "Rooftop Solar PV", "Ground-mounted Solar PV", "Building-integrated PV (BIPV)"
+    subcategory: { type: String }, // e.g., "Residential rooftop – installed on homes"
+    mainCategoryId: { type: Number },
+    subcategoryId: { type: Number }
+  },
   // Add other solar, wind, biomass, hydro fields as needed
 }, { _id: false });
 

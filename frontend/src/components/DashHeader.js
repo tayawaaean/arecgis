@@ -590,7 +590,15 @@ const DashHeader = () => {
                 <List sx={{ pb: 1 }}>
                   <ListItem key="logout" disablePadding>
                     <ListItemButton 
-                      onClick={sendLogout}
+                      onClick={async () => {
+                        try {
+                          await sendLogout().unwrap()
+                          // Navigate to login after successful logout
+                          navigate('/login')
+                        } catch (error) {
+                          console.error('Logout failed:', error)
+                        }
+                      }}
                       sx={{
                         borderRadius: 1,
                         mx: 1,

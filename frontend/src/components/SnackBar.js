@@ -138,13 +138,34 @@ export const SnackBar = (props) => {
                               project?.properties?.reCat === 'Hydropower' ? "N/A" : ''}
                     </TableCell>
                   </TableRow>
-                  {project?.assessment?.solarUsage === 'Power generation' ?
-                    <TableRow>
-                      <TableCell sx={{ fontWeight: "Medium" }}>System Type</TableCell>
-                      <TableCell align="left">
-                        {project.assessment.solarSystemTypes}
-                      </TableCell>
-                    </TableRow> : null}
+                  {project?.assessment?.solarUsage === 'Power Generation' ?
+                    <>
+                      <TableRow>
+                        <TableCell sx={{ fontWeight: "Medium" }}>System Type</TableCell>
+                        <TableCell align="left">
+                          {project.assessment.solarSystemTypes}
+                        </TableCell>
+                      </TableRow>
+                      {project?.assessment?.solarPowerGenSubcategory?.mainCategory ? (
+                        <>
+                          <TableRow>
+                            <TableCell sx={{ fontWeight: "Medium" }}>Solar Subcategory</TableCell>
+                            <TableCell align="left">
+                              {project.assessment.solarPowerGenSubcategory.mainCategory}
+                            </TableCell>
+                          </TableRow>
+                          {project?.assessment?.solarPowerGenSubcategory?.subcategory && (
+                            <TableRow>
+                              <TableCell sx={{ fontWeight: "Medium" }}>Specific Type</TableCell>
+                              <TableCell align="left">
+                                {project.assessment.solarPowerGenSubcategory.subcategory}
+                              </TableCell>
+                            </TableRow>
+                          )}
+                        </>
+                      ) : null}
+                    </>
+                    : null}
                   {project?.assessment?.solarUsage === 'Solar Pump' ?
                     <>
                       <TableRow>

@@ -410,6 +410,8 @@ const approveRequest = async (req, res) => {
 
         await request.save()
 
+        // Email notifications will be handled by the frontend
+
         let message = ''
         if (request.requestType === 'transfer') {
             message = 'Transfer request approved successfully'
@@ -473,6 +475,8 @@ const rejectRequest = async (req, res) => {
         if (rejectionReason) request.rejectionReason = rejectionReason
 
         await request.save()
+
+        // Email notifications will be handled by the frontend
 
         let message = ''
         if (request.requestType === 'transfer') {

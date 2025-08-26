@@ -247,7 +247,15 @@ const AccountSettingsForm = ({ user }) => {
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>
-                    <Button variant="contained" color="success" onClick={sendLogout}>Ok</Button>
+                    <Button variant="contained" color="success" onClick={async () => {
+                        try {
+                            await sendLogout().unwrap()
+                            // Navigate to login after successful logout
+                            navigate('/login')
+                        } catch (error) {
+                            console.error('Logout failed:', error)
+                        }
+                    }}>Ok</Button>
                 </DialogActions>
             </Dialog>
         </>
