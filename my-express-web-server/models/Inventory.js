@@ -19,10 +19,16 @@ const assessmentSchema = new mongoose.Schema({
   status: { type: String },
   // Solar subcategories for power generation
   solarPowerGenSubcategory: {
-    mainCategory: { type: String }, // e.g., "Rooftop Solar PV", "Ground-mounted Solar PV", "Building-integrated PV (BIPV)"
+            mainCategory: { type: String }, // e.g., "Rooftop Solar PV", "Ground-mounted Solar PV", "Floating Solar PV", "Building-integrated PV (BIPV)"
     subcategory: { type: String }, // e.g., "Residential rooftop – installed on homes"
     mainCategoryId: { type: Number },
     subcategoryId: { type: Number }
+  },
+  // Solar subcategory for Solar Pump usage
+  solarPumpSubcategory: {
+    type: String, // e.g., "Solar Pump Irrigation System", "Community Water System", "Livestock Water System"
+    enum: ["Solar Pump Irrigation System", "Community Water System", "Livestock Water System"],
+    default: undefined
   },
   // Add other solar, wind, biomass, hydro fields as needed
 }, { _id: false });

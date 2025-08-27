@@ -244,7 +244,13 @@ const InventoryHelpModal = ({ open, onClose, formType = 'new' }) => {
                 <ListItem>
                   <ListItemText 
                     primary="Ground-mounted Solar PV" 
-                    secondary="Solar farms, captive plants, or floating solar installations"
+                    secondary="Solar farms and captive plants on land"
+                  />
+                </ListItem>
+                <ListItem>
+                  <ListItemText 
+                    primary="Floating Solar PV" 
+                    secondary="Installations on reservoirs, lakes, or dams"
                   />
                 </ListItem>
                 <ListItem>
@@ -491,12 +497,18 @@ const InventoryHelpModal = ({ open, onClose, formType = 'new' }) => {
                         secondary="Utility-scale installations on large open land"
                       />
                     </ListItem>
-                    <ListItem>
-                      <ListItemText 
-                        primary="Captive Solar Plants" 
-                        secondary="Private land installations for self-use (industries, institutions)"
-                      />
-                    </ListItem>
+
+                  </List>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <Card variant="outlined">
+                <CardContent>
+                  <Typography variant="subtitle1" gutterBottom color="primary">
+                    🌊 Floating Solar PV
+                  </Typography>
+                  <List dense>
                     <ListItem>
                       <ListItemText 
                         primary="Floating Solar Farms" 
@@ -553,12 +565,12 @@ const InventoryHelpModal = ({ open, onClose, formType = 'new' }) => {
                   secondary="Expected or actual annual generation"
                 />
               </ListItem>
-              <ListItem sx={{ py: 0 }}>
-                <ListItemText 
-                  primary="• Main Category" 
-                  secondary="Rooftop, Ground-mounted, or BIPV"
-                />
-              </ListItem>
+                              <ListItem sx={{ py: 0 }}>
+                  <ListItemText 
+                    primary="• Main Category" 
+                    secondary="Rooftop, Ground-mounted, Floating, or BIPV"
+                  />
+                </ListItem>
               <ListItem sx={{ py: 0 }}>
                 <ListItemText 
                   primary="• Subcategory" 

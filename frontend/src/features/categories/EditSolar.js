@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { FormLabel, TextField, Input, InputAdornment, Box, Checkbox, FormControlLabel, FormGroup, Typography, Grid, Button, Alert } from '@mui/material'
-import { rawSolarUsage, rawSolarSysTypes, Status, rawSolarPowerGenSubcategories } from "../../config/techAssesment"
+import { rawSolarUsage, rawSolarSysTypes, Status, rawSolarPowerGenSubcategories, rawSolarPumpSubcategories } from "../../config/techAssesment"
 import { boxstyle } from '../../config/style'
 import HighlightOffSharpIcon from '@mui/icons-material/HighlightOffSharp'
 
@@ -36,6 +36,7 @@ export const EditSolar = (props) => {
   const [annualEnergyProduction, setAnnualEnergyProduction] = useState(
     props?.reItems?.assessment?.annualEnergyProduction || ''
   )
+  const [batteryCapacity, setBatteryCapacity] = useState(props?.reItems?.assessment?.batteryCapacity || '')
 
   const [solarUsage, setSolarUsage] = useState(
     found === -1
@@ -59,6 +60,7 @@ export const EditSolar = (props) => {
     mainCategoryId: props?.reItems?.assessment?.solarPowerGenSubcategory?.mainCategoryId || null,
     subcategoryId: props?.reItems?.assessment?.solarPowerGenSubcategory?.subcategoryId || null
   })
+  const [solarPumpSubcategory, setSolarPumpSubcategory] = useState(props?.reItems?.assessment?.solarPumpSubcategory || '')
 
   const [remarks, setRemarks] = useState(props?.reItems?.assessment?.remarks || '')
   const [flowRate, setFlowRate] = useState(props?.reItems?.assessment?.flowRate || '')
@@ -127,7 +129,9 @@ export const EditSolar = (props) => {
       status: status?.value,
       remarks: remarks,
       annualEnergyProduction: solarUsage?.value === "Power Generation" ? annualEnergyProduction : undefined,
+      batteryCapacity: (solarSystemTypes?.value === "Off-grid" || solarSystemTypes?.value === "Hybrid") ? batteryCapacity : undefined,
       solarPowerGenSubcategory: solarUsage?.value === "Power Generation" ? solarPowerGenSubcategory : undefined,
+      solarPumpSubcategory: solarUsage?.value === "Solar Pump" ? solarPumpSubcategory : undefined,
     })
     // eslint-disable-next-line
   }, [
@@ -140,6 +144,7 @@ export const EditSolar = (props) => {
     status,
     remarks,
     annualEnergyProduction,
+    batteryCapacity,
     solarPowerGenSubcategory
   ])
 
@@ -365,6 +370,23 @@ export const EditSolar = (props) => {
             For Solar Pump (leave blank if not applicable)
           </Typography>
           <Typography sx={{ fontStyle: 'italic' }} component="h1" variant="subtitle2">
+            Solar Pump Subcategory:
+          </Typography>
+          {rawSolarPumpSubcategories.map((opt) => (
+            <FormGroup key={opt.id}>
+              <FormControlLabel
+                sx={{ ml: 2 }}
+                control={
+                  <Checkbox
+                    onChange={(e) => setSolarPumpSubcategory(e.target.checked ? opt.name : '')}
+                    checked={solarPumpSubcategory === opt.name}
+                  />
+                }
+                label={opt.name}
+              />
+            </FormGroup>
+          ))}
+          <Typography sx={{ fontStyle: 'italic' }} component="h1" variant="subtitle2">
             Capacity:
           </Typography>
           <TextField
@@ -414,37 +436,6 @@ export const EditSolar = (props) => {
           <Typography sx={{ fontStyle: 'italic', mb: 2 }} component="h1" variant="subtitle2">
             For Power Generation (leave blank if not applicable)
           </Typography>
-          <Typography sx={{ fontStyle: 'italic' }} component="h1" variant="subtitle2">
-            Capacity:
-          </Typography>
-          <TextField
-            fullWidth
-            size="small"
-            id="capacity"
-            name="capacity"
-            type="number"
-            value={capacity}
-            onChange={(e) => setCapacity(e.target.value)}
-            InputProps={{
-              endAdornment: <InputAdornment position="end"><var>Wp</var></InputAdornment>,
-            }}
-          />
-          {/* Annual Energy Production input, only for Power Generation */}
-          <Typography sx={{ fontStyle: 'italic' }} component="h1" variant="subtitle2">
-            Annual Energy Production:
-          </Typography>
-          <TextField
-            fullWidth
-            size="small"
-            id="annualEnergyProduction"
-            name="annualEnergyProduction"
-            type="number"
-            value={annualEnergyProduction}
-            onChange={(e) => setAnnualEnergyProduction(e.target.value)}
-            InputProps={{
-              endAdornment: <InputAdornment position="end">kWh</InputAdornment>,
-            }}
-          />
           
           {/* Solar Power Generation Subcategories */}
           <Typography sx={{ fontStyle: 'italic', mt: 2, mb: 1 }} component="h1" variant="subtitle2">
@@ -561,12 +552,11 @@ export const EditSolar = (props) => {
             </FormGroup>
           ))}
         </Box>
-        <Box sx={{ display: solarUsage?.value === 'Other' ? 'block' : 'none' }}>
-          <Typography sx={{ fontStyle: 'italic', mb: 2 }} component="h1" variant="subtitle2">
-            For Other Solar Energy System
-          </Typography>
-          <Typography sx={{ fontStyle: 'italic' }} component="h1" variant="subtitle2">
-            Capacity:
+        
+        {/* Capacity and Energy Production Fields - Added at the end */}
+        <Box sx={{ display: solarUsage?.value === 'Power Generation' ? 'block' : 'none' }}>
+          <Typography sx={{ fontStyle: 'italic', mt: 2, mb: 1 }} component="h1" variant="subtitle2">
+            Capacity (kWp):
           </Typography>
           <TextField
             fullWidth
@@ -577,10 +567,46 @@ export const EditSolar = (props) => {
             value={capacity}
             onChange={(e) => setCapacity(e.target.value)}
             InputProps={{
-              endAdornment: <InputAdornment position="end"><var>Wp</var></InputAdornment>,
+              endAdornment: <InputAdornment position="end">kWp</InputAdornment>,
             }}
           />
+          
+          <Typography sx={{ fontStyle: 'italic', mt: 2, mb: 1 }} component="h1" variant="subtitle2">
+            Annual Energy Production (kWh):
+          </Typography>
+          <TextField
+            fullWidth
+            size="small"
+            id="annualEnergyProduction"
+            name="annualEnergyProduction"
+            type="number"
+            value={annualEnergyProduction}
+            onChange={(e) => setAnnualEnergyProduction(e.target.value)}
+            InputProps={{
+              endAdornment: <InputAdornment position="end">kWh</InputAdornment>,
+            }}
+          />
+          
+          {/* Battery Capacity for Off-grid and Hybrid systems */}
+          <Box sx={{ display: (solarSystemTypes?.value === 'Off-grid' || solarSystemTypes?.value === 'Hybrid') ? 'block' : 'none' }}>
+            <Typography sx={{ fontStyle: 'italic', mt: 2, mb: 1 }} component="h1" variant="subtitle2">
+              Battery Capacity (Ah) - Optional:
+            </Typography>
+            <TextField
+              fullWidth
+              size="small"
+              id="batteryCapacity"
+              name="batteryCapacity"
+              type="number"
+              value={batteryCapacity}
+              onChange={(e) => setBatteryCapacity(e.target.value)}
+              InputProps={{
+                endAdornment: <InputAdornment position="end">Ah</InputAdornment>,
+              }}
+            />
+          </Box>
         </Box>
+        
         <Typography sx={{ fontStyle: 'italic' }} component="h1" variant="subtitle2">
           Status:
         </Typography>

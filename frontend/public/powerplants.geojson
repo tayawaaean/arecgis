@@ -1,0 +1,6143 @@
+{
+    "type": "FeatureCollection",
+    "generator": "overpass-turbo",
+    "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL.",
+    "timestamp": "2025-08-27T08:25:36Z",
+    "features": [
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "relation/2913262",
+          "addr:city": "Pililla",
+          "landuse": "industrial",
+          "name": "Malaya Thermal Power Plant",
+          "operator": "Belgrove Power Corporation",
+          "operator:1995-2010": "Korea Electric Power Company Philippines",
+          "operator:2010-2020": "STX Marine Service",
+          "owner": "National Power Corporation",
+          "plant:output:electricity": "650 MW",
+          "plant:source": "oil",
+          "power": "plant",
+          "source": "bing",
+          "start_date": "1995-9-15",
+          "type": "multipolygon",
+          "@timestamp": "2023-06-04T12:44:38Z",
+          "@version": 5,
+          "@changeset": 136931866,
+          "@user": "mueschel",
+          "@uid": 616774,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            121.3344757,
+            14.3953526
+          ]
+        },
+        "id": "relation/2913262"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "relation/5495786",
+          "is_in:province": "Negros Oriental",
+          "is_in:town": "Valencia",
+          "landuse": "industrial",
+          "name": "Palinpinon Geothermal Power Plant",
+          "operator": "Energy Development Corporation",
+          "operator:type": "private",
+          "plant:output:electricity": "172.5 MW",
+          "plant:source": "geothermal",
+          "power": "plant",
+          "type": "multipolygon",
+          "website": "https://www.ngaphil.com/about-us/geothermal-sites/palinpinon/",
+          "@timestamp": "2024-12-09T01:22:13Z",
+          "@version": 8,
+          "@changeset": 160074979,
+          "@user": "Timmy_Tesseract",
+          "@uid": 5653955,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            123.158248,
+            9.2879109
+          ]
+        },
+        "id": "relation/5495786"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "relation/7923642",
+          "landuse": "industrial",
+          "operator": "Valenzuela Solar Energy, Inc.",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "8.6 MW",
+          "plant:source": "solar",
+          "plant:type": "solar_photovoltaic_panel",
+          "power": "plant",
+          "start_date": "2015-11",
+          "type": "multipolygon",
+          "@timestamp": "2024-01-16T04:14:09Z",
+          "@version": 5,
+          "@changeset": 146306304,
+          "@user": "Timmy_Tesseract",
+          "@uid": 5653955,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.9521207,
+            14.7029892
+          ]
+        },
+        "id": "relation/7923642"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "relation/8344291",
+          "name": "Burgos Wind Farm",
+          "operator": "EDC Burgos Wind Power Corporation (EBWPC)",
+          "plant:method": "wind_turbine",
+          "plant:output:electricity": "150 MW",
+          "plant:source": "wind",
+          "power": "plant",
+          "site": "wind_farm",
+          "start_date": "2014-11",
+          "type": "site",
+          "wikidata": "Q4998672",
+          "@timestamp": "2024-12-27T13:36:20Z",
+          "@version": 3,
+          "@changeset": 160676622,
+          "@user": "Claudius Henrichs",
+          "@uid": 18069,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.6555202,
+            18.5300989
+          ]
+        },
+        "id": "relation/8344291"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "relation/9256100",
+          "name": "Nabas Wind Farm",
+          "plant:method": "wind_turbine",
+          "plant:output:electricity": "36 MW",
+          "plant:source": "wind",
+          "power": "plant",
+          "site": "wind_farm",
+          "type": "site",
+          "@timestamp": "2022-04-26T20:53:13Z",
+          "@version": 5,
+          "@changeset": 120230306,
+          "@user": "Claudius Henrichs",
+          "@uid": 18069,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            121.9788917,
+            11.8779251
+          ]
+        },
+        "id": "relation/9256100"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "relation/9256278",
+          "name": "Caparispisan Wind Farm",
+          "operator": "North Luzon Renewable Energy Corporation (NLREC)",
+          "plant:method": "wind_turbine",
+          "plant:output:electricity": "81 MW",
+          "plant:source": "wind",
+          "power": "plant",
+          "site": "wind_farm",
+          "start_date": "2014-11",
+          "type": "site",
+          "wikidata": "Q23048138",
+          "@timestamp": "2021-08-14T00:56:39Z",
+          "@version": 2,
+          "@changeset": 109652855,
+          "@user": "Olyon",
+          "@uid": 1443767,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.8051735,
+            18.6166767
+          ]
+        },
+        "id": "relation/9256278"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "relation/11033796",
+          "landuse": "industrial",
+          "name": "Currimao Solar",
+          "operator": "Mirae Asia Energy Corporation",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "20 MW",
+          "plant:source": "solar",
+          "power": "plant",
+          "type": "multipolygon",
+          "@timestamp": "2025-06-12T10:22:18Z",
+          "@version": 4,
+          "@changeset": 167526942,
+          "@user": "catgirlseraid",
+          "@uid": 21657267,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.4870796,
+            18.0495572
+          ]
+        },
+        "id": "relation/11033796"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "relation/13009207",
+          "addr:barangay": "Barangay 19-B",
+          "addr:city": "Davao City",
+          "addr:district": "Poblacion District",
+          "addr:postcode": "8000",
+          "addr:province": "Davao del Sur",
+          "addr:street": "J. P. Laurel Avenue",
+          "landuse": "industrial",
+          "name": "Bajada Power Plant",
+          "operator": "Davao Light and Power Company",
+          "operator:short": "DLPC",
+          "operator:type": "private",
+          "operator:wikidata": "Q5228152",
+          "plant:method": "combustion",
+          "plant:source": "diesel",
+          "power": "plant",
+          "type": "multipolygon",
+          "@timestamp": "2025-06-01T00:50:27Z",
+          "@version": 3,
+          "@changeset": 167032599,
+          "@user": "Timmy_Tesseract",
+          "@uid": 5653955,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            125.6122752,
+            7.0939555
+          ]
+        },
+        "id": "relation/13009207"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "relation/13088522",
+          "name": "Makban Geothermal Plant B",
+          "operator": "AP Renewables",
+          "plant:output:electricity": "459.5 MW",
+          "plant:source": "geothermal",
+          "power": "plant",
+          "type": "multipolygon",
+          "@timestamp": "2021-08-14T00:56:39Z",
+          "@version": 1,
+          "@changeset": 109652855,
+          "@user": "Olyon",
+          "@uid": 1443767,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            121.2202987,
+            14.0888908
+          ]
+        },
+        "id": "relation/13088522"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "relation/13088523",
+          "addr:city": "Pililla",
+          "addr:province": "Rizal",
+          "name": "Pililia Wind Farm",
+          "operator": "Alternergy Wind One Corporation",
+          "plant:method": "wind_turbine",
+          "plant:output:electricity": "54 MW",
+          "plant:source": "wind",
+          "power": "plant",
+          "site": "wind_farm",
+          "start_date": "2015-06",
+          "type": "site",
+          "wikidata": "Q25052031",
+          "@timestamp": "2024-12-27T13:36:39Z",
+          "@version": 2,
+          "@changeset": 160676636,
+          "@user": "Claudius Henrichs",
+          "@uid": 18069,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            121.3599474,
+            14.4817549
+          ]
+        },
+        "id": "relation/13088523"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "relation/13088524",
+          "name": "Tiwi Geothermal Power Plant",
+          "operator": "AP Renewables",
+          "plant:output:electricity": "234 MW",
+          "plant:source": "geothermal",
+          "power": "plant",
+          "type": "multipolygon",
+          "@timestamp": "2021-08-14T00:56:39Z",
+          "@version": 1,
+          "@changeset": 109652855,
+          "@user": "Olyon",
+          "@uid": 1443767,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            123.6485842,
+            13.4622271
+          ]
+        },
+        "id": "relation/13088524"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "relation/13088525",
+          "frequency": "60",
+          "name": "Silay Solar Power",
+          "operator": "Silay Solar Power, Inc",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "25 MW",
+          "plant:source": "solar",
+          "power": "plant",
+          "type": "multipolygon",
+          "@timestamp": "2025-06-12T09:44:51Z",
+          "@version": 2,
+          "@changeset": 167525497,
+          "@user": "catgirlseraid",
+          "@uid": 21657267,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            122.9921174,
+            10.8054135
+          ]
+        },
+        "id": "relation/13088525"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "relation/13088526",
+          "name": "Burgos Solar",
+          "operator": "Energy Development Corporation",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "6.9 MW",
+          "plant:source": "solar",
+          "power": "plant",
+          "type": "multipolygon",
+          "@timestamp": "2021-08-14T00:56:39Z",
+          "@version": 1,
+          "@changeset": 109652855,
+          "@user": "Olyon",
+          "@uid": 1443767,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.6365481,
+            18.5274596
+          ]
+        },
+        "id": "relation/13088526"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "relation/13088527",
+          "name": "Bangui Wind Farm",
+          "operator": "North Wind Power Development Corporation (NWPDC)",
+          "plant:method": "wind_turbine",
+          "plant:output:electricity": "51.9 MW",
+          "plant:source": "wind",
+          "power": "plant",
+          "start_date": "2005",
+          "type": "site",
+          "wikidata": "Q4855634",
+          "@timestamp": "2021-08-14T00:56:39Z",
+          "@version": 1,
+          "@changeset": 109652855,
+          "@user": "Olyon",
+          "@uid": 1443767,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.7142989,
+            18.5265323
+          ]
+        },
+        "id": "relation/13088527"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "relation/13088528",
+          "name": "SaCaSol",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "45 MW",
+          "plant:source": "solar",
+          "power": "plant",
+          "type": "multipolygon",
+          "@timestamp": "2021-08-14T00:56:39Z",
+          "@version": 1,
+          "@changeset": 109652855,
+          "@user": "Olyon",
+          "@uid": 1443767,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            123.4287747,
+            10.5186267
+          ]
+        },
+        "id": "relation/13088528"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "relation/13687759",
+          "landuse": "industrial",
+          "name": "Tarlac Solar Power Project-2",
+          "operator": "PetroSolar Corporation",
+          "plant:method": "photovoltaic",
+          "plant:source": "solar",
+          "power": "plant",
+          "type": "multipolygon",
+          "@timestamp": "2022-01-18T03:20:14Z",
+          "@version": 1,
+          "@changeset": 116278431,
+          "@user": "GOwin",
+          "@uid": 1041828,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.6446725,
+            15.4464814
+          ]
+        },
+        "id": "relation/13687759"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "relation/14080681",
+          "name": "San Lorenzo Wind Farm",
+          "plant:method": "wind_turbine",
+          "plant:output:electricity": "54 MW",
+          "plant:source": "wind",
+          "power": "plant",
+          "site": "wind_farm",
+          "type": "site",
+          "@timestamp": "2023-02-11T21:52:40Z",
+          "@version": 2,
+          "@changeset": 132423794,
+          "@user": "Claudius Henrichs",
+          "@uid": 18069,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            122.7082288,
+            10.5965668
+          ]
+        },
+        "id": "relation/14080681"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "relation/14080686",
+          "name": "Puerto Galera Wind Farm",
+          "plant:method": "wind_turbine",
+          "plant:output:electricity": "16 MW",
+          "plant:source": "wind",
+          "power": "plant",
+          "site": "wind_farm",
+          "type": "site",
+          "@timestamp": "2022-04-26T20:55:43Z",
+          "@version": 1,
+          "@changeset": 120230388,
+          "@user": "Claudius Henrichs",
+          "@uid": 18069,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.9210528,
+            13.4672684
+          ]
+        },
+        "id": "relation/14080686"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "relation/14230101",
+          "addr:city": "Valenzuela",
+          "addr:postcode": "1445",
+          "addr:street": "Tagalag Road",
+          "landuse": "industrial",
+          "name": "Tagalag Solar Park",
+          "operator": "Eco-Park Energy of Valenzuela Corporation",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "20.69 MW",
+          "plant:source": "solar",
+          "power": "plant",
+          "start_date": "2019-05-31",
+          "type": "multipolygon",
+          "@timestamp": "2022-06-08T07:46:42Z",
+          "@version": 1,
+          "@changeset": 122103865,
+          "@user": "GOwin",
+          "@uid": 1041828,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.9400721,
+            14.7256136
+          ]
+        },
+        "id": "relation/14230101"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "relation/14722224",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "yes",
+          "plant:source": "solar",
+          "power": "plant",
+          "type": "multipolygon",
+          "@timestamp": "2023-09-29T20:00:25Z",
+          "@version": 2,
+          "@changeset": 141928599,
+          "@user": "clay_c@gem",
+          "@uid": 19754042,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.5340461,
+            15.4170771
+          ]
+        },
+        "id": "relation/14722224"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "relation/14921344",
+          "name": "Concepcion Solar Farm",
+          "operator": "Solar Philippines",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "150 MW",
+          "plant:source": "solar",
+          "power": "plant",
+          "type": "multipolygon",
+          "@timestamp": "2023-09-01T15:23:10Z",
+          "@version": 2,
+          "@changeset": 140684933,
+          "@user": "clay_c@gem",
+          "@uid": 19754042,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.6083371,
+            15.3758707
+          ]
+        },
+        "id": "relation/14921344"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "relation/16227790",
+          "landuse": "industrial",
+          "name": "Naga Power Complex",
+          "plant:method": "combustion",
+          "plant:output:electricity": "yes",
+          "plant:source": "coal",
+          "power": "plant",
+          "source": "https://www.gem.wiki/Naga_power_station",
+          "type": "multipolygon",
+          "@timestamp": "2023-08-21T17:51:24Z",
+          "@version": 1,
+          "@changeset": 140194293,
+          "@user": "tjnakano",
+          "@uid": 12640051,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            123.7588861,
+            10.2183423
+          ]
+        },
+        "id": "relation/16227790"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "relation/16266383",
+          "name": "Arayat-Mexico Solar Farm",
+          "operator": "ACEN;Citicore",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "yes",
+          "plant:source": "solar",
+          "power": "plant",
+          "type": "multipolygon",
+          "@timestamp": "2024-06-26T11:55:03Z",
+          "@version": 4,
+          "@changeset": 153199092,
+          "@user": "VMPanes",
+          "@uid": 1488198,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.6740256,
+            15.16871
+          ]
+        },
+        "id": "relation/16266383"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "relation/16505329",
+          "name": "GigaSol Power Plant",
+          "operator": "Acen",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "yes",
+          "plant:source": "solar",
+          "power": "plant",
+          "type": "multipolygon",
+          "@timestamp": "2023-10-17T05:39:55Z",
+          "@version": 1,
+          "@changeset": 142694073,
+          "@user": "GOwin",
+          "@uid": 1041828,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            119.9544499,
+            15.4451558
+          ]
+        },
+        "id": "relation/16505329"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "relation/16533845",
+          "landuse": "industrial",
+          "name": "Lal-lo Solar Power Plant Project",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "yes",
+          "plant:source": "solar",
+          "power": "plant",
+          "type": "multipolygon",
+          "@timestamp": "2024-09-02T11:53:27Z",
+          "@version": 2,
+          "@changeset": 156094910,
+          "@user": "VMPanes",
+          "@uid": 1488198,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            121.7136883,
+            18.1198493
+          ]
+        },
+        "id": "relation/16533845"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "relation/16534987",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "yes",
+          "plant:source": "solar",
+          "power": "plant",
+          "type": "multipolygon",
+          "@timestamp": "2023-10-21T11:32:06Z",
+          "@version": 1,
+          "@changeset": 142919745,
+          "@user": "GOwin",
+          "@uid": 1041828,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.4839968,
+            18.0519479
+          ]
+        },
+        "id": "relation/16534987"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "relation/16535003",
+          "addr:city": "Mabalacat",
+          "addr:place": "Bical",
+          "name": "Raslag Solar Power Plant- Phase 3",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "yes",
+          "plant:source": "solar",
+          "power": "plant",
+          "type": "multipolygon",
+          "@timestamp": "2023-10-21T11:42:36Z",
+          "@version": 2,
+          "@changeset": 142920183,
+          "@user": "GOwin",
+          "@uid": 1041828,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.6257522,
+            15.1941853
+          ]
+        },
+        "id": "relation/16535003"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "relation/16684483",
+          "frequency": "60",
+          "name": "Bais Solar Power Plant",
+          "operator": "Monte Solar Energy Inc.",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "yes",
+          "plant:source": "solar",
+          "power": "plant",
+          "ref": "http://www.ayala-energyinfra.com/ac-energy/solar-energy/monte-solar-energy-inc/",
+          "type": "multipolygon",
+          "@timestamp": "2023-11-12T03:58:06Z",
+          "@version": 1,
+          "@changeset": 143920787,
+          "@user": "chaelo86",
+          "@uid": 14996391,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            123.096256,
+            9.6365471
+          ]
+        },
+        "id": "relation/16684483"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "relation/16999797",
+          "name": "Pagudpud Wind Farm",
+          "operator": "ACEN",
+          "plant:method": "wind_turbine",
+          "plant:output:electricity": "160MW",
+          "plant:source": "wind",
+          "power": "plant",
+          "source": "Schadow1 Expeditions",
+          "start_date": "2023",
+          "type": "site",
+          "wikidata": "Q124201788",
+          "@timestamp": "2024-01-08T07:51:06Z",
+          "@version": 1,
+          "@changeset": 146018081,
+          "@user": "schadow1",
+          "@uid": 81841,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.8590507,
+            18.6145707
+          ]
+        },
+        "id": "relation/16999797"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "relation/17337525",
+          "name": "Gigasol Alaminos Solar Power Plant",
+          "operator": "AC Energy",
+          "plant:method": "thermal",
+          "plant:output:electricity": "120 MW",
+          "plant:source": "solar",
+          "power": "plant",
+          "type": "multipolygon",
+          "@timestamp": "2024-03-14T02:19:28Z",
+          "@version": 2,
+          "@changeset": 148618955,
+          "@user": "relaemanila",
+          "@uid": 15297177,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            121.2261764,
+            14.0710107
+          ]
+        },
+        "id": "relation/17337525"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "relation/17780173",
+          "name": "RASLAG Solar Power Plant",
+          "operator": "Angeles Power",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "23 MW",
+          "plant:source": "solar",
+          "power": "plant",
+          "start_date": "2015",
+          "type": "multipolygon",
+          "@timestamp": "2024-06-29T05:07:27Z",
+          "@version": 1,
+          "@changeset": 153317618,
+          "@user": "VMPanes",
+          "@uid": 1488198,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.6343679,
+            15.1333005
+          ]
+        },
+        "id": "relation/17780173"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/39996539",
+          "landuse": "industrial",
+          "name": "Quezon/San Buenaventura Power Plant",
+          "plant:method": "combustion",
+          "plant:output:electricity": "1011 MW",
+          "plant:source": "coal",
+          "power": "plant",
+          "start_date": "2000",
+          "wikidata": "Q19385979",
+          "@timestamp": "2023-01-04T15:52:47Z",
+          "@version": 7,
+          "@changeset": 130872710,
+          "@user": "p4wizard",
+          "@uid": 18122716,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            121.752793,
+            14.2278954
+          ]
+        },
+        "id": "way/39996539"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/96691959",
+          "landuse": "industrial",
+          "name": "Kalayaan Hydroelectric Power Plant",
+          "operator": "Caliraya Botocan Kalayaan Power Company",
+          "plant:method": "water-pumped-storage",
+          "plant:output:electricity": "684.6 MW",
+          "plant:source": "hydro",
+          "power": "plant",
+          "@timestamp": "2021-03-30T05:21:03Z",
+          "@version": 11,
+          "@changeset": 101953545,
+          "@user": "Sodermalm",
+          "@uid": 9625494,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            121.4740541,
+            14.3188464
+          ]
+        },
+        "id": "way/96691959"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/98289364",
+          "landuse": "industrial",
+          "name": "Caliraya Hydroelectric Power Plant",
+          "plant:method": "water-storage",
+          "plant:output:electricity": "22.6 MW",
+          "plant:source": "hydro",
+          "power": "plant",
+          "source": "Bing",
+          "@timestamp": "2019-09-21T22:22:24Z",
+          "@version": 3,
+          "@changeset": 74760460,
+          "@user": "Olyon",
+          "@uid": 1443767,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            121.4701169,
+            14.2991124
+          ]
+        },
+        "id": "way/98289364"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/100805566",
+          "landuse": "industrial",
+          "name": "San Lorenzo - Santa Rita Power Plant",
+          "operator": "First Gas",
+          "owner": "First Gen",
+          "plant:method": "combustion",
+          "plant:output:electricity": "1914 MW",
+          "plant:source": "gas",
+          "power": "plant",
+          "source": "https://www.gem.wiki/San_Lorenzo_power_station;https://www.gem.wiki/Santa_Rita_power_station",
+          "@timestamp": "2024-08-13T21:23:51Z",
+          "@version": 10,
+          "@changeset": 155215148,
+          "@user": "tjnakano",
+          "@uid": 12640051,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            121.03475,
+            13.7700308
+          ]
+        },
+        "id": "way/100805566"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/106052675",
+          "addr:city": "Puerto Princesa",
+          "landuse": "industrial",
+          "name": "NAPOCOR Puerto Princesa Power Plant",
+          "power": "plant",
+          "@timestamp": "2015-11-23T21:01:28Z",
+          "@version": 2,
+          "@changeset": 35538856,
+          "@user": "42429",
+          "@uid": 42429,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            118.7463,
+            9.7691807
+          ]
+        },
+        "id": "way/106052675"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/106986586",
+          "addr:barangay": "Camp I",
+          "addr:city": "Maramag",
+          "addr:place": "Kiuntod",
+          "addr:postcode": "8714",
+          "addr:province": "Bukidnon",
+          "landuse": "industrial",
+          "name": "Pulangi IV Hydroelectric Power Plant",
+          "operator": "National Power Corporation",
+          "operator:short": "NAPOCOR",
+          "operator:type": "government",
+          "operator:wikidata": "Q6975021",
+          "plant:method": "water-storage",
+          "plant:output:electricity": "255 MW",
+          "plant:source": "hydro",
+          "power": "plant",
+          "start_date": "1985",
+          "wikidata": "Q7259179",
+          "@timestamp": "2025-04-01T15:46:14Z",
+          "@version": 5,
+          "@changeset": 164381548,
+          "@user": "Timmy_Tesseract",
+          "@uid": 5653955,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            125.0231736,
+            7.7149853
+          ]
+        },
+        "id": "way/106986586"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/141725284",
+          "name": "Agus VII Hydroelectric Power Plant",
+          "operator": "National Power Corporation-Mindanao Generation (NPC-MinGen)",
+          "plant:method": "water-storage",
+          "plant:output:electricity": "54 MW",
+          "plant:source": "hydro",
+          "power": "plant",
+          "source": "Bing",
+          "wikidata": "Q84761346",
+          "@timestamp": "2024-04-13T19:28:59Z",
+          "@version": 4,
+          "@changeset": 149966867,
+          "@user": "James Atwil",
+          "@uid": 21280834,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            124.191428,
+            8.1933579
+          ]
+        },
+        "id": "way/141725284"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/141727551",
+          "alt_name": "Maria Christina Hydroelectric Power Plant",
+          "landuse": "industrial",
+          "name": "Agus VI Hydroelectric Power Plant",
+          "operator": "National Power Corporation",
+          "plant:output:electricity": "219 MW",
+          "plant:source": "hydro",
+          "power": "plant",
+          "source": "Bing",
+          "wikidata": "Q31796019",
+          "@timestamp": "2021-08-21T12:32:06Z",
+          "@version": 5,
+          "@changeset": 110026932,
+          "@user": "Lyze",
+          "@uid": 13522110,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            124.1928164,
+            8.184413
+          ]
+        },
+        "id": "way/141727551"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/142871259",
+          "description:plant:source": "Pulvurized Sub Critical Coal",
+          "landuse": "industrial",
+          "name": "Mindanao STEAG Power Plant",
+          "operator": "STEAG State Power Inc",
+          "plant:method": "combustion",
+          "plant:output:electricity": "232 MW",
+          "plant:source": "coal",
+          "power": "plant",
+          "source": "https://www.gem.wiki/Mindanao_Steag_power_station",
+          "@timestamp": "2022-06-06T08:23:53Z",
+          "@version": 7,
+          "@changeset": 122011307,
+          "@user": "mueschel",
+          "@uid": 616774,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            124.7590633,
+            8.570438
+          ]
+        },
+        "id": "way/142871259"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/149885287",
+          "description": "Gas Turbine Power Plant",
+          "generator:method": "combustion",
+          "generator:output:electricity": "yes",
+          "generator:source": "gas",
+          "generator:type": "gas_turbine",
+          "landuse": "industrial",
+          "name": "Navotas Power Plant",
+          "power": "plant",
+          "source": "https://www.industryabout.com/country-territories-3/694-philippines/fossil-fuels-energy/6059-navotas-gas-power-plant",
+          "@timestamp": "2021-06-02T00:38:51Z",
+          "@version": 5,
+          "@changeset": 105703484,
+          "@user": "tjnakano",
+          "@uid": 12640051,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.9544289,
+            14.6395664
+          ]
+        },
+        "id": "way/149885287"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/156623859",
+          "addr:city": "Batangas City",
+          "landuse": "industrial",
+          "name": "Ilijan Power Plant",
+          "operator": "Korea Electric Power Company Philippines",
+          "plant:method": "combustion",
+          "plant:output:electricity": "1251 MW",
+          "plant:source": "gas",
+          "power": "plant",
+          "source": "Bing",
+          "website": "http://www.kepcophilippines.com/ilijan-combined-cycle-power-plant",
+          "wikidata": "Q20861495",
+          "@timestamp": "2024-09-15T18:01:03Z",
+          "@version": 10,
+          "@changeset": 156658688,
+          "@user": "TagaSanPedroAko",
+          "@uid": 2541613,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            121.0786024,
+            13.6225252
+          ]
+        },
+        "id": "way/156623859"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/173017165",
+          "landuse": "industrial",
+          "name": "Panay Diesel Power Plant 3 (PDPP3)",
+          "plant:method": "combustion",
+          "plant:source": "diesel",
+          "power": "plant",
+          "@timestamp": "2023-02-06T18:25:39Z",
+          "@version": 7,
+          "@changeset": 132169875,
+          "@user": "tjnakano",
+          "@uid": 12640051,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            122.6320281,
+            11.0249902
+          ]
+        },
+        "id": "way/173017165"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/185930322",
+          "landuse": "industrial",
+          "name": "Meralco Santa Rosa",
+          "power": "plant",
+          "source": "Bing",
+          "@timestamp": "2021-08-14T00:56:39Z",
+          "@version": 5,
+          "@changeset": 109652855,
+          "@user": "Olyon",
+          "@uid": 1443767,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            121.1168765,
+            14.2783909
+          ]
+        },
+        "id": "way/185930322"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/245016474",
+          "landuse": "industrial",
+          "name": "First Catanduanes Electric Cooperative, Inc. (FICELCO)",
+          "power": "plant",
+          "@timestamp": "2020-03-26T16:32:56Z",
+          "@version": 6,
+          "@changeset": 82672818,
+          "@user": "rtrojas",
+          "@uid": 10942910,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            124.266402,
+            13.5962546
+          ]
+        },
+        "id": "way/245016474"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/246667669",
+          "name": "PRYCE GAS Plant",
+          "plant:source": "gas",
+          "power": "plant",
+          "source": "bing",
+          "@timestamp": "2021-07-02T13:01:59Z",
+          "@version": 3,
+          "@changeset": 107312382,
+          "@user": "Vatanka",
+          "@uid": 13686075,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            123.0054598,
+            11.0916093
+          ]
+        },
+        "id": "way/246667669"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/250193974",
+          "alt_name": "Limay CCGT",
+          "landuse": "industrial",
+          "name": "Bataan Combined Cycle Power Plant",
+          "operator": "Panasia Energy",
+          "plant:method": "combustion",
+          "plant:output:electricity": "648 MW",
+          "plant:source": "oil",
+          "plant:type": "combined_cycle",
+          "power": "plant",
+          "source": "Bing",
+          "@timestamp": "2021-12-07T13:39:41Z",
+          "@version": 5,
+          "@changeset": 114661668,
+          "@user": "ianlopez1115",
+          "@uid": 44938,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.5984835,
+            14.5430958
+          ]
+        },
+        "id": "way/250193974"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/250502684",
+          "landuse": "industrial",
+          "name": "Botocan Hydro-electric Power Plant",
+          "plant:method": "run-of-the-river",
+          "plant:output:electricity": "20.8 MW",
+          "plant:source": "hydro",
+          "power": "plant",
+          "source": "Bing",
+          "@timestamp": "2020-12-22T05:20:20Z",
+          "@version": 4,
+          "@changeset": 96230586,
+          "@user": "Dunajec5",
+          "@uid": 10811350,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            121.4852187,
+            14.1561562
+          ]
+        },
+        "id": "way/250502684"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/254493891",
+          "generator:type": "steam_turbine",
+          "name": "Malitbog Geothermal Power Plant",
+          "operator": "Energy Development Corporation",
+          "plant:output:electricity": "232.5 MW",
+          "plant:source": "geothermal",
+          "power": "plant",
+          "@timestamp": "2021-08-14T00:56:39Z",
+          "@version": 7,
+          "@changeset": 109652855,
+          "@user": "Olyon",
+          "@uid": 1443767,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            124.6494549,
+            11.1525239
+          ]
+        },
+        "id": "way/254493891"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/263612167",
+          "landuse": "industrial",
+          "name": "Petron Bataan Refinery Power Plant",
+          "plant:method": "combustion",
+          "plant:output:electricity": "140 MW",
+          "plant:source": "coal",
+          "power": "plant",
+          "@timestamp": "2023-01-16T17:43:39Z",
+          "@version": 4,
+          "@changeset": 131347524,
+          "@user": "tjnakano",
+          "@uid": 12640051,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.5958521,
+            14.524009
+          ]
+        },
+        "id": "way/263612167"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/267003417",
+          "barrier": "fence",
+          "landuse": "industrial",
+          "name": "Western Mindanao Power Corporation Zamboanga Power Plant",
+          "name:abbr": "WMPC",
+          "operator": "Alsons Power Group",
+          "plant:output:electricity": "100 MW",
+          "plant:source": "diesel",
+          "power": "plant",
+          "source": "https://www.industryabout.com/country-territories-3/694-philippines/fossil-fuels-energy/6070-sangali-oil-power-plant",
+          "@timestamp": "2021-05-25T21:21:12Z",
+          "@version": 4,
+          "@changeset": 105316092,
+          "@user": "tjnakano",
+          "@uid": 12640051,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            122.2143691,
+            7.0810941
+          ]
+        },
+        "id": "way/267003417"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/278209424",
+          "landuse": "industrial",
+          "name": "Agus 4 Hydroelectric Power Plant",
+          "operator": "National Power Corporation-Mindanao Generation (NPC-MinGen)",
+          "plant:method": "water-storage",
+          "plant:output:electricity": "158.1 MW",
+          "plant:source": "hydro",
+          "power": "plant",
+          "wikidata": "Q398724",
+          "@timestamp": "2025-03-31T00:29:41Z",
+          "@version": 4,
+          "@changeset": 164309322,
+          "@user": "Timmy_Tesseract",
+          "@uid": 5653955,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            124.202484,
+            8.1355412
+          ]
+        },
+        "id": "way/278209424"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/316944399",
+          "addr:city": "Rosario",
+          "addr:postcode": "4106",
+          "addr:province": "Cavite",
+          "landuse": "industrial",
+          "name": "Magellan Cogeneration",
+          "power": "plant",
+          "@timestamp": "2017-10-31T01:58:58Z",
+          "@version": 5,
+          "@changeset": 53382845,
+          "@user": "sc3005",
+          "@uid": 5570896,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.8603126,
+            14.4143216
+          ]
+        },
+        "id": "way/316944399"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/319701528",
+          "landuse": "industrial",
+          "name": "San Roque Hydroelectric Power Plant",
+          "operator": "San Roque Power",
+          "plant:method": "water-storage",
+          "plant:output:electricity": "435 MW",
+          "plant:source": "hydro",
+          "power": "plant",
+          "website": "https://sanroquepower.ph/features-of-srmp/",
+          "@timestamp": "2022-05-21T14:17:51Z",
+          "@version": 5,
+          "@changeset": 121284296,
+          "@user": "b-jazz-bot",
+          "@uid": 9451067,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.6809277,
+            16.1376681
+          ]
+        },
+        "id": "way/319701528"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/323730186",
+          "name": "NGPT Mariveles Solar Power Plant",
+          "operator": "Next Generation Power Technology Corporation",
+          "operator:type": "private",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "18 MW",
+          "plant:source": "solar",
+          "power": "plant",
+          "start_date": "2016-03",
+          "@timestamp": "2023-06-08T23:59:34Z",
+          "@version": 4,
+          "@changeset": 137115630,
+          "@user": "TagaSanPedroAko",
+          "@uid": 2541613,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.534707,
+            14.4511741
+          ]
+        },
+        "id": "way/323730186"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/325103801",
+          "landuse": "industrial",
+          "name": "One Subic Power Plant",
+          "operator": "One Subic Power Generation Corporation",
+          "operator:type": "private",
+          "plant:method": "combustion",
+          "plant:output:electricity": "130.3 MW",
+          "plant:source": "oil",
+          "power": "plant",
+          "source": "https://www.industryabout.com/country-territories-3/694-philippines/fossil-fuels-energy/6061-one-subic-oil-power-plant",
+          "start_date": "1994",
+          "@timestamp": "2023-02-28T11:21:38Z",
+          "@version": 5,
+          "@changeset": 133124312,
+          "@user": "ervin1118",
+          "@uid": 4936523,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.3001828,
+            14.8173585
+          ]
+        },
+        "id": "way/325103801"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/377488588",
+          "landuse": "industrial",
+          "name": "Magat Hydroelectric Power Plant",
+          "operator": "SN Aboitiz Power",
+          "plant:method": "water-storage",
+          "plant:output:electricity": "360 MW",
+          "plant:source": "hydro",
+          "power": "plant",
+          "wikidata": "Q1637455",
+          "wikipedia": "en:Magat Dam",
+          "@timestamp": "2020-02-13T01:08:27Z",
+          "@version": 5,
+          "@changeset": 80927864,
+          "@user": "Olyon",
+          "@uid": 1443767,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            121.4555944,
+            16.8268803
+          ]
+        },
+        "id": "way/377488588"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/377530308",
+          "description:plant:source": "Pulvurized Sub Critical Coal",
+          "landuse": "industrial",
+          "name": "Sual Power Plant",
+          "operator": "TEAM Energy",
+          "plant:method": "combustion",
+          "plant:output:electricity": "1218 MW",
+          "plant:source": "coal",
+          "power": "plant",
+          "website": "http://www.teamenergy.ph/about01_sual.php",
+          "wikidata": "Q7630459",
+          "@timestamp": "2023-12-16T01:32:38Z",
+          "@version": 10,
+          "@changeset": 145171212,
+          "@user": "caspermonte",
+          "@uid": 1888269,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.0987853,
+            16.1279347
+          ]
+        },
+        "id": "way/377530308"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/377852790",
+          "alt_name": "Mindanao Geothermal Power Plant",
+          "landuse": "industrial",
+          "name": "Mount Apo Geothermal Power Plant",
+          "operator": "Energy Development Corporation",
+          "plant:output:electricity": "108.5 MW",
+          "plant:source": "geothermal",
+          "power": "plant",
+          "website": "https://www.energy.com.ph/projects/geothermal/mindanao-geothermal-production-field-mgpf/",
+          "@timestamp": "2025-03-31T00:29:41Z",
+          "@version": 5,
+          "@changeset": 164309322,
+          "@user": "Timmy_Tesseract",
+          "@uid": 5653955,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            125.2198606,
+            7.0129313
+          ]
+        },
+        "id": "way/377852790"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/386455923",
+          "alt_name": "Agus 5 Hydroelectric Power Plant",
+          "name": "Agus V Hydroelectric Power Plant",
+          "operator": "National Power Corporation",
+          "plant:output:electricity": "55 MW",
+          "plant:source": "hydro",
+          "power": "plant",
+          "wikidata": "Q11957061",
+          "@timestamp": "2021-08-14T00:56:39Z",
+          "@version": 4,
+          "@changeset": 109652855,
+          "@user": "Olyon",
+          "@uid": 1443767,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            124.1950667,
+            8.1700644
+          ]
+        },
+        "id": "way/386455923"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/396416206",
+          "landuse": "industrial",
+          "name": "Bauang Diesel Power Plant",
+          "operator": "1590 Energy Corporation",
+          "owner": "Vivant",
+          "plant:method": "combustion",
+          "plant:output:electricity": "255 MW",
+          "plant:source": "diesel",
+          "power": "plant",
+          "website": "https://www.vivant.com.ph/index.php/business-services-1590-ec/",
+          "@timestamp": "2022-05-21T14:16:24Z",
+          "@version": 7,
+          "@changeset": 121284214,
+          "@user": "b-jazz-bot",
+          "@uid": 9451067,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.326146,
+            16.4907584
+          ]
+        },
+        "id": "way/396416206"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/397942151",
+          "addr:city": "Pagbilao",
+          "landuse": "industrial",
+          "name": "Pagbilao Power Plant",
+          "operator": "TEAM Energy",
+          "plant:method": "combustion",
+          "plant:output:electricity": "1184 MW",
+          "plant:source": "coal",
+          "power": "plant",
+          "website": "https://www.teamenergy.ph/pagbilao-power-plant/",
+          "wikidata": "Q104857140",
+          "@timestamp": "2023-06-01T04:27:47Z",
+          "@version": 9,
+          "@changeset": 136811870,
+          "@user": "TagaSanPedroAko",
+          "@uid": 2541613,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            121.7448173,
+            13.8948505
+          ]
+        },
+        "id": "way/397942151"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/399336542",
+          "addr:barangay": "Santa Ana",
+          "addr:city": "Nasipit",
+          "addr:postcode": "8802",
+          "addr:province": "Agusan del Norte",
+          "alt_name": "Nasipit Power Barge",
+          "building": "ship",
+          "contact:website": "https://aboitizpower.com/about-us/our-businesses/power-generation/thermal/therma-marine-inc",
+          "floating": "yes",
+          "height": "10",
+          "landuse": "industrial",
+          "name": "Aboitiz Power Barge",
+          "official_name": "Aboitiz Power Mobile 2",
+          "old_name": "Power Barge 117",
+          "operator": "Therma Marine Inc.",
+          "operator:short": "TMI",
+          "operator:type": "private",
+          "plant:method": "combustion",
+          "plant:output:electricity": "100 MW",
+          "plant:source": "diesel",
+          "power": "plant",
+          "short_name": "PB 117",
+          "start_date": "1994-08",
+          "@timestamp": "2024-06-04T08:03:59Z",
+          "@version": 5,
+          "@changeset": 152231162,
+          "@user": "Timmy_Tesseract",
+          "@uid": 5653955,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            125.3305498,
+            8.9774064
+          ]
+        },
+        "id": "way/399336542"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/399338863",
+          "addr:barangay": "San Roque",
+          "addr:city": "Maco",
+          "addr:postcode": "8806",
+          "addr:province": "Davao de Oro",
+          "alt_name": "Maco Power Barge",
+          "building": "ship",
+          "contact:website": "https://aboitizpower.com/about-us/our-businesses/power-generation/thermal/therma-marine-inc",
+          "floating": "yes",
+          "height": "10",
+          "landuse": "industrial",
+          "name": "Aboitiz Power Barge",
+          "official_name": "Aboitiz Power Mobile 1",
+          "old_name": "Power Barge 118",
+          "operator": "Therma Marine Inc.",
+          "operator:short": "TMI",
+          "operator:type": "private",
+          "plant:method": "combustion",
+          "plant:output:electricity": "100 MW",
+          "plant:source": "diesel",
+          "power": "plant",
+          "short_name": "PB 118",
+          "start_date": "1994-08",
+          "@timestamp": "2024-06-04T08:09:43Z",
+          "@version": 6,
+          "@changeset": 152231366,
+          "@user": "Timmy_Tesseract",
+          "@uid": 5653955,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            125.8532117,
+            7.3497027
+          ]
+        },
+        "id": "way/399338863"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/401263860",
+          "name": "Agus 2.0 Hydroelectric Power Plant (LanaoProvinces)",
+          "operator": "National Power Corporation-Mindanao Generation (NPC-MinGen)",
+          "plant:method": "run-of-the-river",
+          "plant:output:electricity": "180 MW",
+          "plant:source": "hydro",
+          "power": "plant",
+          "@timestamp": "2025-04-16T06:12:40Z",
+          "@version": 8,
+          "@changeset": 165011863,
+          "@user": "AndromedaGovern",
+          "@uid": 21573854,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            124.270863,
+            8.0528315
+          ]
+        },
+        "id": "way/401263860"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/401884718",
+          "addr:barangay": "Mabila",
+          "addr:city": "Sarangani",
+          "addr:postcode": "8015",
+          "addr:province": "Davao Occidental",
+          "landuse": "industrial",
+          "name": "Balut Diesel Power Plant",
+          "plant:source": "diesel",
+          "power": "plant",
+          "@timestamp": "2022-08-15T10:48:00Z",
+          "@version": 5,
+          "@changeset": 124922057,
+          "@user": "Timmy_Tesseract",
+          "@uid": 5653955,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            125.4283352,
+            5.4170662
+          ]
+        },
+        "id": "way/401884718"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/426278018",
+          "landuse": "industrial",
+          "name": "Maibarara Power Plant",
+          "operator": "Maibarara Geothermal, Inc.",
+          "plant:output:electricity": "20 MW",
+          "plant:source": "geothermal",
+          "power": "plant",
+          "start_date": "2014",
+          "@timestamp": "2020-08-06T00:45:19Z",
+          "@version": 3,
+          "@changeset": 89005163,
+          "@user": "Olyon",
+          "@uid": 1443767,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            121.164378,
+            14.1386803
+          ]
+        },
+        "id": "way/426278018"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/430461774",
+          "landuse": "industrial",
+          "name": "Masinloc Power Plant",
+          "operator": "Masinloc Power Partners Co. Ltd",
+          "operator:short": "MPPCL",
+          "operator:type": "private",
+          "plant:method": "combustion",
+          "plant:output:electricity": "1025.8 MW",
+          "plant:source": "coal",
+          "power": "plant",
+          "start_date": "1998",
+          "website": "http://aes.ph/masinloc-coal-fired-thermal-power-plant/",
+          "wikidata": "Q11988604",
+          "@timestamp": "2022-10-18T12:02:10Z",
+          "@version": 5,
+          "@changeset": 127723599,
+          "@user": "ianlopez1115",
+          "@uid": 44938,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            119.921886,
+            15.5672545
+          ]
+        },
+        "id": "way/430461774"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/431408943",
+          "name": "Cabanatuan City Solar Power Farm",
+          "operator": "FCSV",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "yes",
+          "plant:source": "solar",
+          "power": "plant",
+          "@timestamp": "2023-09-29T18:28:04Z",
+          "@version": 8,
+          "@changeset": 141925680,
+          "@user": "clay_c@gem",
+          "@uid": 19754042,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.9917435,
+            15.4965123
+          ]
+        },
+        "id": "way/431408943"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/457588162",
+          "building": "yes",
+          "generator:source": "hydro",
+          "power": "plant",
+          "@timestamp": "2016-12-04T04:44:04Z",
+          "@version": 1,
+          "@changeset": 44150567,
+          "@user": "tarsius",
+          "@uid": 558528,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            125.6070715,
+            10.3529103
+          ]
+        },
+        "id": "way/457588162"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/471446218",
+          "addr:city": "Alabel",
+          "addr:postcode": "9501",
+          "addr:village": "Baluntay",
+          "barrier": "fence",
+          "landuse": "industrial",
+          "name": "SPPC Diesel Power Plant",
+          "operator": "Southern Philippines Power Corporation",
+          "plant:method": "combustion",
+          "plant:output:electricity": "55 MW",
+          "plant:source": "diesel",
+          "power": "plant",
+          "@timestamp": "2021-06-02T02:27:35Z",
+          "@version": 3,
+          "@changeset": 105704950,
+          "@user": "Timmy_Tesseract",
+          "@uid": 5653955,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            125.2598522,
+            6.1298536
+          ]
+        },
+        "id": "way/471446218"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/483027469",
+          "name": "Power Plant",
+          "power": "plant",
+          "@timestamp": "2017-03-27T11:58:17Z",
+          "@version": 1,
+          "@changeset": 47199642,
+          "@user": "VMPanes",
+          "@uid": 1488198,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.6133753,
+            16.3742497
+          ]
+        },
+        "id": "way/483027469"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/485734072",
+          "power": "plant",
+          "@timestamp": "2017-04-09T20:36:24Z",
+          "@version": 1,
+          "@changeset": 47603569,
+          "@user": "dmgroom_ct",
+          "@uid": 437598,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            121.1602775,
+            14.9070107
+          ]
+        },
+        "id": "way/485734072"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/485761448",
+          "alt_name": "Puting Bato Power Plant",
+          "landuse": "industrial",
+          "name": "Calaca SLTEC Power Plant",
+          "operator": "South Luzon Thermal Energy Corp.",
+          "plant:method": "combustion",
+          "plant:output:electricity": "280 MW",
+          "plant:source": "coal",
+          "power": "plant",
+          "source": "https://www.gem.wiki/Puting_Bato_power_station",
+          "voltage": "230000",
+          "@timestamp": "2023-11-08T11:02:45Z",
+          "@version": 5,
+          "@changeset": 143774642,
+          "@user": "caspermonte",
+          "@uid": 1888269,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.8264341,
+            13.9192978
+          ]
+        },
+        "id": "way/485761448"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/492370927",
+          "landuse": "industrial",
+          "name": "Avion Open Cycle Power Plant",
+          "operator": "First Gas",
+          "plant:method": "combustion",
+          "plant:output:electricity": "94 MW",
+          "plant:source": "gas",
+          "power": "plant",
+          "@timestamp": "2023-12-14T09:07:31Z",
+          "@version": 3,
+          "@changeset": 145102672,
+          "@user": "caspermonte",
+          "@uid": 1888269,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            121.0410591,
+            13.7706645
+          ]
+        },
+        "id": "way/492370927"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/502798652",
+          "landuse": "industrial",
+          "name": "Villanueva Solar Power Plant",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "yes",
+          "plant:source": "solar",
+          "power": "plant",
+          "@timestamp": "2023-09-29T18:07:59Z",
+          "@version": 3,
+          "@changeset": 141925066,
+          "@user": "clay_c@gem",
+          "@uid": 19754042,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            124.7867769,
+            8.5558548
+          ]
+        },
+        "id": "way/502798652"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/506206651",
+          "name": "Tongonan Geothermal Power Plant",
+          "operator": "Energy Development Corporation",
+          "plant:output:electricity": "123 MW",
+          "plant:source": "geothermal",
+          "power": "plant",
+          "@timestamp": "2021-11-26T22:03:39Z",
+          "@version": 3,
+          "@changeset": 114279550,
+          "@user": "Engineer0088397",
+          "@uid": 12390218,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            124.638447,
+            11.1622079
+          ]
+        },
+        "id": "way/506206651"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/513059742",
+          "frequency": "60",
+          "generator:output:electricity": "yes",
+          "generator:type": "solar_photovoltaic_panel",
+          "name": "Cadiz Solar Power Plant",
+          "operator": "Helios Solar Energy",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "132.5 MW",
+          "plant:source": "solar",
+          "power": "plant",
+          "wikidata": "Q23048127",
+          "wikipedia": "en:Cadiz Solar Power Plant",
+          "@timestamp": "2025-08-22T10:19:01Z",
+          "@version": 10,
+          "@changeset": 170822821,
+          "@user": "catgirlseraid",
+          "@uid": 21657267,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            123.2972733,
+            10.9209423
+          ]
+        },
+        "id": "way/513059742"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/513262610",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "yes",
+          "plant:source": "solar",
+          "power": "plant",
+          "@timestamp": "2023-11-12T03:58:06Z",
+          "@version": 6,
+          "@changeset": 143920787,
+          "@user": "chaelo86",
+          "@uid": 14996391,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            123.096256,
+            9.6369569
+          ]
+        },
+        "id": "way/513262610"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/513473977",
+          "name": "ISLASOL II",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "yes",
+          "plant:source": "solar",
+          "plant:type": "solar_photovoltaic_panel",
+          "power": "plant",
+          "website": "https://www.thomas-lloyd.com/en/portfolio-item/islasol-ii/",
+          "wikidata": "Q23808071",
+          "wikipedia": "en:IslaSol II",
+          "@timestamp": "2025-01-16T07:25:32Z",
+          "@version": 11,
+          "@changeset": 161406217,
+          "@user": "uᴉʍOꓨ",
+          "@uid": 6591426,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            123.1650066,
+            10.9448328
+          ]
+        },
+        "id": "way/513473977"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/513853838",
+          "name": "Clark Solar Project",
+          "operator:type": "consortium",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "22 MW",
+          "plant:source": "solar",
+          "power": "plant",
+          "start_date": "2016-03-11",
+          "@timestamp": "2022-10-10T09:51:42Z",
+          "@version": 7,
+          "@changeset": 127292498,
+          "@user": "PoolMalebo",
+          "@uid": 14854465,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.5567726,
+            15.227559
+          ]
+        },
+        "id": "way/513853838"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/515474881",
+          "alt_name": "Calumangan Diesel Power Plant",
+          "generator:type": "reciprocating_engine",
+          "landuse": "industrial",
+          "name": "Central Negros Power Reliability Inc.",
+          "operator": "Energreeen Corp.",
+          "plant:method": "combustion",
+          "plant:output:electricity": "31 MW",
+          "plant:source": "diesel",
+          "power": "plant",
+          "@timestamp": "2023-10-12T23:09:27Z",
+          "@version": 5,
+          "@changeset": 142499728,
+          "@user": "charmaine_dalisay",
+          "@uid": 16076232,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            122.886206,
+            10.5594166
+          ]
+        },
+        "id": "way/515474881"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/518271632",
+          "name": "Hermosa Solar Power Plant",
+          "operator": "YH Green Energy Incorporated",
+          "operator:type": "private",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "12.6 MW",
+          "plant:source": "solar",
+          "plant:type": "solar_photovoltaic_panel",
+          "power": "plant",
+          "@timestamp": "2023-10-24T12:04:32Z",
+          "@version": 3,
+          "@changeset": 143061620,
+          "@user": "ervinjoshuadelrosario",
+          "@uid": 6831896,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.4470406,
+            14.8318196
+          ]
+        },
+        "id": "way/518271632"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/520432596",
+          "addr:city": "Subic Bay Freeport Zone",
+          "landuse": "industrial",
+          "name": "JSI Subic Solar Power Plant",
+          "operator": "Jobin-SQM, Inc. / Emerging Power Inc.",
+          "operator:short": "JSI",
+          "operator:type": "private",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "100 MW",
+          "plant:source": "solar",
+          "power": "plant",
+          "@timestamp": "2024-10-03T13:56:33Z",
+          "@version": 7,
+          "@changeset": 157420461,
+          "@user": "ianlopez1115",
+          "@uid": 44938,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.3653495,
+            14.8021115
+          ]
+        },
+        "id": "way/520432596"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/528716075",
+          "landuse": "industrial",
+          "name": "Kibawe Solar Power Plant",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "yes",
+          "plant:source": "solar",
+          "power": "plant",
+          "@timestamp": "2023-09-26T14:52:12Z",
+          "@version": 3,
+          "@changeset": 141778327,
+          "@user": "clay_c@gem",
+          "@uid": 19754042,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            124.9698068,
+            7.5550901
+          ]
+        },
+        "id": "way/528716075"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/528732939",
+          "landuse": "industrial",
+          "name": "Calatagan Solar Power Plant",
+          "operator": "Solar Philippines",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "yes",
+          "plant:source": "solar",
+          "power": "plant",
+          "@timestamp": "2024-09-16T02:46:28Z",
+          "@version": 4,
+          "@changeset": 156669329,
+          "@user": "TagaSanPedroAko",
+          "@uid": 2541613,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.6684523,
+            13.9242714
+          ]
+        },
+        "id": "way/528732939"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/529099405",
+          "addr:barangay": "Binugao",
+          "addr:city": "Davao City",
+          "addr:district": "Toril District",
+          "addr:postcode": "8000",
+          "addr:province": "Davao del Sur",
+          "addr:street": "MacArthur Highway",
+          "landuse": "industrial",
+          "name": "Therma South Coal Power Plant (Aboitiz_Davao_Region)",
+          "operator": "Therma South Inc.",
+          "operator:short": "TSI",
+          "operator:type": "private",
+          "plant:method": "combustion",
+          "plant:output:electricity": "300 MW",
+          "plant:source": "coal",
+          "power": "plant",
+          "start_date": "2016-01-08",
+          "@timestamp": "2025-04-13T01:37:27Z",
+          "@version": 13,
+          "@changeset": 164876887,
+          "@user": "AndromedaGovern",
+          "@uid": 21573854,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            125.4806409,
+            6.9646758
+          ]
+        },
+        "id": "way/529099405"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/537098792",
+          "landuse": "industrial",
+          "name": "Bakun Hydropower Plant",
+          "plant:output:electricity": "70 MW",
+          "plant:source": "hydro",
+          "power": "plant",
+          "website": "https://digitalfcb.com/aboitizdev/press-releases/aboitizpowers-70-mw-hydroelectric-plant-back-online",
+          "@timestamp": "2023-10-13T22:02:21Z",
+          "@version": 4,
+          "@changeset": 142549207,
+          "@user": "b-jazz-bot",
+          "@uid": 9451067,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.5836293,
+            16.850947
+          ]
+        },
+        "id": "way/537098792"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/539156478",
+          "landuse": "industrial",
+          "name": "Panay Power Bunker Fuel Power Station",
+          "power": "plant",
+          "@timestamp": "2025-05-01T16:19:33Z",
+          "@version": 3,
+          "@changeset": 165683775,
+          "@user": "jbcharron",
+          "@uid": 8241440,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            122.589856,
+            10.7259324
+          ]
+        },
+        "id": "way/539156478"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/539189141",
+          "landuse": "industrial",
+          "name": "Upper Mahiao Geothermal Power Plant",
+          "operator": "Energy Development Corporation",
+          "plant:output:electricity": "134 MW",
+          "plant:source": "geothermal",
+          "power": "plant",
+          "@timestamp": "2021-08-14T00:56:39Z",
+          "@version": 3,
+          "@changeset": 109652855,
+          "@user": "Olyon",
+          "@uid": 1443767,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            124.6296598,
+            11.1730143
+          ]
+        },
+        "id": "way/539189141"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/540368298",
+          "landuse": "industrial",
+          "name": "Bundagul Power Plant",
+          "operator": "ANDA Power Corporation",
+          "plant:method": "combustion",
+          "plant:output:electricity": "yes",
+          "plant:source": "coal",
+          "power": "plant",
+          "@timestamp": "2024-07-20T23:08:12Z",
+          "@version": 3,
+          "@changeset": 154198752,
+          "@user": "TagaSanPedroAko",
+          "@uid": 2541613,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.6101499,
+            15.236128
+          ]
+        },
+        "id": "way/540368298"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/540589756",
+          "landuse": "industrial",
+          "name": "National Power Corporation",
+          "operator": "NAPOCOR",
+          "power": "plant",
+          "@timestamp": "2017-11-15T05:34:35Z",
+          "@version": 1,
+          "@changeset": 53791343,
+          "@user": "Dexter Pamintuan",
+          "@uid": 6988252,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            121.9916736,
+            12.417255
+          ]
+        },
+        "id": "way/540589756"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/541623528",
+          "addr:city": "Malita",
+          "addr:street": "Davao-Sarangani Coastal Road",
+          "description": "already started who supply Aboitiz Davao Light in Davao City",
+          "landuse": "industrial",
+          "name": "SMC Power Malita",
+          "operator": "San Miguel Power",
+          "plant:method": "combustion",
+          "plant:output:electricity": "555 MW",
+          "plant:source": "coal",
+          "power": "plant",
+          "website": "https://smcglobalpower.com.ph/our-business-power-generation?slug=malita-power-plant&p=1",
+          "@timestamp": "2025-03-31T08:04:55Z",
+          "@version": 6,
+          "@changeset": 164316944,
+          "@user": "AndromedaGovern",
+          "@uid": 21573854,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            125.6164897,
+            6.3931618
+          ]
+        },
+        "id": "way/541623528"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/555264236",
+          "landuse": "industrial",
+          "name": "San Jose Diesel Power Plant",
+          "plant:source": "diesel",
+          "power": "plant",
+          "@timestamp": "2022-04-26T20:43:27Z",
+          "@version": 3,
+          "@changeset": 120229981,
+          "@user": "Claudius Henrichs",
+          "@uid": 18069,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            121.9609203,
+            12.0641278
+          ]
+        },
+        "id": "way/555264236"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/555264282",
+          "landuse": "industrial",
+          "name": "NPC Diesel Power Plant",
+          "plant:source": "diesel",
+          "power": "plant",
+          "@timestamp": "2022-04-26T20:42:52Z",
+          "@version": 3,
+          "@changeset": 120229936,
+          "@user": "Claudius Henrichs",
+          "@uid": 18069,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            121.7222773,
+            12.9122712
+          ]
+        },
+        "id": "way/555264282"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/571889596",
+          "addr:city": "Malabon",
+          "addr:street": "M. H. Del Pilar",
+          "landuse": "industrial",
+          "power": "plant",
+          "wall:material": "concrete",
+          "@timestamp": "2022-01-22T15:18:18Z",
+          "@version": 2,
+          "@changeset": 116469775,
+          "@user": "marczoutendijk",
+          "@uid": 606555,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.9582929,
+            14.6849188
+          ]
+        },
+        "id": "way/571889596"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/573739214",
+          "landuse": "industrial",
+          "name": "Misamis Coal-Fired Power Plant",
+          "operator": "Filinvest Development Corporation",
+          "plant:method": "combustion",
+          "plant:output:electricity": "400 MW",
+          "plant:source": "coal",
+          "power": "plant",
+          "start_date": "2016-10",
+          "@timestamp": "2021-08-13T01:34:06Z",
+          "@version": 7,
+          "@changeset": 109598958,
+          "@user": "Olyon",
+          "@uid": 1443767,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            124.7497183,
+            8.5595723
+          ]
+        },
+        "id": "way/573739214"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/574202289",
+          "landuse": "industrial",
+          "name": "Balingasag Thermal Power Plant",
+          "operator": "Minergy Power Corporation",
+          "plant:output:electricity": "165 MW",
+          "plant:source": "coal",
+          "power": "plant",
+          "@timestamp": "2021-08-13T01:34:06Z",
+          "@version": 4,
+          "@changeset": 109598958,
+          "@user": "Olyon",
+          "@uid": 1443767,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            124.7676033,
+            8.7660558
+          ]
+        },
+        "id": "way/574202289"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/592788976",
+          "name": "Bacman Geothermal Power Plant",
+          "operator": "Bacman Geothermal Inc. (BGI)",
+          "plant:output:electricity": "140 MW",
+          "plant:source": "geothermal",
+          "power": "plant",
+          "@timestamp": "2021-08-14T00:56:39Z",
+          "@version": 3,
+          "@changeset": 109652855,
+          "@user": "Olyon",
+          "@uid": 1443767,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            123.9294867,
+            13.0599595
+          ]
+        },
+        "id": "way/592788976"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/596012142",
+          "landuse": "industrial",
+          "name": "Green Innovations For Tommorow Inc.",
+          "operator": "GIFT Inc.",
+          "plant:method": "thermal",
+          "plant:output:electricity": "10.8 MW",
+          "plant:source": "biomass",
+          "power": "plant",
+          "@timestamp": "2024-12-17T14:20:11Z",
+          "@version": 6,
+          "@changeset": 160301613,
+          "@user": "bulanbap",
+          "@uid": 11027635,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.9002476,
+            15.6934935
+          ]
+        },
+        "id": "way/596012142"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/601146151",
+          "name": "SPARC Solar-Power Agri-Rural Community",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "yes",
+          "plant:source": "solar",
+          "power": "plant",
+          "@timestamp": "2022-11-06T14:27:18Z",
+          "@version": 3,
+          "@changeset": 128557599,
+          "@user": "kylxbn",
+          "@uid": 14395905,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.9731358,
+            15.0074403
+          ]
+        },
+        "id": "way/601146151"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/601146152",
+          "name": "Bulacan Solar Power Plant",
+          "operator": "Bulacan Solar Energy Corporation",
+          "operator:type": "consortium",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "15 MW",
+          "plant:source": "solar",
+          "power": "plant",
+          "@timestamp": "2021-05-03T22:42:46Z",
+          "@version": 5,
+          "@changeset": 104081991,
+          "@user": "DP24PH",
+          "@uid": 5752740,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            121.0265004,
+            15.0039442
+          ]
+        },
+        "id": "way/601146152"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/606044631",
+          "name": "Century Peak Hydro Powerplant",
+          "plant:source": "hydro",
+          "power": "plant",
+          "@timestamp": "2021-10-25T09:15:57Z",
+          "@version": 2,
+          "@changeset": 112937106,
+          "@user": "Claudius Henrichs",
+          "@uid": 18069,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            122.2291721,
+            10.7734829
+          ]
+        },
+        "id": "way/606044631"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/609760353",
+          "addr:city": "Ermita, Cebu City",
+          "addr:housename": "Old VECO Compound",
+          "landuse": "industrial",
+          "name": "Cebu Private Power Corporation",
+          "operator": "Aboitiz Power Corporation",
+          "plant:method": "combustion",
+          "plant:output:electricity": "70 MW",
+          "plant:source": "oil",
+          "power": "plant",
+          "source": "https://aboitizpower.com/about-us/our-businesses/power-generation/thermal/cebu-private-power-corporation",
+          "start_date": "1998",
+          "@timestamp": "2024-09-15T05:10:56Z",
+          "@version": 4,
+          "@changeset": 156633777,
+          "@user": "uᴉʍOꓨ",
+          "@uid": 6591426,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            123.8972047,
+            10.2895739
+          ]
+        },
+        "id": "way/609760353"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/611695436",
+          "landuse": "industrial",
+          "name": "iPower",
+          "operator": "San Jose City iPower Corporation",
+          "plant:method": "combustion",
+          "plant:output:electricity": "20 MW",
+          "plant:source": "biomass",
+          "power": "plant",
+          "@timestamp": "2023-11-10T15:08:45Z",
+          "@version": 4,
+          "@changeset": 143868025,
+          "@user": "adobekalan",
+          "@uid": 19189897,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.9957013,
+            15.7790176
+          ]
+        },
+        "id": "way/611695436"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/635909487",
+          "landuse": "industrial",
+          "name": "Toledo Power Company",
+          "operator": "Global Business Power Corporation - Toledo Power Corporation (GBPC-TPC)",
+          "plant:method": "combustion",
+          "plant:output:electricity": "150 MW",
+          "plant:source": "coal",
+          "power": "plant",
+          "@timestamp": "2025-01-18T11:06:23Z",
+          "@version": 5,
+          "@changeset": 161486782,
+          "@user": "caspermonte",
+          "@uid": 1888269,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            123.64408,
+            10.3870682
+          ]
+        },
+        "id": "way/635909487"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/635909488",
+          "name": "First Toledo Solar Energy Corporation",
+          "operator": "First Toledo Solar Energy Corporation",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "60 MW",
+          "plant:source": "solar",
+          "power": "plant",
+          "@timestamp": "2025-05-02T11:11:10Z",
+          "@version": 7,
+          "@changeset": 165714295,
+          "@user": "uᴉʍOꓨ",
+          "@uid": 6591426,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            123.6783545,
+            10.4156355
+          ]
+        },
+        "id": "way/635909488"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/644450031",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "yes",
+          "plant:source": "solar",
+          "power": "plant",
+          "@timestamp": "2023-09-29T19:59:11Z",
+          "@version": 3,
+          "@changeset": 141928547,
+          "@user": "clay_c@gem",
+          "@uid": 19754042,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            124.7444042,
+            6.3338394
+          ]
+        },
+        "id": "way/644450031"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/646201909",
+          "landuse": "industrial",
+          "name": "Romblon ELectric Cooperative",
+          "power": "plant",
+          "@timestamp": "2018-11-19T05:57:29Z",
+          "@version": 1,
+          "@changeset": 64640760,
+          "@user": "drokski",
+          "@uid": 5722734,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            122.5970973,
+            12.3043509
+          ]
+        },
+        "id": "way/646201909"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/649104784",
+          "addr:barangay": "Hambi-an",
+          "addr:city": "Banton",
+          "addr:postcode": "5515",
+          "addr:province": "Romblon",
+          "landuse": "industrial",
+          "name": "ROMELCO Power Station",
+          "plant:method": "combustion",
+          "plant:output:electricity": "yes",
+          "plant:source": "diesel",
+          "power": "plant",
+          "@timestamp": "2024-09-25T13:50:31Z",
+          "@version": 6,
+          "@changeset": 157084255,
+          "@user": "Timmy_Tesseract",
+          "@uid": 5653955,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            122.0963641,
+            12.9386486
+          ]
+        },
+        "id": "way/649104784"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/649202627",
+          "landuse": "industrial",
+          "name": "NPC Power Plant",
+          "power": "plant",
+          "@timestamp": "2018-11-26T16:03:33Z",
+          "@version": 1,
+          "@changeset": 64903069,
+          "@user": "drokski",
+          "@uid": 5722734,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            122.0392758,
+            12.7859012
+          ]
+        },
+        "id": "way/649202627"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/650546826",
+          "landuse": "industrial",
+          "name": "Doong NPC Diesel Plant",
+          "plant:source": "diesel",
+          "power": "plant",
+          "@timestamp": "2024-03-28T04:23:51Z",
+          "@version": 4,
+          "@changeset": 149250408,
+          "@user": "chaelo86",
+          "@uid": 14996391,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            123.6431795,
+            11.0776695
+          ]
+        },
+        "id": "way/650546826"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/659480030",
+          "name": "North Negros BioPower Inc.",
+          "plant:method": "combustion",
+          "plant:output:electricity": "25 MW",
+          "plant:source": "biomass",
+          "plant:type": "steam_generator",
+          "power": "plant",
+          "ref": "https://www.thomas-lloyd.com/en/portfolio-item/north-negros-biopower/",
+          "@timestamp": "2021-07-02T13:01:59Z",
+          "@version": 3,
+          "@changeset": 107312382,
+          "@user": "Vatanka",
+          "@uid": 13686075,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            123.1725656,
+            10.9423471
+          ]
+        },
+        "id": "way/659480030"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/661056273",
+          "landuse": "industrial",
+          "name": "Iloilo Solar Power Plant",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "yes",
+          "plant:source": "solar",
+          "power": "plant",
+          "@timestamp": "2023-09-28T18:06:57Z",
+          "@version": 2,
+          "@changeset": 141875831,
+          "@user": "clay_c@gem",
+          "@uid": 19754042,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            122.167847,
+            10.6157855
+          ]
+        },
+        "id": "way/661056273"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/663531518",
+          "landuse": "industrial",
+          "name": "BASELCO",
+          "power": "plant",
+          "@timestamp": "2019-01-15T16:12:17Z",
+          "@version": 1,
+          "@changeset": 66336189,
+          "@user": "drokski",
+          "@uid": 5722734,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            121.990845,
+            6.6985046
+          ]
+        },
+        "id": "way/663531518"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/680879194",
+          "landuse": "industrial",
+          "power": "plant",
+          "@timestamp": "2019-04-01T11:23:36Z",
+          "@version": 1,
+          "@changeset": 68750503,
+          "@user": "drokski",
+          "@uid": 5722734,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            122.6172754,
+            10.7047834
+          ]
+        },
+        "id": "way/680879194"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/692263010",
+          "addr:barangay": "San Roque",
+          "addr:city": "Digos City",
+          "addr:place": "Purok 2 Curacha",
+          "addr:postcode": "8002",
+          "addr:province": "Davao del Sur",
+          "landuse": "industrial",
+          "name": "Digos Solar Power Plant",
+          "operator": "MIESCOR",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "28.6 MW",
+          "plant:source": "solar",
+          "plant:type": "solar_photovoltaic_panel",
+          "power": "plant",
+          "source_ref": "http://www.miescor.ph/projects/view/digos-solar-power-plant",
+          "@timestamp": "2023-12-18T09:48:57Z",
+          "@version": 6,
+          "@changeset": 145244174,
+          "@user": "Timmy_Tesseract",
+          "@uid": 5653955,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            125.2848446,
+            6.7729312
+          ]
+        },
+        "id": "way/692263010"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/692881644",
+          "landuse": "industrial",
+          "name": "69 KV Power Station",
+          "power": "plant",
+          "@timestamp": "2019-05-28T00:15:38Z",
+          "@version": 1,
+          "@changeset": 70677460,
+          "@user": "roughlook",
+          "@uid": 10020277,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            125.0928676,
+            6.0570832
+          ]
+        },
+        "id": "way/692881644"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/694409066",
+          "landuse": "industrial",
+          "name": "Limay Power Plant",
+          "operator": "SMC Consolidated Power Corporation",
+          "plant:method": "combustion",
+          "plant:output:electricity": "600 MW",
+          "plant:source": "coal",
+          "power": "plant",
+          "source": "https://www.gem.wiki/Limay_power_station",
+          "@timestamp": "2023-03-22T17:12:31Z",
+          "@version": 4,
+          "@changeset": 133987880,
+          "@user": "tjnakano",
+          "@uid": 12640051,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.6052626,
+            14.5198456
+          ]
+        },
+        "id": "way/694409066"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/702960231",
+          "plant:source": "hydro",
+          "power": "plant",
+          "@timestamp": "2020-05-06T20:56:38Z",
+          "@version": 2,
+          "@changeset": 84783972,
+          "@user": "Claudius Henrichs",
+          "@uid": 18069,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            124.2487245,
+            8.3317877
+          ]
+        },
+        "id": "way/702960231"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/710674036",
+          "landuse": "industrial",
+          "name": "S.I. Power Corporation",
+          "other_name": "SIPCOR",
+          "power": "plant",
+          "@timestamp": "2019-08-04T13:33:31Z",
+          "@version": 1,
+          "@changeset": 72989998,
+          "@user": "kinleah",
+          "@uid": 7570404,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            123.5277249,
+            9.2245568
+          ]
+        },
+        "id": "way/710674036"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/804751668",
+          "landuse": "industrial",
+          "name": "Calaca Power Plant",
+          "operator": "Sem-Calaca Power",
+          "plant:method": "combustion",
+          "plant:output:electricity": "600 MW",
+          "plant:source": "coal",
+          "power": "plant",
+          "@timestamp": "2021-08-13T01:34:06Z",
+          "@version": 3,
+          "@changeset": 109598958,
+          "@user": "Olyon",
+          "@uid": 1443767,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.7888982,
+            13.9311625
+          ]
+        },
+        "id": "way/804751668"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/804751698",
+          "name": "SLPGC Coal-fired Power Plant",
+          "operator": "Southern Luzon Power Generation Corporation",
+          "plant:method": "combustion",
+          "plant:output:electricity": "300 MW",
+          "plant:source": "coal",
+          "power": "plant",
+          "start_date": "2016",
+          "@timestamp": "2021-08-13T01:34:06Z",
+          "@version": 2,
+          "@changeset": 109598958,
+          "@user": "Olyon",
+          "@uid": 1443767,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.785878,
+            13.9314472
+          ]
+        },
+        "id": "way/804751698"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/805500373",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "yes",
+          "plant:source": "solar",
+          "power": "plant",
+          "@timestamp": "2020-05-18T17:04:20Z",
+          "@version": 1,
+          "@changeset": 85395218,
+          "@user": "sravyasri",
+          "@uid": 11178752,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            122.1651149,
+            11.8046766
+          ]
+        },
+        "id": "way/805500373"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/814423312",
+          "landuse": "industrial",
+          "name": "VS Gripal Power Plant",
+          "operator": "VS Gripal Power",
+          "plant:method": "combustion",
+          "plant:output:electricity": "5 MW",
+          "plant:source": "biomass",
+          "power": "plant",
+          "@timestamp": "2023-06-03T21:48:59Z",
+          "@version": 4,
+          "@changeset": 136916694,
+          "@user": "TagaSanPedroAko",
+          "@uid": 2541613,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.9969232,
+            15.774604
+          ]
+        },
+        "id": "way/814423312"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/817290659",
+          "name": "Dalayap Solar Power Plant",
+          "operator": "Enfinity Philippines Renewable Sources Inc.",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "7.48 MW",
+          "plant:source": "solar",
+          "power": "plant",
+          "@timestamp": "2021-08-14T00:56:39Z",
+          "@version": 2,
+          "@changeset": 109652855,
+          "@user": "Olyon",
+          "@uid": 1443767,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.6148973,
+            15.5364972
+          ]
+        },
+        "id": "way/817290659"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/821487687",
+          "landuse": "industrial",
+          "name": "MVC Hydroelectric Plant 2",
+          "plant:output:electricity": "yes",
+          "plant:source": "hydro",
+          "power": "plant",
+          "@timestamp": "2020-06-30T14:12:39Z",
+          "@version": 1,
+          "@changeset": 87353094,
+          "@user": "qzxpqbp",
+          "@uid": 3113813,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            125.0161493,
+            7.9893377
+          ]
+        },
+        "id": "way/821487687"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/836798412",
+          "name": "Morong Solar Power Plant",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "5 MW",
+          "plant:source": "solar",
+          "power": "plant",
+          "@timestamp": "2023-10-24T11:52:37Z",
+          "@version": 4,
+          "@changeset": 143061192,
+          "@user": "ervinjoshuadelrosario",
+          "@uid": 6831896,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.2666045,
+            14.6914537
+          ]
+        },
+        "id": "way/836798412"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/839042400",
+          "name": "Palauig Solar Power Plant",
+          "operator": "SPARC Solar Powered Agri-Rural Communities Corporation (SPARCC)",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "5 MW",
+          "plant:source": "solar",
+          "power": "plant",
+          "@timestamp": "2021-08-14T00:56:39Z",
+          "@version": 2,
+          "@changeset": 109652855,
+          "@user": "Olyon",
+          "@uid": 1443767,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            119.9854405,
+            15.4409269
+          ]
+        },
+        "id": "way/839042400"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/846226985",
+          "addr:city": "General Santos City",
+          "addr:place": "Sitio Changco",
+          "addr:postcode": "9500",
+          "addr:province": "South Cotabato",
+          "addr:village": "Siguel",
+          "barrier": "fence",
+          "description": "Santos Star Solar Power Plant",
+          "landuse": "industrial",
+          "name": "GenSan_SolarEnergy_DaytimePower",
+          "operator": "Harbor Star Energy Corp.",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "25 MW",
+          "plant:source": "solar",
+          "power": "plant",
+          "start_date": "2019",
+          "website": "https://www.gem.wiki/Santos_Solar_Power_Project",
+          "@timestamp": "2025-03-31T08:17:01Z",
+          "@version": 5,
+          "@changeset": 164317342,
+          "@user": "AndromedaGovern",
+          "@uid": 21573854,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            125.0683895,
+            5.9772953
+          ]
+        },
+        "id": "way/846226985"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/874088033",
+          "building": "industrial",
+          "name": "Talomo 3 Hydro",
+          "note": "start date approximate",
+          "operator": "Hedcor",
+          "plant:output:electricity": "1920 kW",
+          "plant:source": "hydro",
+          "power": "plant",
+          "start_date": "1950",
+          "@timestamp": "2021-10-25T09:14:24Z",
+          "@version": 4,
+          "@changeset": 112937037,
+          "@user": "Claudius Henrichs",
+          "@uid": 18069,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            125.5237201,
+            7.0845097
+          ]
+        },
+        "id": "way/874088033"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/879039749",
+          "building": "industrial",
+          "name": "Talomo 2B Hydro",
+          "operator": "Hedcor",
+          "plant:output:electricity": "300 kW",
+          "plant:source": "hydro",
+          "power": "plant",
+          "start_date": "1958",
+          "@timestamp": "2021-10-25T09:14:49Z",
+          "@version": 3,
+          "@changeset": 112937052,
+          "@user": "Claudius Henrichs",
+          "@uid": 18069,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            125.4917143,
+            7.0959543
+          ]
+        },
+        "id": "way/879039749"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/879039752",
+          "addr:barangay": "Mintal",
+          "addr:city": "Davao City",
+          "addr:district": "Tugbok District",
+          "addr:postcode": "8022",
+          "addr:province": "Davao del Sur",
+          "building": "industrial",
+          "building:levels": "1",
+          "name": "Talomo 2 Hydro",
+          "operator": "Hedcor",
+          "operator:type": "private",
+          "plant:output:electricity": "600 kW",
+          "plant:source": "hydro",
+          "power": "plant",
+          "start_date": "1959",
+          "@timestamp": "2025-08-16T04:36:47Z",
+          "@version": 2,
+          "@changeset": 170505887,
+          "@user": "Timmy_Tesseract",
+          "@uid": 5653955,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            125.5053307,
+            7.0924543
+          ]
+        },
+        "id": "way/879039752"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/879516719",
+          "note": "geometry is approximated, using sentinel 2 imagery",
+          "operator": "G.A. Philkor Multi Energy Corporation",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "yes",
+          "plant:source": "solar",
+          "power": "plant",
+          "source": "sentinel-2",
+          "@timestamp": "2023-11-21T12:44:16Z",
+          "@version": 4,
+          "@changeset": 144285912,
+          "@user": "Khyle Castro",
+          "@uid": 20381331,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.8164665,
+            14.2975324
+          ]
+        },
+        "id": "way/879516719"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/885874116",
+          "operator": "San Ildefonso Alternative Energy Corporation",
+          "operator:type": "private",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "22 MW",
+          "plant:source": "solar",
+          "power": "plant",
+          "@timestamp": "2023-09-28T15:59:11Z",
+          "@version": 3,
+          "@changeset": 141870907,
+          "@user": "clay_c@gem",
+          "@uid": 19754042,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            121.0304064,
+            15.0073186
+          ]
+        },
+        "id": "way/885874116"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/892121755",
+          "landuse": "industrial",
+          "name": "SURSECO II",
+          "power": "plant",
+          "@timestamp": "2022-07-31T12:46:09Z",
+          "@version": 2,
+          "@changeset": 124302050,
+          "@user": "ampak",
+          "@uid": 1917503,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            125.9594384,
+            9.2689786
+          ]
+        },
+        "id": "way/892121755"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/907605727",
+          "landuse": "industrial",
+          "operator": "DMCI Power",
+          "plant:method": "combustion",
+          "plant:output:electricity": "20 MW",
+          "plant:source": "oil",
+          "power": "plant",
+          "@timestamp": "2023-04-20T07:34:25Z",
+          "@version": 2,
+          "@changeset": 135134937,
+          "@user": "TagaSanPedroAko",
+          "@uid": 2541613,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            123.6407731,
+            12.3489681
+          ]
+        },
+        "id": "way/907605727"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/919025519",
+          "landuse": "industrial",
+          "name": "Palm Concepcion Power Corporation Thermal Power Plant",
+          "plant:method": "combustion",
+          "plant:output:electricity": "135 MW",
+          "plant:source": "coal",
+          "power": "plant",
+          "@timestamp": "2023-10-08T06:41:21Z",
+          "@version": 4,
+          "@changeset": 142292120,
+          "@user": "gscholz",
+          "@uid": 109705,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            123.1216724,
+            11.1886298
+          ]
+        },
+        "id": "way/919025519"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/926419110",
+          "addr:city": "Maasim",
+          "addr:place": "Sitio Tampuan",
+          "addr:postcode": "9502",
+          "addr:province": "Sarangani",
+          "addr:street": "Sarangani-Sultan Kudarat Coastal Road",
+          "addr:village": "Kamanga",
+          "barrier": "fence",
+          "landuse": "industrial",
+          "name": "Kamanga SM200 Power Plant",
+          "operator": "Sarangani Energy Corporation",
+          "plant:method": "combustion",
+          "plant:output:electricity": "210 MW",
+          "plant:source": "coal",
+          "power": "plant",
+          "@timestamp": "2021-06-10T06:07:08Z",
+          "@version": 2,
+          "@changeset": 106130886,
+          "@user": "Timmy_Tesseract",
+          "@uid": 5653955,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            125.0798305,
+            5.8689403
+          ]
+        },
+        "id": "way/926419110"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/931610392",
+          "landuse": "industrial",
+          "name": "Mariveles Power Plant",
+          "operator": "GNPower",
+          "plant:method": "combustion",
+          "plant:output:electricity": "690 MW",
+          "plant:source": "coal",
+          "power": "plant",
+          "source": "https://www.gem.wiki/Mariveles_Power_Plant",
+          "start_date": "2013",
+          "wikidata": "Q21852409",
+          "@timestamp": "2021-08-13T01:34:06Z",
+          "@version": 3,
+          "@changeset": 109598958,
+          "@user": "Olyon",
+          "@uid": 1443767,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.5367498,
+            14.4248536
+          ]
+        },
+        "id": "way/931610392"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/931945940",
+          "landuse": "industrial",
+          "name": "Tumingad Solar Power Plant",
+          "operator": "SUWECO",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "7.5 MW",
+          "plant:source": "solar",
+          "power": "plant",
+          "source": "https://pia.gov.ph/news/articles/1026123",
+          "start_date": "2019-09",
+          "@timestamp": "2022-04-29T14:43:10Z",
+          "@version": 2,
+          "@changeset": 120351822,
+          "@user": "Claudius Henrichs",
+          "@uid": 18069,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            122.0222967,
+            12.4348635
+          ]
+        },
+        "id": "way/931945940"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/936748768",
+          "landuse": "industrial",
+          "name": "MPGC – Mariveles Coal-Fired Power Plant",
+          "plant:method": "combustion",
+          "plant:output:electricity": "600 MW",
+          "plant:source": "coal",
+          "power": "plant",
+          "@timestamp": "2024-08-01T17:03:50Z",
+          "@version": 5,
+          "@changeset": 154703526,
+          "@user": "claudia10",
+          "@uid": 557496,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.4322688,
+            14.4500639
+          ]
+        },
+        "id": "way/936748768"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/937496043",
+          "alt_name": "Panay Energy Development Corporation Coal Power Plant",
+          "landuse": "industrial",
+          "name": "Iloilo City PEDC Panay Power Plant",
+          "operator": "GBPC-PEDC",
+          "plant:method": "combustion",
+          "plant:output:electricity": "317.4 MW",
+          "plant:source": "coal",
+          "power": "plant",
+          "source": "https://www.gem.wiki/Panay_power_station",
+          "@timestamp": "2021-08-13T01:34:06Z",
+          "@version": 2,
+          "@changeset": 109598958,
+          "@user": "Olyon",
+          "@uid": 1443767,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            122.596006,
+            10.7240745
+          ]
+        },
+        "id": "way/937496043"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/940891843",
+          "addr:city": "naga",
+          "alt_name": "KEPCO SPC",
+          "landuse": "industrial",
+          "name": "Naga-2 Power Plant",
+          "operator": "KEPCO - Salcon Power Corporation",
+          "plant:method": "combustion",
+          "plant:output:electricity": "206 MW",
+          "plant:source": "coal",
+          "power": "plant",
+          "source": "https://www.gem.wiki/Naga_power_complex#Background_on_Naga-1_and_Naga-2",
+          "start_date": "2011-02-28",
+          "@timestamp": "2021-10-21T20:48:56Z",
+          "@version": 4,
+          "@changeset": 112810515,
+          "@user": "Jakub_sz",
+          "@uid": 13278284,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            123.7617583,
+            10.2175107
+          ]
+        },
+        "id": "way/940891843"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/941668491",
+          "operator": "SEPALCO",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "50 MW",
+          "plant:source": "solar",
+          "power": "plant",
+          "@timestamp": "2024-09-08T16:53:55Z",
+          "@version": 3,
+          "@changeset": 156361076,
+          "@user": "VMPanes",
+          "@uid": 1488198,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            124.9211156,
+            11.1406323
+          ]
+        },
+        "id": "way/941668491"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/942024012",
+          "building": "industrial",
+          "landuse": "industrial",
+          "name": "Polillo Power Plant",
+          "power": "plant",
+          "source": "node 5479258922",
+          "@timestamp": "2024-06-15T11:08:35Z",
+          "@version": 2,
+          "@changeset": 152716222,
+          "@user": "mikko_tamura",
+          "@uid": 2258022,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            121.922507,
+            14.7641988
+          ]
+        },
+        "id": "way/942024012"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/949969597",
+          "addr:barangay": "Libertad",
+          "addr:city": "Kauswagan",
+          "addr:postcode": "9202",
+          "addr:province": "Lanao del Norte",
+          "landuse": "industrial",
+          "name": "GNPower Kauswagan Power Plant",
+          "plant:method": "combustion",
+          "plant:output:electricity": "600 MW",
+          "plant:source": "coal",
+          "power": "plant",
+          "website": "https://ayala.com/",
+          "@timestamp": "2025-04-28T01:43:44Z",
+          "@version": 5,
+          "@changeset": 165527988,
+          "@user": "AndromedaGovern",
+          "@uid": 21573854,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            124.1173783,
+            8.1854149
+          ]
+        },
+        "id": "way/949969597"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/960744611",
+          "landuse": "industrial",
+          "name": "Therma Visayas",
+          "name:en": "Therma Visayas",
+          "operator": "Aboitiz Power",
+          "plant:method": "combustion",
+          "plant:output:electricity": "340 MW",
+          "plant:source": "coal",
+          "power": "plant",
+          "short_name": "TVI",
+          "start_date": "2019",
+          "@timestamp": "2024-11-02T09:45:42Z",
+          "@version": 4,
+          "@changeset": 158650610,
+          "@user": "MarcoR",
+          "@uid": 175882,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            123.6046482,
+            10.3485827
+          ]
+        },
+        "id": "way/960744611"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/969474189",
+          "landuse": "industrial",
+          "name": "Dinginin Power Station",
+          "plant:method": "combustion",
+          "plant:output:electricity": "1336 MW",
+          "plant:source": "coal",
+          "power": "plant",
+          "source": "https://www.gem.wiki/Dinginin_power_station",
+          "@timestamp": "2021-08-17T16:56:25Z",
+          "@version": 3,
+          "@changeset": 109824456,
+          "@user": "ervinjoshuadelrosario",
+          "@uid": 6831896,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.5421194,
+            14.4241585
+          ]
+        },
+        "id": "way/969474189"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/972710219",
+          "name": "Cebu Energy Development Corporation",
+          "plant:method": "combustion",
+          "plant:output:electricity": "251.1 MW",
+          "plant:source": "coal",
+          "power": "plant",
+          "@timestamp": "2021-08-13T01:34:06Z",
+          "@version": 1,
+          "@changeset": 109598958,
+          "@user": "Olyon",
+          "@uid": 1443767,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            123.639784,
+            10.3866171
+          ]
+        },
+        "id": "way/972710219"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/972982990",
+          "landuse": "industrial",
+          "name": "Manolo Fortich Hydroelectric Power Plant",
+          "operator": "Hydro Electric Development Corporation (HEDCOR) Bukidnon, Inc.",
+          "plant:output:electricity": "73.3 MW",
+          "plant:source": "hydro",
+          "power": "plant",
+          "@timestamp": "2025-03-31T00:29:41Z",
+          "@version": 2,
+          "@changeset": 164309322,
+          "@user": "Timmy_Tesseract",
+          "@uid": 5653955,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            124.9823038,
+            8.4299272
+          ]
+        },
+        "id": "way/972982990"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/972982998",
+          "name": "Mahanagdong-B",
+          "operator": "Energy Development Corporation",
+          "plant:output:electricity": "60 MW",
+          "plant:source": "geothermal",
+          "power": "plant",
+          "@timestamp": "2021-08-14T00:56:39Z",
+          "@version": 1,
+          "@changeset": 109652855,
+          "@user": "Olyon",
+          "@uid": 1443767,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            124.6695104,
+            11.130805
+          ]
+        },
+        "id": "way/972982998"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/972982999",
+          "name": "Mahanagdong-A",
+          "operator": "Energy Development Corporation",
+          "plant:output:electricity": "120 MW",
+          "plant:source": "geothermal",
+          "power": "plant",
+          "@timestamp": "2021-08-14T00:56:39Z",
+          "@version": 1,
+          "@changeset": 109652855,
+          "@user": "Olyon",
+          "@uid": 1443767,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            124.672814,
+            11.1152617
+          ]
+        },
+        "id": "way/972982999"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/972983000",
+          "name": "Leyte Geothermal Power Plant",
+          "operator": "Energy Development Corporation",
+          "plant:output:electricity": "57.2 MW",
+          "plant:source": "geothermal",
+          "power": "plant",
+          "@timestamp": "2021-08-14T00:56:39Z",
+          "@version": 1,
+          "@changeset": 109652855,
+          "@user": "Olyon",
+          "@uid": 1443767,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            124.6460503,
+            11.1532641
+          ]
+        },
+        "id": "way/972983000"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/972983001",
+          "name": "First Soleq Energy Corporation",
+          "note": "Vena Energy 30MW Solar Project",
+          "operator": "First Soleq Energy Corporation",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "30.4 MW",
+          "plant:source": "solar",
+          "power": "plant",
+          "@timestamp": "2024-04-03T22:01:06Z",
+          "@version": 2,
+          "@changeset": 149545315,
+          "@user": "TWHB",
+          "@uid": 6556551,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            124.6305596,
+            11.0843311
+          ]
+        },
+        "id": "way/972983001"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/985412190",
+          "landuse": "industrial",
+          "operator": "DMCI Power",
+          "plant:source": "biomass",
+          "power": "plant",
+          "@timestamp": "2021-09-21T05:56:06Z",
+          "@version": 1,
+          "@changeset": 111475768,
+          "@user": "TagaSanPedroAko",
+          "@uid": 2541613,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            121.1602944,
+            13.366549
+          ]
+        },
+        "id": "way/985412190"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/989904283",
+          "landuse": "industrial",
+          "name": "Delta P Power Plant",
+          "power": "plant",
+          "@timestamp": "2021-10-05T13:16:34Z",
+          "@version": 1,
+          "@changeset": 112123066,
+          "@user": "drokski",
+          "@uid": 5722734,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            118.7366892,
+            9.8505901
+          ]
+        },
+        "id": "way/989904283"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/990835912",
+          "name": "Sabang Renewable Energy Corporation",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "yes",
+          "plant:source": "solar",
+          "power": "plant",
+          "@timestamp": "2021-10-07T10:31:32Z",
+          "@version": 1,
+          "@changeset": 112209672,
+          "@user": "drokski",
+          "@uid": 5722734,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            118.8735299,
+            10.1498791
+          ]
+        },
+        "id": "way/990835912"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/993568433",
+          "name": "Lake Mainit 25 MW Power Plant",
+          "operator": "Lake Mainit Hydro Generation Corp.",
+          "plant:output:electricity": "25 MW",
+          "plant:source": "hydro",
+          "power": "plant",
+          "@timestamp": "2021-10-18T06:05:32Z",
+          "@version": 1,
+          "@changeset": 112636071,
+          "@user": "ampak",
+          "@uid": 1917503,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            125.4851704,
+            9.3492296
+          ]
+        },
+        "id": "way/993568433"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1082255030",
+          "addr:city": "Kiangan",
+          "addr:postcode": "3604",
+          "landuse": "industrial",
+          "name": "Ambangal Mini Hydro Power Plant",
+          "operator": "PLGU Ifugao",
+          "plant:method": "run-of-the-river",
+          "plant:output:electricity": "200 kW",
+          "plant:source": "hydro",
+          "power": "plant",
+          "@timestamp": "2024-12-19T11:48:35Z",
+          "@version": 2,
+          "@changeset": 160390676,
+          "@user": "joconnor-cti",
+          "@uid": 11543026,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            121.1068532,
+            16.7916912
+          ]
+        },
+        "id": "way/1082255030"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1082256331",
+          "addr:city": "Asipulo",
+          "landuse": "industrial",
+          "name": "Likud MiniHydro PowerPlant",
+          "operator": "PLGU Ifugao",
+          "plant:method": "run-of-the-river",
+          "plant:output:electricity": "yes",
+          "plant:source": "hydro",
+          "power": "plant",
+          "@timestamp": "2022-07-29T07:55:28Z",
+          "@version": 1,
+          "@changeset": 124217113,
+          "@user": "aymarballanti",
+          "@uid": 16529216,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            121.1023628,
+            16.7322495
+          ]
+        },
+        "id": "way/1082256331"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1086683249",
+          "addr:city": "Taft",
+          "area": "yes",
+          "fixme": "Area Boundary is only assumed until full satellite imagery is available.",
+          "name": "Taft Hydro Energy",
+          "operator": "Taft Hydro Energy",
+          "plant:method": "run-of-the-river",
+          "plant:output:electricity": "yes",
+          "plant:source": "hydro",
+          "power": "plant",
+          "type": "site",
+          "@timestamp": "2022-12-22T13:02:02Z",
+          "@version": 2,
+          "@changeset": 130375082,
+          "@user": "@CACCABO",
+          "@uid": 4035171,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            125.3043365,
+            11.8237016
+          ]
+        },
+        "id": "way/1086683249"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1092043306",
+          "addr:city": "San Miguel",
+          "addr:street": "Magsaysay Road",
+          "name": "San Miguel Solar Project",
+          "operator": "Bulacan Sol",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "50 MW",
+          "plant:source": "solar",
+          "power": "plant",
+          "@timestamp": "2023-05-31T02:55:24Z",
+          "@version": 2,
+          "@changeset": 136768571,
+          "@user": "TagaSanPedroAko",
+          "@uid": 2541613,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.9992283,
+            15.1375247
+          ]
+        },
+        "id": "way/1092043306"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1111764402",
+          "name": "Pasuquin Solar Power Plant",
+          "operator": "Energy Logics Philippines, Inc.",
+          "operator:type": "private",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "100 MW",
+          "plant:source": "solar",
+          "power": "plant",
+          "@timestamp": "2023-03-19T17:01:12Z",
+          "@version": 3,
+          "@changeset": 133865880,
+          "@user": "VMPanes",
+          "@uid": 1488198,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.6892912,
+            18.4541801
+          ]
+        },
+        "id": "way/1111764402"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1118870543",
+          "addr:barangay": "Santa Cruz",
+          "addr:city": "Samal",
+          "addr:district": "Kaputian District",
+          "addr:postcode": "8119",
+          "addr:province": "Davao del Norte",
+          "landuse": "industrial",
+          "name": "Talikud Diesel Power Plant",
+          "plant:method": "combustion",
+          "plant:source": "diesel",
+          "power": "plant",
+          "short_name": "Talikud DPP",
+          "@timestamp": "2024-04-06T13:54:56Z",
+          "@version": 3,
+          "@changeset": 149656575,
+          "@user": "Timmy_Tesseract",
+          "@uid": 5653955,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            125.7172192,
+            6.9381822
+          ]
+        },
+        "id": "way/1118870543"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1127372997",
+          "landuse": "industrial",
+          "plant:method": "combustion",
+          "plant:output:electricity": "yes",
+          "plant:source": "oil",
+          "power": "plant",
+          "@timestamp": "2023-01-05T00:09:02Z",
+          "@version": 1,
+          "@changeset": 130886616,
+          "@user": "Junjie",
+          "@uid": 3007717,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            125.349811,
+            7.9000868
+          ]
+        },
+        "id": "way/1127372997"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1135514550",
+          "landuse": "industrial",
+          "name": "15 MW MEGC Dalipuga Iligan Diesel Power Plant",
+          "operator": "Mapalad Energy Generating Corporation",
+          "plant:source": "diesel",
+          "power": "plant",
+          "source": "https://eneken.ieej.or.jp/data/5228.pdf",
+          "@timestamp": "2023-01-26T19:48:53Z",
+          "@version": 1,
+          "@changeset": 131745601,
+          "@user": "tjnakano",
+          "@uid": 12640051,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            124.247156,
+            8.326625
+          ]
+        },
+        "id": "way/1135514550"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1135517694",
+          "landuse": "industrial",
+          "name": "MPC Iligan DPP",
+          "operator": "Mapalad Power Corporation",
+          "plant:source": "diesel",
+          "power": "plant",
+          "source": "https://www.doe.gov.ph/sites/default/files/pdf/announcements/electric_power_plants_03_mindanao_connected_december_2021.pdf",
+          "@timestamp": "2023-01-26T19:58:50Z",
+          "@version": 1,
+          "@changeset": 131745933,
+          "@user": "tjnakano",
+          "@uid": 12640051,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            124.2546277,
+            8.3272775
+          ]
+        },
+        "id": "way/1135517694"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1156212931",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "yes",
+          "plant:source": "solar",
+          "power": "plant",
+          "@timestamp": "2023-03-22T07:09:17Z",
+          "@version": 1,
+          "@changeset": 133965550,
+          "@user": "haha iba pala ang mahal par umay",
+          "@uid": 18723650,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            124.6313918,
+            11.0852084
+          ]
+        },
+        "id": "way/1156212931"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1156212932",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "yes",
+          "plant:source": "solar",
+          "power": "plant",
+          "@timestamp": "2023-03-22T07:09:17Z",
+          "@version": 1,
+          "@changeset": 133965550,
+          "@user": "haha iba pala ang mahal par umay",
+          "@uid": 18723650,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            124.6321847,
+            11.0852151
+          ]
+        },
+        "id": "way/1156212932"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1156212933",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "yes",
+          "plant:source": "solar",
+          "power": "plant",
+          "@timestamp": "2023-03-22T07:09:17Z",
+          "@version": 1,
+          "@changeset": 133965550,
+          "@user": "haha iba pala ang mahal par umay",
+          "@uid": 18723650,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            124.6321832,
+            11.0857173
+          ]
+        },
+        "id": "way/1156212933"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1156212934",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "yes",
+          "plant:source": "solar",
+          "power": "plant",
+          "@timestamp": "2023-03-22T07:09:17Z",
+          "@version": 1,
+          "@changeset": 133965550,
+          "@user": "haha iba pala ang mahal par umay",
+          "@uid": 18723650,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            124.6321933,
+            11.0866476
+          ]
+        },
+        "id": "way/1156212934"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1156212935",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "yes",
+          "plant:source": "solar",
+          "power": "plant",
+          "@timestamp": "2023-03-22T07:09:17Z",
+          "@version": 1,
+          "@changeset": 133965550,
+          "@user": "haha iba pala ang mahal par umay",
+          "@uid": 18723650,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            124.6328846,
+            11.0866094
+          ]
+        },
+        "id": "way/1156212935"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1156212936",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "yes",
+          "plant:source": "solar",
+          "power": "plant",
+          "@timestamp": "2023-03-22T07:09:17Z",
+          "@version": 1,
+          "@changeset": 133965550,
+          "@user": "haha iba pala ang mahal par umay",
+          "@uid": 18723650,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            124.6313831,
+            11.0857021
+          ]
+        },
+        "id": "way/1156212936"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1156212937",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "yes",
+          "plant:source": "solar",
+          "power": "plant",
+          "@timestamp": "2023-03-22T07:09:17Z",
+          "@version": 1,
+          "@changeset": 133965550,
+          "@user": "haha iba pala ang mahal par umay",
+          "@uid": 18723650,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            124.6335045,
+            11.0866583
+          ]
+        },
+        "id": "way/1156212937"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1156212938",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "yes",
+          "plant:source": "solar",
+          "power": "plant",
+          "@timestamp": "2023-03-22T07:09:17Z",
+          "@version": 1,
+          "@changeset": 133965550,
+          "@user": "haha iba pala ang mahal par umay",
+          "@uid": 18723650,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            124.6335057,
+            11.0860242
+          ]
+        },
+        "id": "way/1156212938"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1156212939",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "yes",
+          "plant:source": "solar",
+          "power": "plant",
+          "@timestamp": "2023-03-22T07:09:17Z",
+          "@version": 1,
+          "@changeset": 133965550,
+          "@user": "haha iba pala ang mahal par umay",
+          "@uid": 18723650,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            124.6328827,
+            11.0859554
+          ]
+        },
+        "id": "way/1156212939"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1156212940",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "yes",
+          "plant:source": "solar",
+          "power": "plant",
+          "@timestamp": "2023-03-22T07:09:17Z",
+          "@version": 1,
+          "@changeset": 133965550,
+          "@user": "haha iba pala ang mahal par umay",
+          "@uid": 18723650,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            124.6321797,
+            11.0861326
+          ]
+        },
+        "id": "way/1156212940"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1156212941",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "yes",
+          "plant:source": "solar",
+          "power": "plant",
+          "@timestamp": "2023-03-22T07:09:17Z",
+          "@version": 1,
+          "@changeset": 133965550,
+          "@user": "haha iba pala ang mahal par umay",
+          "@uid": 18723650,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            124.6313871,
+            11.0861284
+          ]
+        },
+        "id": "way/1156212941"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1156212942",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "yes",
+          "plant:source": "solar",
+          "power": "plant",
+          "@timestamp": "2023-03-22T07:09:17Z",
+          "@version": 1,
+          "@changeset": 133965550,
+          "@user": "haha iba pala ang mahal par umay",
+          "@uid": 18723650,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            124.6313807,
+            11.0866543
+          ]
+        },
+        "id": "way/1156212942"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1158774815",
+          "landuse": "industrial",
+          "name": "San Gabriel Power Plant",
+          "plant:method": "combustion",
+          "plant:output:electricity": "420 MW",
+          "plant:source": "gas",
+          "power": "plant",
+          "source": "https://www.gem.wiki/San_Gabriel_power_station",
+          "@timestamp": "2023-03-31T17:49:16Z",
+          "@version": 1,
+          "@changeset": 134355181,
+          "@user": "tjnakano",
+          "@uid": 12640051,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            121.0347951,
+            13.7741814
+          ]
+        },
+        "id": "way/1158774815"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1163763467",
+          "landuse": "industrial",
+          "name": "Minergy",
+          "operator": "Mindanao Energy Systems Inc.",
+          "plant:method": "combustion",
+          "plant:output:electricity": "yes",
+          "plant:source": "oil",
+          "power": "plant",
+          "@timestamp": "2023-04-19T02:05:10Z",
+          "@version": 1,
+          "@changeset": 135082204,
+          "@user": "TagaSanPedroAko",
+          "@uid": 2541613,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            124.7259751,
+            8.4767366
+          ]
+        },
+        "id": "way/1163763467"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1167740742",
+          "name": "Pinugay Solar Power Project",
+          "operator": "PH Renewables Inc.",
+          "operator:type": "consortium",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "75 MW",
+          "plant:source": "solar",
+          "power": "plant",
+          "@timestamp": "2023-05-01T13:39:25Z",
+          "@version": 1,
+          "@changeset": 135574513,
+          "@user": "ianlopez1115",
+          "@uid": 44938,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            121.286501,
+            14.5800271
+          ]
+        },
+        "id": "way/1167740742"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1177381240",
+          "name": "Ingrid Power Pililia",
+          "operator": "AC Energy",
+          "plant:output:electricity": "600 MW",
+          "plant:source": "diesel",
+          "power": "plant",
+          "substation": "generation",
+          "@timestamp": "2023-05-31T20:41:56Z",
+          "@version": 2,
+          "@changeset": 136805199,
+          "@user": "TagaSanPedroAko",
+          "@uid": 2541613,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            121.335888,
+            14.3903889
+          ]
+        },
+        "id": "way/1177381240"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1178622842",
+          "landuse": "industrial",
+          "name": "Green Gold Biomass Power Plant",
+          "operator": "Grass Gold Renewable Energy",
+          "plant:method": "combustion",
+          "plant:output:electricity": "10 MW",
+          "plant:source": "biomass",
+          "power": "plant",
+          "@timestamp": "2023-06-03T21:48:59Z",
+          "@version": 2,
+          "@changeset": 136916694,
+          "@user": "TagaSanPedroAko",
+          "@uid": 2541613,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            121.0183,
+            15.7381909
+          ]
+        },
+        "id": "way/1178622842"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1178658681",
+          "name": "Pantabangan Hydroelectric Power Plant",
+          "plant:method": "water-storage",
+          "plant:output:electricity": "100 MW",
+          "plant:source": "hydro",
+          "power": "plant",
+          "@timestamp": "2023-06-03T22:04:12Z",
+          "@version": 1,
+          "@changeset": 136916945,
+          "@user": "TagaSanPedroAko",
+          "@uid": 2541613,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            121.108239,
+            15.8116532
+          ]
+        },
+        "id": "way/1178658681"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1178748749",
+          "addr:city": "Alicia",
+          "addr:street": "Maharlika Highway",
+          "landuse": "industrial",
+          "name": "IBEC Biomass Power Plant",
+          "operator": "Isabela Biomass Energy Corporation",
+          "plant:method": "combustion",
+          "plant:output:electricity": "20 MW",
+          "plant:source": "biomass",
+          "power": "plant",
+          "@timestamp": "2024-03-28T14:36:01Z",
+          "@version": 3,
+          "@changeset": 149272538,
+          "@user": "mueschel",
+          "@uid": 616774,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            121.7327109,
+            16.8314059
+          ]
+        },
+        "id": "way/1178748749"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1179637332",
+          "name": "Baligatan Hydroelectric Power Plant",
+          "operator": "SN Aboitiz Power",
+          "plant:method": "run-of-the-river",
+          "plant:output:electricity": "6 MW",
+          "plant:source": "hydro",
+          "power": "plant",
+          "@timestamp": "2024-01-30T06:52:01Z",
+          "@version": 2,
+          "@changeset": 146849954,
+          "@user": "Shandhivya",
+          "@uid": 10395831,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            121.4502843,
+            16.8077229
+          ]
+        },
+        "id": "way/1179637332"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1180700842",
+          "landuse": "industrial",
+          "power": "plant",
+          "@timestamp": "2023-06-09T15:51:26Z",
+          "@version": 1,
+          "@changeset": 137143458,
+          "@user": "hmartin3758",
+          "@uid": 16251134,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            121.8131209,
+            17.4161071
+          ]
+        },
+        "id": "way/1180700842"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1194287177",
+          "addr:barangay": "Wilson",
+          "addr:city": "San Jose",
+          "addr:province": "Dinagat",
+          "name": "Dinagat Diesel Power Plant",
+          "plant:method": "combustion",
+          "plant:source": "diesel",
+          "power": "plant",
+          "@timestamp": "2023-09-19T15:29:31Z",
+          "@version": 2,
+          "@changeset": 141474506,
+          "@user": "Timmy_Tesseract",
+          "@uid": 5653955,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            125.58326,
+            10.0244393
+          ]
+        },
+        "id": "way/1194287177"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1200031767",
+          "landuse": "industrial",
+          "name": "Camotes Diesel Power Plant",
+          "operator": "National Power Corporation",
+          "plant:method": "combustion",
+          "plant:output:electricity": "yes",
+          "plant:source": "diesel",
+          "power": "plant",
+          "@timestamp": "2023-08-20T02:49:21Z",
+          "@version": 1,
+          "@changeset": 140115932,
+          "@user": "chaelo86",
+          "@uid": 14996391,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            124.4020263,
+            10.6293548
+          ]
+        },
+        "id": "way/1200031767"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1202855214",
+          "landuse": "industrial",
+          "name": "Peakpower San Francisco",
+          "plant:method": "combustion",
+          "plant:output:electricity": "yes",
+          "plant:source": "oil",
+          "power": "plant",
+          "@timestamp": "2023-08-28T15:40:43Z",
+          "@version": 1,
+          "@changeset": 140501529,
+          "@user": "TheHelpfulContributor",
+          "@uid": 20121677,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            125.9726188,
+            8.485269
+          ]
+        },
+        "id": "way/1202855214"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1217253342",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "yes",
+          "plant:source": "solar",
+          "power": "plant",
+          "@timestamp": "2023-10-21T06:12:01Z",
+          "@version": 1,
+          "@changeset": 142909024,
+          "@user": "GOwin",
+          "@uid": 1041828,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            121.0695757,
+            14.7175393
+          ]
+        },
+        "id": "way/1217253342"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1217262942",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "yes",
+          "plant:source": "solar",
+          "power": "plant",
+          "@timestamp": "2023-10-21T07:17:52Z",
+          "@version": 1,
+          "@changeset": 142910605,
+          "@user": "GOwin",
+          "@uid": 1041828,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.6502455,
+            13.9157237
+          ]
+        },
+        "id": "way/1217262942"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1217310176",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "yes",
+          "plant:source": "solar",
+          "power": "plant",
+          "@timestamp": "2023-10-21T11:14:35Z",
+          "@version": 1,
+          "@changeset": 142919014,
+          "@user": "GOwin",
+          "@uid": 1041828,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            125.2550163,
+            6.1078639
+          ]
+        },
+        "id": "way/1217310176"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1220602348",
+          "operator:type": "private",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "yes",
+          "plant:source": "solar",
+          "power": "plant",
+          "@timestamp": "2024-10-04T08:49:47Z",
+          "@version": 2,
+          "@changeset": 157450336,
+          "@user": "FoodPanda_Dyllan",
+          "@uid": 10580696,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.7581558,
+            14.9709365
+          ]
+        },
+        "id": "way/1220602348"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1222876388",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "yes",
+          "plant:source": "solar",
+          "power": "plant",
+          "@timestamp": "2023-11-12T03:58:06Z",
+          "@version": 1,
+          "@changeset": 143920787,
+          "@user": "chaelo86",
+          "@uid": 14996391,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            123.0954169,
+            9.6339847
+          ]
+        },
+        "id": "way/1222876388"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1225188837",
+          "landuse": "industrial",
+          "name": "Concepcion BESS",
+          "operator": "Universal Power Solutions",
+          "plant:source": "battery",
+          "power": "plant",
+          "substation": "yes",
+          "@timestamp": "2025-05-19T12:15:41Z",
+          "@version": 6,
+          "@changeset": 166473254,
+          "@user": "Timmy_Tesseract",
+          "@uid": 5653955,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.6145354,
+            15.3766687
+          ]
+        },
+        "id": "way/1225188837"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1232964061",
+          "description": "Old Gandara Electricity serving Concrete Post at the Poblacion Proper",
+          "image": "https://i.ytimg.com/vi/juLHXs1Vc7Y/maxresdefault.jpg",
+          "landuse": "industrial",
+          "name": "Old Gandara Blackstone Diesel Street Electricity",
+          "operator": "Gandara Local Government",
+          "plant:method": "combustion",
+          "plant:output:electricity": "yes",
+          "plant:source": "oil",
+          "power": "plant",
+          "website": "https://blackstonepower.com.au/",
+          "@timestamp": "2023-12-21T14:02:57Z",
+          "@version": 2,
+          "@changeset": 145372205,
+          "@user": "Engineer0088397",
+          "@uid": 12390218,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            124.8095796,
+            12.0151566
+          ]
+        },
+        "id": "way/1232964061"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1243108530",
+          "landuse": "industrial",
+          "operator": "National Power Corporation",
+          "power": "plant",
+          "@timestamp": "2024-01-26T07:40:38Z",
+          "@version": 1,
+          "@changeset": 146698930,
+          "@user": "ImmoOSM",
+          "@uid": 20937286,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            122.2725815,
+            12.578373
+          ]
+        },
+        "id": "way/1243108530"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1265454211",
+          "description": "EU-European Union Funded (SAMELCO I)",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "yes",
+          "plant:source": "solar",
+          "power": "plant",
+          "@timestamp": "2024-09-10T20:03:26Z",
+          "@version": 3,
+          "@changeset": 156456162,
+          "@user": "woodpeck_repair",
+          "@uid": 145231,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            124.6398124,
+            12.0503051
+          ]
+        },
+        "id": "way/1265454211"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1265619705",
+          "name": "INABASAN MINI HYDRO POWER PLANT",
+          "plant:method": "run-of-the-river",
+          "plant:output:electricity": "10 MW",
+          "plant:source": "hydro",
+          "power": "plant",
+          "@timestamp": "2024-03-23T18:41:54Z",
+          "@version": 1,
+          "@changeset": 149063421,
+          "@user": "pro_philippines",
+          "@uid": 20159901,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.9179638,
+            13.3538819
+          ]
+        },
+        "id": "way/1265619705"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1268841585",
+          "plant:method": "photovoltaic",
+          "plant:source": "solar",
+          "power": "plant",
+          "@timestamp": "2024-04-03T22:01:06Z",
+          "@version": 1,
+          "@changeset": 149545315,
+          "@user": "TWHB",
+          "@uid": 6556551,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            124.6257854,
+            11.083652
+          ]
+        },
+        "id": "way/1268841585"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1273120139",
+          "name": "Lucanin 2 Solar Power",
+          "operator": "SMC Global Light and Power Corporation",
+          "operator:short": "SGLPC",
+          "operator:type": "private",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "154 MW",
+          "plant:source": "solar",
+          "power": "plant",
+          "@timestamp": "2024-04-16T15:35:22Z",
+          "@version": 1,
+          "@changeset": 150091082,
+          "@user": "ervinjoshuadelrosario",
+          "@uid": 6831896,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.5722986,
+            14.4827286
+          ]
+        },
+        "id": "way/1273120139"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1293624884",
+          "addr:barangay": "Santa Fe",
+          "addr:city": "San Marcelino",
+          "addr:place": "Sitio Kakilingan",
+          "addr:postcode": "2207",
+          "addr:province": "Zambales",
+          "contact:website": "https://www.acenrenewables.com/project/sanmar-solar/",
+          "name": "SanMar Solar",
+          "official_name": "Santa Cruz Solar Energy Inc.",
+          "operator": "AC Energy Corp.",
+          "operator:short": "ACEN",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "yes",
+          "plant:source": "solar",
+          "power": "plant",
+          "@timestamp": "2024-06-19T10:44:54Z",
+          "@version": 1,
+          "@changeset": 152889722,
+          "@user": "Timmy_Tesseract",
+          "@uid": 5653955,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.252099,
+            15.0211161
+          ]
+        },
+        "id": "way/1293624884"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1295600924",
+          "landuse": "industrial",
+          "name": "Calabanga Solar Power Project",
+          "plant:source": "solar",
+          "power": "plant",
+          "@timestamp": "2025-04-30T17:36:58Z",
+          "@version": 2,
+          "@changeset": 165645228,
+          "@user": "c4rlo",
+          "@uid": 11903857,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            123.2541219,
+            13.7302879
+          ]
+        },
+        "id": "way/1295600924"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1304922824",
+          "landuse": "industrial",
+          "name:en": "Norzagaray Bulacan Bunker C-fired diesel power station",
+          "plant:source": "diesel",
+          "power": "plant",
+          "source": "https://www.gem.wiki/Bulacan_Bunker_C-fired_diesel_power_station",
+          "@timestamp": "2024-07-31T21:47:56Z",
+          "@version": 1,
+          "@changeset": 154669485,
+          "@user": "tjnakano",
+          "@uid": 12640051,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            121.0741385,
+            14.8931831
+          ]
+        },
+        "id": "way/1304922824"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1314439328",
+          "description": "below-SeaLevel Coal Smouldering",
+          "landuse": "industrial",
+          "plant:method": "combustion",
+          "plant:output:electricity": "yes",
+          "plant:output:heat": "yes",
+          "plant:output:steam": "yes",
+          "plant:source": "coal",
+          "power": "plant",
+          "@timestamp": "2024-09-10T20:04:26Z",
+          "@version": 2,
+          "@changeset": 156456162,
+          "@user": "woodpeck_repair",
+          "@uid": 145231,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            125.6176101,
+            6.3926048
+          ]
+        },
+        "id": "way/1314439328"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1319480527",
+          "addr:city": "Marawi City",
+          "addr:postcode": "9700",
+          "addr:province": "Lanao del Sur",
+          "landuse": "industrial",
+          "name": "Agus 1 Hydroelectric Power Plant",
+          "operator": "National Power Corporation-Mindanao Generation",
+          "operator:short": "NPC-MinGen",
+          "operator:type": "public",
+          "plant:method": "water-storage",
+          "plant:output:electricity": "80 MW",
+          "plant:source": "hydro",
+          "power": "plant",
+          "start_date": "1992",
+          "wikidata": "Q31796010",
+          "@timestamp": "2024-09-30T06:53:23Z",
+          "@version": 1,
+          "@changeset": 157281749,
+          "@user": "Timmy_Tesseract",
+          "@uid": 5653955,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            124.2868827,
+            8.005075
+          ]
+        },
+        "id": "way/1319480527"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1321600979",
+          "landuse": "industrial",
+          "name": "Mexico Battery Energy Storage System",
+          "operator": "SMGP BESS Power, Inc.",
+          "plant:output:electricity": "yes",
+          "plant:source": "battery",
+          "power": "plant",
+          "start_date": "2023-12-18",
+          "substation": "yes",
+          "@timestamp": "2025-05-19T12:15:41Z",
+          "@version": 2,
+          "@changeset": 166473254,
+          "@user": "Timmy_Tesseract",
+          "@uid": 5653955,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.7186181,
+            15.0554771
+          ]
+        },
+        "id": "way/1321600979"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1328517036",
+          "name": "PV Sinag Power Laoag 2",
+          "operator": "AboitizPower",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "128 MW",
+          "plant:source": "solar",
+          "power": "plant",
+          "@timestamp": "2024-11-01T03:28:42Z",
+          "@version": 3,
+          "@changeset": 158604380,
+          "@user": "caspermonte",
+          "@uid": 1888269,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.1910379,
+            15.8401441
+          ]
+        },
+        "id": "way/1328517036"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1328528794",
+          "name": "PV Sinag Power Laoag 1",
+          "operator": "AboitizPower",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "159 MW",
+          "plant:source": "solar",
+          "power": "plant",
+          "@timestamp": "2024-11-01T03:40:54Z",
+          "@version": 3,
+          "@changeset": 158604522,
+          "@user": "caspermonte",
+          "@uid": 1888269,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.2155006,
+            15.8438236
+          ]
+        },
+        "id": "way/1328528794"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1331993759",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "yes",
+          "plant:source": "solar",
+          "power": "plant",
+          "@timestamp": "2024-11-08T17:14:19Z",
+          "@version": 1,
+          "@changeset": 158904242,
+          "@user": "AndromedaGovern",
+          "@uid": 21573854,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            124.9540447,
+            11.3238498
+          ]
+        },
+        "id": "way/1331993759"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1336361650",
+          "name": "RASLAG IV Solar Power Project",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "yes",
+          "plant:source": "solar",
+          "power": "plant",
+          "@timestamp": "2024-11-21T03:17:34Z",
+          "@version": 1,
+          "@changeset": 159392281,
+          "@user": "PengualaHeadphones",
+          "@uid": 18523299,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.6725945,
+            15.2105941
+          ]
+        },
+        "id": "way/1336361650"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1337363506",
+          "name": "Dagohoy Solar Power Plant",
+          "operator": "Dagohoy Green Energy Corporation",
+          "plant:output:electricity": "27 MW",
+          "plant:source": "solar",
+          "power": "plant",
+          "start_date": "2024-11-21",
+          "website": "https://petroenergy.com.ph/",
+          "@timestamp": "2024-11-24T12:57:33Z",
+          "@version": 1,
+          "@changeset": 159532391,
+          "@user": "p4wizard",
+          "@uid": 18122716,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            124.2616798,
+            9.8703019
+          ]
+        },
+        "id": "way/1337363506"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1353806140",
+          "landuse": "industrial",
+          "power": "plant",
+          "@timestamp": "2025-01-23T23:56:50Z",
+          "@version": 1,
+          "@changeset": 161693539,
+          "@user": "pro_philippines",
+          "@uid": 20159901,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.9273331,
+            13.4688579
+          ]
+        },
+        "id": "way/1353806140"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1359378253",
+          "addr:barangay": "Santa Cruz",
+          "addr:city": "Island Garden City of Samal",
+          "addr:district": "Kaputian District",
+          "addr:place": "Purok Solid",
+          "addr:postcode": "8119",
+          "addr:province": "Davao del Norte",
+          "landuse": "industrial",
+          "name": "Talicud Solar Power Plant",
+          "plant:method": "photovoltaic",
+          "plant:source": "solar",
+          "power": "plant",
+          "@timestamp": "2025-02-12T18:14:23Z",
+          "@version": 1,
+          "@changeset": 162440476,
+          "@user": "Timmy_Tesseract",
+          "@uid": 5653955,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            125.7176846,
+            6.9338693
+          ]
+        },
+        "id": "way/1359378253"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1360804647",
+          "alt_name": "ISWMF",
+          "landuse": "construction",
+          "name": "Iloilo City Integrated Solid Waste Management Facility",
+          "plant:method": "combustion",
+          "plant:output:electricity": "3.44 MW",
+          "plant:source": "waste",
+          "power": "plant",
+          "@timestamp": "2025-02-18T02:22:26Z",
+          "@version": 1,
+          "@changeset": 162642041,
+          "@user": "Merd123",
+          "@uid": 17020405,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            122.5861578,
+            10.7268507
+          ]
+        },
+        "id": "way/1360804647"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1369713659",
+          "generator:method": "photovoltaic",
+          "generator:output:electricity": "48.1 MW",
+          "generator:source": "solar",
+          "generator:type": "solar_photovoltaic_panel",
+          "landuse": "industrial",
+          "name": "Samal Solar Power",
+          "operator": "Samal Solar Renewables Energy Corporation",
+          "operator:type": "private",
+          "power": "plant",
+          "@timestamp": "2025-03-24T12:15:44Z",
+          "@version": 3,
+          "@changeset": 164029434,
+          "@user": "ervinjoshuadelrosario",
+          "@uid": 6831896,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.4879332,
+            14.7642111
+          ]
+        },
+        "id": "way/1369713659"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1372401043",
+          "generator:method": "photovoltaic",
+          "generator:output:electricity": "48.1 MW",
+          "generator:source": "solar",
+          "generator:type": "solar_photovoltaic_panel",
+          "landuse": "industrial",
+          "name": "Balsik Solar Power",
+          "operator": "Alternergy Holdings Corporation",
+          "operator:type": "private",
+          "power": "plant",
+          "@timestamp": "2025-03-28T12:55:20Z",
+          "@version": 1,
+          "@changeset": 164206794,
+          "@user": "ervinjoshuadelrosario",
+          "@uid": 6831896,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.5018089,
+            14.8641864
+          ]
+        },
+        "id": "way/1372401043"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1382221838",
+          "name": "Sinocalan Solar Power Plant",
+          "operator": "Sinocalan Solar Power Corporation",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "yes",
+          "plant:source": "solar",
+          "power": "plant",
+          "@timestamp": "2025-04-29T06:26:54Z",
+          "@version": 1,
+          "@changeset": 165576121,
+          "@user": "TagaSanPedroAko",
+          "@uid": 2541613,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            120.6414007,
+            16.0737742
+          ]
+        },
+        "id": "way/1382221838"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1388697748",
+          "landuse": "industrial",
+          "name": "Pagsanghan_Waste_Dumpsite",
+          "plant:method": "combustion",
+          "plant:output:electricity": "yes",
+          "plant:source": "waste",
+          "power": "plant",
+          "@timestamp": "2025-05-22T05:33:32Z",
+          "@version": 1,
+          "@changeset": 166594596,
+          "@user": "AndromedaGovern",
+          "@uid": 21573854,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            124.7210952,
+            11.9579144
+          ]
+        },
+        "id": "way/1388697748"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1390481707",
+          "addr:barangay": "Port Barton",
+          "addr:city": "San Vicente",
+          "addr:place": "Purok Maunlad",
+          "addr:postcode": "5309",
+          "addr:province": "Palawan",
+          "contact:facebook": "https://www.facebook.com/profile.php?id=100083279747503",
+          "landuse": "industrial",
+          "name": "Port Barton Diesel Power Plant",
+          "operator": "PowerSource Philippines Incorporated",
+          "operator:short": "PSPI",
+          "operator:type": "private",
+          "plant:method": "combustion",
+          "plant:source": "diesel",
+          "power": "plant",
+          "@timestamp": "2025-05-28T15:30:43Z",
+          "@version": 1,
+          "@changeset": 166881609,
+          "@user": "Timmy_Tesseract",
+          "@uid": 5653955,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            119.1827988,
+            10.4082988
+          ]
+        },
+        "id": "way/1390481707"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1408950805",
+          "barrier": "wall",
+          "operator": "Nickel Asia Philippines",
+          "plant:method": "combustion",
+          "plant:source": "diesel",
+          "power": "plant",
+          "@timestamp": "2025-06-24T01:40:18Z",
+          "@version": 1,
+          "@changeset": 168026302,
+          "@user": "uᴉʍOꓨ",
+          "@uid": 6591426,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            125.5081562,
+            9.7189728
+          ]
+        },
+        "id": "way/1408950805"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "way/1416231751",
+          "plant:method": "photovoltaic",
+          "plant:output:electricity": "yes",
+          "plant:source": "solar",
+          "power": "plant",
+          "@timestamp": "2025-07-21T05:17:13Z",
+          "@version": 1,
+          "@changeset": 169223423,
+          "@user": "mCdAS9qs",
+          "@uid": 11514937,
+          "@geometry": "center"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            122.964343,
+            10.5904705
+          ]
+        },
+        "id": "way/1416231751"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "node/5479285193",
+          "generator:method": "water-storage",
+          "generator:source": "hydro",
+          "power": "plant",
+          "@timestamp": "2018-03-15T03:50:18Z",
+          "@version": 1,
+          "@changeset": 57197172,
+          "@user": "Timmy_Tesseract",
+          "@uid": 5653955
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            125.4209948,
+            7.1738077
+          ]
+        },
+        "id": "node/5479285193"
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "@id": "node/11890129693",
+          "generator:output:electricity": "2.475",
+          "generator:source": "diesel",
+          "operator": "NATIONAL POWER CORPORATION",
+          "power": "plant",
+          "@timestamp": "2024-05-09T01:36:55Z",
+          "@version": 1,
+          "@changeset": 151080421,
+          "@user": "POWER BARGE 114",
+          "@uid": 21455799
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            123.7261782,
+            12.5701625
+          ]
+        },
+        "id": "node/11890129693"
+      }
+    ]
+  }

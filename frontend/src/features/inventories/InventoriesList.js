@@ -301,6 +301,14 @@ const extractedFilters = useMemo(() => {
             field: 'reCat',
             headerName: 'RE Category',
             width: 140,
+            filterable: true,
+            type: 'singleSelect',
+            valueOptions: [
+                'Solar Energy',
+                'Wind Energy',
+                'Hydropower',
+                'Biomass'
+            ],
             valueGetter: (inventories) => inventories.row.properties.reCat,
             renderCell: (params) => {
                 const getIcon = (category) => {
@@ -459,8 +467,9 @@ const extractedFilters = useMemo(() => {
             valueOptions: ['Yes', 'No', 'n/a'],
             valueGetter: (inventories) => {
                 const value = inventories.row?.properties?.isNetMetered;
-                return value === true || value === "true" ? "Yes" :
-                       value === false || value === "false" ? "No" : "n/a";
+                if (value === true || value === "true" || value === "Yes") return "Yes";
+                if (value === false || value === "false" || value === "No") return "No";
+                return "n/a";
             },
             renderCell: (params) => {
                 const value = params.value;
@@ -484,8 +493,9 @@ const extractedFilters = useMemo(() => {
             valueOptions: ['Yes', 'No', 'n/a'],
             valueGetter: (inventories) => {
                 const value = inventories.row?.properties?.ownUse;
-                return value === true || value === "true" ? "Yes" :
-                       value === false || value === "false" ? "No" : "n/a";
+                if (value === true || value === "true" || value === "Yes") return "Yes";
+                if (value === false || value === "false" || value === "No") return "No";
+                return "n/a";
             },
             renderCell: (params) => {
                 const value = params.value;

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { FormLabel, TextField, Input, InputAdornment, Box, Checkbox, FormControlLabel, FormGroup, Typography, Grid, Button, Alert } from '@mui/material'
-import { rawSolarUsage, rawSolarSysTypes, Status, rawSolarPowerGenSubcategories } from '../../config/techAssesment'
+import { rawSolarUsage, rawSolarSysTypes, Status, rawSolarPowerGenSubcategories, rawSolarPumpSubcategories } from '../../config/techAssesment'
 import { boxstyle } from '../../config/style'
 import HighlightOffSharpIcon from '@mui/icons-material/HighlightOffSharp'
 
@@ -30,6 +30,7 @@ export const Solar = (props) => {
 
   const [capacity, setCapacity] = useState("")
   const [annualEnergyProduction, setAnnualEnergyProduction] = useState("")
+  const [batteryCapacity, setBatteryCapacity] = useState("")
   const [solarUsage, setSolarUsage] = useState({
     index: '', value: '', otherVal: ''
   })
@@ -45,6 +46,7 @@ export const Solar = (props) => {
     mainCategoryId: null,
     subcategoryId: null
   })
+  const [solarPumpSubcategory, setSolarPumpSubcategory] = useState('')
 
   const [remarks, setRemarks] = useState("")
   const [flowRate, setFlowRate] = useState("")
@@ -113,7 +115,9 @@ export const Solar = (props) => {
       status: status?.value,
       remarks: remarks,
       annualEnergyProduction: solarUsage?.value === "Power Generation" ? annualEnergyProduction : undefined,
+      batteryCapacity: (solarSystemTypes?.value === "Off-grid" || solarSystemTypes?.value === "Hybrid") ? batteryCapacity : undefined,
       solarPowerGenSubcategory: solarUsage?.value === "Power Generation" ? solarPowerGenSubcategory : undefined,
+      solarPumpSubcategory: solarUsage?.value === "Solar Pump" ? solarPumpSubcategory : undefined,
     })
     
     // Debug logging for solar subcategories
@@ -136,6 +140,7 @@ export const Solar = (props) => {
     status,
     remarks,
     annualEnergyProduction,
+    batteryCapacity,
     solarPowerGenSubcategory
   ])
 
@@ -351,6 +356,23 @@ export const Solar = (props) => {
             For Solar Pump (leave blank if not applicable)
           </Typography>
           <Typography sx={{ fontStyle: 'italic' }} component="h1" variant="subtitle2">
+            Solar Pump Subcategory:
+          </Typography>
+          {rawSolarPumpSubcategories.map((opt) => (
+            <FormGroup key={opt.id}>
+              <FormControlLabel
+                sx={{ ml: 2 }}
+                control={
+                  <Checkbox
+                    onChange={(e) => setSolarPumpSubcategory(e.target.checked ? opt.name : '')}
+                    checked={solarPumpSubcategory === opt.name}
+                  />
+                }
+                label={opt.name}
+              />
+            </FormGroup>
+          ))}
+          <Typography sx={{ fontStyle: 'italic' }} component="h1" variant="subtitle2">
             Capacity:
           </Typography>
           <TextField
@@ -400,37 +422,6 @@ export const Solar = (props) => {
           <Typography sx={{ fontStyle: 'italic', mb: 2 }} component="h1" variant="subtitle2">
             For Power Generation (leave blank if not applicable)
           </Typography>
-          <Typography sx={{ fontStyle: 'italic' }} component="h1" variant="subtitle2">
-            Capacity:
-          </Typography>
-          <TextField
-            fullWidth
-            size="small"
-            id="capacity"
-            name="capacity"
-            type="number"
-            value={capacity}
-            onChange={(e) => setCapacity(e.target.value)}
-            InputProps={{
-              endAdornment: <InputAdornment position="end"><var>Wp</var></InputAdornment>,
-            }}
-          />
-          {/* Annual Energy Production input, only for Power Generation */}
-          <Typography sx={{ fontStyle: 'italic' }} component="h1" variant="subtitle2">
-            Annual Energy Production:
-          </Typography>
-          <TextField
-            fullWidth
-            size="small"
-            id="annualEnergyProduction"
-            name="annualEnergyProduction"
-            type="number"
-            value={annualEnergyProduction}
-            onChange={(e) => setAnnualEnergyProduction(e.target.value)}
-            InputProps={{
-              endAdornment: <InputAdornment position="end">kWh</InputAdornment>,
-            }}
-          />
           
           {/* Solar Power Generation Subcategories */}
           <Typography sx={{ fontStyle: 'italic', mt: 2, mb: 1 }} component="h1" variant="subtitle2">
@@ -547,32 +538,12 @@ export const Solar = (props) => {
             </FormGroup>
           ))}
         </Box>
-        <Box sx={{ display: solarUsage?.value === 'Off-grid' ? 'block' : 'none' }}>
-          <Typography sx={{ fontStyle: 'italic', mb: 2 }} component="h1" variant="subtitle2">
-            For Off-grid (leave blank if not applicable)
-          </Typography>
-          <Typography sx={{ fontStyle: 'italic' }} component="h1" variant="subtitle2">
-            Capacity:
-          </Typography>
-          <TextField
-            fullWidth
-            size="small"
-            id="capacity"
-            name="capacity"
-            type="number"
-            value={capacity}
-            onChange={(e) => setCapacity(e.target.value)}
-            InputProps={{
-              endAdornment: <InputAdornment position="end"><var>Wp</var></InputAdornment>,
-            }}
-          />
-        </Box>
-        <Box sx={{ display: solarUsage?.value === 'Other' ? 'block' : 'none' }}>
-          <Typography sx={{ fontStyle: 'italic', mb: 2 }} component="h1" variant="subtitle2">
-            For Other Solar Energy System
-          </Typography>
-          <Typography sx={{ fontStyle: 'italic' }} component="h1" variant="subtitle2">
-            Capacity:
+
+        
+        {/* Capacity and Energy Production Fields - Added at the end */}
+        <Box sx={{ display: solarUsage?.value === 'Power Generation' ? 'block' : 'none' }}>
+          <Typography sx={{ fontStyle: 'italic', mt: 2, mb: 1 }} component="h1" variant="subtitle2">
+            Capacity (kWp):
           </Typography>
           <TextField
             fullWidth
@@ -583,10 +554,46 @@ export const Solar = (props) => {
             value={capacity}
             onChange={(e) => setCapacity(e.target.value)}
             InputProps={{
-              endAdornment: <InputAdornment position="end"><var>Wp</var></InputAdornment>,
+              endAdornment: <InputAdornment position="end">kWp</InputAdornment>,
             }}
           />
+          
+          <Typography sx={{ fontStyle: 'italic', mt: 2, mb: 1 }} component="h1" variant="subtitle2">
+            Annual Energy Production (kWh):
+          </Typography>
+          <TextField
+            fullWidth
+            size="small"
+            id="annualEnergyProduction"
+            name="annualEnergyProduction"
+            type="number"
+            value={annualEnergyProduction}
+            onChange={(e) => setAnnualEnergyProduction(e.target.value)}
+            InputProps={{
+              endAdornment: <InputAdornment position="end">kWh</InputAdornment>,
+            }}
+          />
+          
+          {/* Battery Capacity for Off-grid and Hybrid systems */}
+          <Box sx={{ display: (solarSystemTypes?.value === 'Off-grid' || solarSystemTypes?.value === 'Hybrid') ? 'block' : 'none' }}>
+            <Typography sx={{ fontStyle: 'italic', mt: 2, mb: 1 }} component="h1" variant="subtitle2">
+              Battery Capacity (Ah) - Optional:
+            </Typography>
+            <TextField
+              fullWidth
+              size="small"
+              id="batteryCapacity"
+              name="batteryCapacity"
+              type="number"
+              value={batteryCapacity}
+              onChange={(e) => setBatteryCapacity(e.target.value)}
+              InputProps={{
+                endAdornment: <InputAdornment position="end">Ah</InputAdornment>,
+              }}
+            />
+          </Box>
         </Box>
+        
         <Typography sx={{ fontStyle: 'italic' }} component="h1" variant="subtitle2">
           Status:
         </Typography>

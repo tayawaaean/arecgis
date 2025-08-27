@@ -538,6 +538,14 @@ const InventoryTable = ({ setClearVal, clearVal, onFlyTo }) => {
       field: 'reCat',
       headerName: 'RE Category',
       width: 140,
+      filterable: true,
+      type: 'singleSelect',
+      valueOptions: [
+        'Solar Energy',
+        'Wind Energy',
+        'Hydropower',
+        'Biomass'
+      ],
       valueGetter: (inventories) => inventories.row.properties.reCat,
       renderCell: (params) => {
         const getIcon = (category) => {
@@ -641,21 +649,21 @@ const InventoryTable = ({ setClearVal, clearVal, onFlyTo }) => {
       width: 130,
       filterable: true,
       type: 'singleSelect',
-      valueOptions: ['Yes', 'No'],
-      valueGetter: (inventories) => inventories.row?.properties?.isNetMetered || '',
+      valueOptions: ['Yes', 'No', 'n/a'],
+      valueGetter: (inventories) => {
+        const value = inventories.row?.properties?.isNetMetered;
+        if (value === true || value === "true" || value === "Yes") return "Yes";
+        if (value === false || value === "false" || value === "No") return "No";
+        return "n/a";
+      },
       renderCell: (params) => {
         const value = params.value;
-        if (!value) return (
-          <Typography variant="body2" color="text.secondary" fontStyle="italic">
-            Not specified
-          </Typography>
-        );
         return (
           <Chip 
             label={value} 
             size="small" 
-            color={value === "Yes" ? "success" : "error"}
-            variant="filled"
+            color={value === "Yes" ? "success" : value === "No" ? "error" : "default"}
+            variant={value === "n/a" ? "outlined" : "filled"}
             sx={{ fontWeight: 'medium' }}
           />
         );
@@ -668,21 +676,21 @@ const InventoryTable = ({ setClearVal, clearVal, onFlyTo }) => {
       width: 130,
       filterable: true,
       type: 'singleSelect',
-      valueOptions: ['Yes', 'No'],
-      valueGetter: (inventories) => inventories.row?.properties?.ownUse || '',
+      valueOptions: ['Yes', 'No', 'n/a'],
+      valueGetter: (inventories) => {
+        const value = inventories.row?.properties?.ownUse;
+        if (value === true || value === "true" || value === "Yes") return "Yes";
+        if (value === false || value === "false" || value === "No") return "No";
+        return "n/a";
+      },
       renderCell: (params) => {
         const value = params.value;
-        if (!value) return (
-          <Typography variant="body2" color="text.secondary" fontStyle="italic">
-            Not specified
-          </Typography>
-        );
         return (
           <Chip 
             label={value} 
             size="small" 
-            color={value === "Yes" ? "success" : "error"}
-            variant="filled"
+            color={value === "Yes" ? "success" : value === "No" ? "error" : "default"}
+            variant={value === "n/a" ? "outlined" : "filled"}
             sx={{ fontWeight: 'medium' }}
           />
         );
@@ -1224,6 +1232,14 @@ const InventoryTable = ({ setClearVal, clearVal, onFlyTo }) => {
               checkboxSelection={isAdmin}
               onRowSelectionModelChange={(ids) => {
                 setMultiDelete(ids);
+              }}
+              filterMode="client"
+              initialState={{
+                filter: {
+                  filterModel: {
+                    items: [],
+                  },
+                },
               }}
               sx={{
                 '& .MuiDataGrid-cell': {

@@ -74,6 +74,22 @@ export const rawSolarUsage = [{
 },
 ]
 
+export const rawSolarPumpSubcategories = [{
+    id: 0,
+    name: "Solar Pump Irrigation System",
+    checked: false,
+},
+{
+    id: 1,
+    name: "Community Water System",
+    checked: false,
+},
+{
+    id: 2,
+    name: "Livestock Water System",
+    checked: false,
+}]
+
 export const rawSolarPowerGenSubcategories = [{
     id: 0,
     name: "Rooftop Solar PV",
@@ -105,21 +121,23 @@ export const rawSolarPowerGenSubcategories = [{
             id: 0,
             name: "Solar farms / Solar parks – utility-scale, large open land",
             checked: false,
-        },
+        }
+    ]
+},
+{
+    id: 2,
+    name: "Floating Solar PV",
+    checked: false,
+    subcategories: [
         {
-            id: 1,
-            name: "Captive solar plants – installed on private land for self-use (industries, institutions)",
-            checked: false,
-        },
-        {
-            id: 2,
+            id: 0,
             name: "Floating solar farms – installed on reservoirs, lakes, or dams",
             checked: false,
         }
     ]
 },
 {
-    id: 2,
+    id: 3,
     name: "Building-integrated PV (BIPV)",
     checked: false,
     subcategories: [
