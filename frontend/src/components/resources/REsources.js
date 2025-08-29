@@ -105,6 +105,36 @@ const BiogasEnergyCard = () => {
     </>
   )
 }
+
+const GeothermalEnergyCard = () => {
+  return (
+    <>
+      <Card sx={{ maxWidth: 345 }}>
+        <CardMedia
+          sx={{ height: 140 }}
+          image="/geothermal-energy.jpg"
+          title="geothermal energy"
+        />
+        <CardContent>
+          <Typography gutterBottom variant="h5" component="div">
+            Geothermal Energy Systems (GES)
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Geothermal energy harnesses the Earth's
+            internal heat to generate electricity,
+            provide direct heating, or power heat pumps.
+            This renewable energy source offers consistent
+            and reliable power generation with minimal
+            environmental impact.
+          </Typography>
+        </CardContent>
+        <CardActions>
+          <Button size="small">Read more...</Button>
+        </CardActions>
+      </Card>
+    </>
+  )
+}
 const Copyright = () => {
   return (
     <Typography variant="body2" color="text.secondary" align="center" >

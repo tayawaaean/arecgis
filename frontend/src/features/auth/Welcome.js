@@ -33,7 +33,8 @@ import {
   Add as AddIcon,
   CheckCircle as OperationalIcon,
   Warning as WarningIcon,
-  Error as ErrorIcon
+  Error as ErrorIcon,
+  Thermostat as ThermostatIcon
 } from '@mui/icons-material'
 
 const Welcome = () => {
@@ -145,6 +146,7 @@ const Welcome = () => {
       case 'Wind Energy': return <WindIcon fontSize="small" />
       case 'Hydropower': return <HydroIcon fontSize="small" />
       case 'Biomass': return <BiomassIcon fontSize="small" />
+      case 'Geothermal Energy': return <ThermostatIcon fontSize="small" />
       default: return <SolarIcon fontSize="small" />
     }
   }

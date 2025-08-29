@@ -107,6 +107,13 @@ const chartOptions = [
     category: "Biomass",
     description: "Monthly biomass capacity trends (kWp)",
     icon: "🌱"
+  },
+  { 
+    value: "geothermal", 
+    label: "Geothermal Energy", 
+    category: "Geothermal Energy",
+    description: "Monthly geothermal energy capacity trends (kWp)",
+    icon: "🌋"
   }
 ];
 
@@ -121,7 +128,8 @@ const reCatOptions = [
   { value: "Solar Energy", label: "Solar Energy" },
   { value: "Wind Energy", label: "Wind Energy" },
   { value: "Hydropower", label: "Hydropower" },
-  { value: "Biomass", label: "Biomass" }
+  { value: "Biomass", label: "Biomass" },
+  { value: "Geothermal Energy", label: "Geothermal Energy" }
 ];
 
 const statusOptions = [
@@ -150,7 +158,7 @@ function getMonthLabel(monthIdx) {
 function groupAggregates(inventories) {
   const perMonth = {};
   let solarStTotalCap = 0, solarPowerGenTotalCap = 0, solarPumpTotalCap = 0;
-  let windTotalCap = 0, hydroTotalCap = 0, biomassTotalCap = 0;
+  let windTotalCap = 0, hydroTotalCap = 0, biomassTotalCap = 0, geothermalTotalCap = 0;
   let solarPowerGenTotalAEP = 0;
   let realTotalCapacity = 0;
   let totalUnits = 0;
@@ -177,7 +185,8 @@ function groupAggregates(inventories) {
       pump: { cap: 0, count: 0 },
       wind: { cap: 0, count: 0 },
       hydro: { cap: 0, count: 0 },
-      biomass: { cap: 0, count: 0 }
+      biomass: { cap: 0, count: 0 },
+      geothermal: { cap: 0, count: 0 }
     };
 
     // Process based on RE category
@@ -240,6 +249,13 @@ function groupAggregates(inventories) {
       perMonth[monthKey].biomass.count += 1;
       realTotalCapacity += cap;
       unitsThisInv += 1;
+    } else if (reCat === "Geothermal Energy") {
+      const cap = Number(inv.assessment?.capacity) || 0;
+      geothermalTotalCap += cap;
+      perMonth[monthKey].geothermal.cap += cap;
+      perMonth[monthKey].geothermal.count += 1;
+      realTotalCapacity += cap;
+      unitsThisInv += 1;
     } else {
       // For any other category
       const cap = Number(inv.assessment?.capacity) || 0;
@@ -285,6 +301,9 @@ function groupAggregates(inventories) {
   const biomassCapSeries = allMonthKeys.length > 0
     ? allMonthKeys.map(key => ((perMonth[key]?.biomass.cap || 0) / 1000))
     : [];
+  const geothermalCapSeries = allMonthKeys.length > 0
+    ? allMonthKeys.map(key => ((perMonth[key]?.geothermal.cap || 0) / 1000))
+    : [];
   const powerGenAEPSeries = allMonthKeys.length > 0
     ? allMonthKeys.map(key => (perMonth[key]?.powerGen.aep || 0))
     : [];
@@ -310,6 +329,7 @@ function groupAggregates(inventories) {
     windTotalCap,
     hydroTotalCap,
     biomassTotalCap,
+    geothermalTotalCap,
     solarPowerGenTotalAEP,
     solarStCapSeries,
     powerGenCapSeries,
@@ -317,6 +337,7 @@ function groupAggregates(inventories) {
     windCapSeries,
     hydroCapSeries,
     biomassCapSeries,
+    geothermalCapSeries,
     powerGenAEPSeries,
     countSeries,
     totalCapacitySeries,
@@ -349,6 +370,7 @@ const getChartSubtitle = ({
   windTotalCap,
   hydroTotalCap,
   biomassTotalCap,
+  geothermalTotalCap,
   solarPowerGenTotalAEP,
   realTotalCapacity,
 }) => {
@@ -359,10 +381,11 @@ const getChartSubtitle = ({
     case "wind":         return `Total: ${numberFormat(windTotalCap, "MW")}`;
     case "hydro":        return `Total: ${numberFormat(hydroTotalCap, "MW")}`;
     case "biomass":      return `Total: ${numberFormat(biomassTotalCap, "MW")}`;
+    case "geothermal":   return `Total: ${numberFormat(geothermalTotalCap, "MW")}`;
     case "powerGenAEP":  return `Total Declared Annual Energy Prod. (Power Gen): ${numberFormat(solarPowerGenTotalAEP, "kWh")}`;
     case "count":        return `Grand Total Capacity: ${numberFormat(
       solarStTotalCap + solarPowerGenTotalCap + solarPumpTotalCap + 
-      windTotalCap + hydroTotalCap + biomassTotalCap, "MW")}`;
+      windTotalCap + hydroTotalCap + biomassTotalCap + geothermalTotalCap, "MW")}`;
     case "totalCap":     return `Total Installed Capacity: ${numberFormat(realTotalCapacity, "MW")}`;
     default:             return "";
   }
@@ -1598,6 +1621,7 @@ const Charts = () => {
     windTotalCap = 0,
     hydroTotalCap = 0,
     biomassTotalCap = 0,
+    geothermalTotalCap = 0,
     solarPowerGenTotalAEP = 0,
     solarStCapSeries = [],
     powerGenCapSeries = [],
@@ -1605,6 +1629,7 @@ const Charts = () => {
     windCapSeries = [],
     hydroCapSeries = [],
     biomassCapSeries = [],
+    geothermalCapSeries = [],
     powerGenAEPSeries = [],
     countSeries = [],
     totalCapacitySeries = [],
@@ -1628,6 +1653,7 @@ const Charts = () => {
   const safeWindCapSeries = Array.isArray(windCapSeries) ? windCapSeries : [];
   const safeHydroCapSeries = Array.isArray(hydroCapSeries) ? hydroCapSeries : [];
   const safeBiomassCapSeries = Array.isArray(biomassCapSeries) ? biomassCapSeries : [];
+  const safeGeothermalCapSeries = Array.isArray(geothermalCapSeries) ? geothermalCapSeries : [];
   const safePowerGenAEPSeries = Array.isArray(powerGenAEPSeries) ? powerGenAEPSeries : [];
   const safeCountSeries = Array.isArray(countSeries) ? countSeries : [];
   const safeTotalCapacitySeries = Array.isArray(totalCapacitySeries) ? totalCapacitySeries : [];
@@ -1717,6 +1743,22 @@ const Charts = () => {
       <BarChart
         xAxis={[{ id: 'months', data: safeXLabels, scaleType: 'band', label: 'Month' }]}
         series={[{ data: safeBiomassCapSeries, label: 'Biomass (kWp)', color: theme.palette.success.dark }]}
+        height={500}
+        sx={{ 
+          background: "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)", 
+          borderRadius: 4, 
+          py: 3,
+          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)",
+          border: "1px solid rgba(255, 255, 255, 0.3)"
+        }}
+        margin={{ left: 70, right: 40, top: 40, bottom: 60 }}
+      />
+    );
+  } else if (selectedChart === "geothermal") {
+    chartComponent = (
+      <BarChart
+        xAxis={[{ id: 'months', data: safeXLabels, scaleType: 'band', label: 'Month' }]}
+        series={[{ data: safeGeothermalCapSeries, label: 'Geothermal Energy (kWp)', color: theme.palette.warning.dark }]}
         height={500}
         sx={{ 
           background: "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)", 
@@ -1821,6 +1863,7 @@ const Charts = () => {
     windTotalCap,
     hydroTotalCap,
     biomassTotalCap,
+    geothermalTotalCap,
     solarPowerGenTotalAEP,
     realTotalCapacity,
   });

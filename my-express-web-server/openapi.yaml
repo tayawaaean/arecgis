@@ -82,7 +82,8 @@ components:
               example: "John Smith"
             reCat:
               type: string
-              example: "Solar"
+              example: "Solar Energy"
+              enum: ["Solar Energy", "Wind Energy", "Hydropower", "Biomass", "Geothermal Energy"]
             reClass:
               type: string
               example: "Commercial"
@@ -147,6 +148,10 @@ components:
               type: string
               enum: ["Off-grid", "Grid-tied", "Hybrid"]
               example: "Grid-tied"
+            geothermalUsage:
+              type: string
+              enum: ["Power Generation", "Direct Use", "Heat Pump", "Other"]
+              example: "Power Generation"
         images:
           type: array
           items:

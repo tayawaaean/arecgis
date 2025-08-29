@@ -42,7 +42,8 @@ import {
   SolarPower as SolarIcon,
   Air as WindIcon,
   Grass as BiomassIcon,
-  Water as HydroIcon
+  Water as HydroIcon,
+  Thermostat as ThermostatIcon
 } from '@mui/icons-material';
 
 const InventoryHelpModal = ({ open, onClose, formType = 'new' }) => {
@@ -92,7 +93,7 @@ const InventoryHelpModal = ({ open, onClose, formType = 'new' }) => {
               </ListItemIcon>
               <ListItemText 
                 primary="RE Category" 
-                secondary="Select the type of renewable energy: Solar, Wind, Biomass, or Hydropower"
+                secondary="Select the type of renewable energy: Solar, Wind, Biomass, Hydropower, or Geothermal"
               />
             </ListItem>
             <ListItem>
@@ -427,6 +428,38 @@ const InventoryHelpModal = ({ open, onClose, formType = 'new' }) => {
                   <ListItemText 
                     primary="Capacity (kW)" 
                     secondary="Total installed capacity of your hydropower system"
+                  />
+                </ListItem>
+                <ListItem>
+                  <ListItemText 
+                    primary="Status" 
+                    secondary="Operational, For Repair, or Condemnable"
+                  />
+                </ListItem>
+              </List>
+            </AccordionDetails>
+          </Accordion>
+
+          {/* Geothermal Energy Section */}
+          <Accordion sx={{ mt: 2 }}>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <ThermostatIcon color="error" sx={{ mr: 1 }} />
+                <Typography variant="subtitle1">Geothermal Energy</Typography>
+              </Box>
+            </AccordionSummary>
+            <AccordionDetails>
+              <List dense>
+                <ListItem>
+                  <ListItemText 
+                    primary="Capacity (kW)" 
+                    secondary="Total installed capacity of your geothermal system"
+                  />
+                </ListItem>
+                <ListItem>
+                  <ListItemText 
+                    primary="Usage Type" 
+                    secondary="Power Generation, Direct Use, Heat Pump, or Other"
                   />
                 </ListItem>
                 <ListItem>

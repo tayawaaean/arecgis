@@ -20,4 +20,9 @@ export const reCats = [
       contName: "Hydropower",
       checked: false,
     },
+    {
+      id: 4,
+      contName: "Geothermal Energy",
+      checked: false,
+    },
 ]

@@ -25,7 +25,8 @@ const renergySchema = new mongoose.Schema({
             subcategory: { type: String }, // e.g., "Residential rooftop – installed on homes"
             mainCategoryId: { type: Number },
             subcategoryId: { type: Number }
-        }
+        },
+        geothermalUsage: { type: String }
     },
     properties: {
         ownerName: {

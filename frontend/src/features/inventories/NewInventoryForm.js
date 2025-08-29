@@ -37,6 +37,7 @@ import { Solar } from "../categories/Solar";
 import { Wind } from "../categories/Wind";
 import { Biomass } from "../categories/Biomass";
 import { Hydropower } from "../categories/Hydropower";
+import { Geothermal } from "../categories/Geothermal";
 import InventoryHelpModal from "../../components/InventoryHelpModal";
 import { getAllRegionNames, getProvincesForRegion } from '../../config/regions'
 
@@ -80,6 +81,7 @@ const NewInventoryForm = ({ allUsers }) => {
   const [wind, setWind] = useState([]);
   const [biomass, setBiomass] = useState([]);
   const [hydropower, setHydropower] = useState([]);
+  const [geothermal, setGeothermal] = useState([]);
   const [isOwnUse, setIsOwnUse] = useState(null);
   const [isNetMetered, setIsNetMetered] = useState(null);
   const [isDer, setIsDer] = useState(null);
@@ -554,9 +556,16 @@ const NewInventoryForm = ({ allUsers }) => {
       data.append("assessment[status]", biomass.status);
     }
     if (reCat === "Hydropower") {
-      data.append("assessment[capacity]", hydropower.capacity);
-      data.append("assessment[status]", hydropower.status);
-      data.append("assessment[remarks]", hydropower.remarks);
+      if (hydropower?.hydroUsage) data.append("assessment[hydroUsage]", hydropower.hydroUsage);
+      if (hydropower?.capacity) data.append("assessment[capacity]", hydropower.capacity);
+      if (hydropower?.status) data.append("assessment[status]", hydropower.status);
+      if (hydropower?.remarks) data.append("assessment[remarks]", hydropower.remarks);
+    }
+    if (reCat === "Geothermal Energy") {
+      if (geothermal?.capacity) data.append("assessment[capacity]", geothermal.capacity);
+      if (geothermal?.status) data.append("assessment[status]", geothermal.status);
+      if (geothermal?.geothermalUsage) data.append("assessment[geothermalUsage]", geothermal.geothermalUsage);
+      if (geothermal?.remarks) data.append("assessment[remarks]", geothermal.remarks);
     }
     const files = e.target.myUploads.files;
     if (files.length !== 0) {
@@ -1157,7 +1166,9 @@ const NewInventoryForm = ({ allUsers }) => {
           ) : reCat === "Biomass" ? (
             <Biomass setBiomass={setBiomass} />
           ) : reCat === "Hydropower" ? (
-            <Hydropower setHydropower={setHydropower} />
+            <Hydropower setHydropower={setHydropower} reClass={reClass} />
+          ) : reCat === "Geothermal Energy" ? (
+            <Geothermal setGeothermal={setGeothermal} />
           ) : (
             ""
           )}

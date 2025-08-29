@@ -544,6 +544,18 @@ export const rawBiomassSystemStatus = [{
 ]
 
 
+export const rawGeothermalUsage = [{
+    id: 0,
+    name: "Power Generation",
+    checked: false,
+}]
+
+export const rawHydroUsage = [{
+    id: 0,
+    name: "Power Generation",
+    checked: false,
+}]
+
 export const pages = [
     {
         id: 0,

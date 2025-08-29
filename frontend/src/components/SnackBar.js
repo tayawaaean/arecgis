@@ -134,8 +134,9 @@ export const SnackBar = (props) => {
                       {project?.properties?.reCat === null ? null :
                         project?.properties?.reCat === 'Solar Energy' ? project?.assessment?.solarUsage :
                           project?.properties?.reCat === 'Wind Energy' ? project?.assessment?.windUsage :
-                            project?.properties?.reCat === 'Biomass' ? project?.assessment?.biomassPriUsage :
-                              project?.properties?.reCat === 'Hydropower' ? "N/A" : ''}
+                            project?.properties?.reCat === 'Biomass' ? (project?.assessment?.biomassUsage || project?.assessment?.biomassPriUsage) :
+                              project?.properties?.reCat === 'Hydropower' ? (project?.assessment?.hydroUsage || 'Power Generation') :
+                                project?.properties?.reCat === 'Geothermal Energy' ? project?.assessment?.geothermalUsage : ''}
                     </TableCell>
                   </TableRow>
                   {project?.assessment?.solarUsage === 'Power Generation' ?

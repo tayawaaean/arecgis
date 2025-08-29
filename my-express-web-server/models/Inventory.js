@@ -31,6 +31,7 @@ const assessmentSchema = new mongoose.Schema({
     default: undefined
   },
   // Add other solar, wind, biomass, hydro fields as needed
+  geothermalUsage: { type: String },
 }, { _id: false });
 
 const inventorySchema = new mongoose.Schema({

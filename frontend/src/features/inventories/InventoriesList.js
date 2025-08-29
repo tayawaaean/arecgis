@@ -22,7 +22,8 @@ import {
   Grass as BiomassIcon,
   Opacity as HydroIcon,
   LocationOn as LocationIcon,
-  Person as PersonIcon
+  Person as PersonIcon,
+  Thermostat as ThermostatIcon
 } from '@mui/icons-material'
 import { DataGrid, GridToolbar } from '@mui/x-data-grid'
 import useAuth from "../../hooks/useAuth"
@@ -317,6 +318,7 @@ const extractedFilters = useMemo(() => {
                         case 'Wind Energy': return <WindIcon fontSize="small" />;
                         case 'Biomass': return <BiomassIcon fontSize="small" />;
                         case 'Hydropower': return <HydroIcon fontSize="small" />;
+                        case 'Geothermal Energy': return <ThermostatIcon fontSize="small" />;
                         default: return null;
                     }
                 };
@@ -327,6 +329,7 @@ const extractedFilters = useMemo(() => {
                         case 'Wind Energy': return 'info';
                         case 'Biomass': return 'success';
                         case 'Hydropower': return 'primary';
+                        case 'Geothermal Energy': return 'default';
                         default: return 'default';
                     }
                 };
@@ -368,16 +371,14 @@ const extractedFilters = useMemo(() => {
             headerName: 'RE Usage',
             width: 150,
             valueGetter: (inventories) => {
-                if (inventories.row.properties.reCat === 'Solar Energy') {
-                    return inventories.row.assessment.solarUsage || "n/a"
-                }
-                if (inventories.row.properties.reCat === 'Biomass') {
-                    return inventories.row.assessment.biomassPriUsage || "n/a"
-                }
-                if (inventories.row.properties.reCat === 'Wind Energy') {
-                    return inventories.row.assessment.windUsage || "n/a"
-                }
-                return "n/a"
+                const recat = inventories.row.properties?.reCat;
+                const a = inventories.row.assessment || {};
+                if (recat === 'Solar Energy') return a.solarUsage || 'n/a';
+                if (recat === 'Biomass') return a.biomassUsage || a.biomassPriUsage || 'n/a';
+                if (recat === 'Wind Energy') return a.windUsage || 'n/a';
+                if (recat === 'Geothermal Energy') return a.geothermalUsage || 'n/a';
+                if (recat === 'Hydropower') return a.hydroUsage || 'n/a';
+                return 'n/a';
             },
             disableClickEventBubbling: true,
         },

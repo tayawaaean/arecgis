@@ -438,7 +438,7 @@ const ChartHelpModal = ({ open, onClose }) => {
                     Category Filters
                   </Typography>
                   <Typography variant="body2" paragraph>
-                    <strong>RE Category:</strong> Filter by energy type (Solar, Wind, Hydro, Biomass)
+                    <strong>RE Category:</strong> Filter by energy type (Solar, Wind, Hydro, Biomass, Geothermal)
                   </Typography>
                   <Typography variant="body2" paragraph>
                     <strong>Classification:</strong> Commercial vs Non-Commercial systems
@@ -525,6 +525,9 @@ const ChartHelpModal = ({ open, onClose }) => {
                   </Typography>
                   <Typography variant="body2" paragraph>
                     <strong>Hydropower:</strong> 60% capacity factor for hydro systems
+                  </Typography>
+                  <Typography variant="body2" paragraph>
+                    <strong>Geothermal Energy:</strong> 90% capacity factor for geothermal systems
                   </Typography>
                 </CardContent>
               </Card>

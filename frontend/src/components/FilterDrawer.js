@@ -24,6 +24,7 @@ import {
 } from '@mui/icons-material';
 import { useTheme } from '@mui/material/styles';
 import { FadeLoader } from 'react-spinners';
+import { rawGeothermalUsage } from '../../config/techAssesment';
 
 const FilterDrawer = ({ 
   openDrawer, 
@@ -32,22 +33,29 @@ const FilterDrawer = ({
   filters, 
   solarUsageFilter, 
   biomassUsageFilter,
+  windUsageFilter,
+  geothermalUsageFilter,
   solarProvince, 
   solarProvFilter, 
   biomassProvince, 
   bioProvFilter, 
   windProvince, 
   windProvFilter, 
+  geothermalProvince,
+  geoProvFilter,
   rawSolarUsage, 
   rawBiomassPriUsage, 
   rawWindUsage, 
+  rawGeothermalUsage,
   handleChange, 
   onSolarChecked, 
   onBiomassChecked, 
   onWindChecked, 
+  onGeothermalChecked,
   onChangeSolarProv, 
   onChangeBioProv, 
   onChangeWindProv, 
+  onChangeGeothermalProv,
   clearAll 
 }) => {
   const theme = useTheme();
@@ -95,7 +103,8 @@ const FilterDrawer = ({
                       checked={type.checked}
                       indeterminate={type.contName === 'Solar Energy' ? (rawSolarUsage.map(item => solarUsageFilter.indexOf(item.name)).includes(-1)) || (solarProvince.map(item => solarProvFilter.indexOf(item)).includes(-1)) :
                         type.contName === 'Biomass' ? (rawBiomassPriUsage.map(item => biomassUsageFilter.indexOf(item.name)).includes(-1)) || (biomassProvince.map(item => bioProvFilter.indexOf(item)).includes(-1)) :
-                          type.contName === 'Wind Energy' ? (rawWindUsage.map(item => windUsageFilter.indexOf(item.name)).includes(-1)) || (windProvince.map(item => windProvFilter.indexOf(item)).includes(-1)) : false}
+                          type.contName === 'Wind Energy' ? (rawWindUsage.map(item => windUsageFilter.indexOf(item.name)).includes(-1)) || (windProvince.map(item => windProvFilter.indexOf(item)).includes(-1)) :
+                            type.contName === 'Geothermal Energy' ? (rawGeothermalUsage.map(item => geothermalUsageFilter.indexOf(item.name)).includes(-1)) || (geothermalProvince.map(item => geoProvFilter.indexOf(item)).includes(-1)) : false}
                       onChange={handleChange(type.contName, index)}
                     />
                   }
@@ -216,6 +225,42 @@ const FilterDrawer = ({
                         {rawWindUsage.map((value, index) => (
                           <MenuItem key={index} value={value.name}>
                             <Checkbox checked={windUsageFilter.indexOf(value.name) > -1} color="primary" />
+                            <ListItemText primary={value.name} />
+                          </MenuItem>
+                        ))}
+                      </Select> : type.contName === 'Geothermal Energy' ? <Select
+                        id="multiple-checkbox"
+                        multiple
+                        value={geothermalUsageFilter}
+                        onChange={onGeothermalChecked}
+                        input={<OutlinedInput 
+                          label="Select Usage" 
+                          sx={{ 
+                            borderRadius: 2,
+                            "&:hover": { borderColor: theme.palette.primary.main }
+                          }}
+                        />}
+                        renderValue={(selected) => selected.join(', ')}
+                        MenuProps={{
+                          ...MenuProps,
+                          PaperProps: {
+                            style: {
+                              maxHeight: 300,
+                              width: 300,
+                            },
+                          },
+                        }}
+                        sx={{
+                          borderRadius: 2,
+                          "& .MuiOutlinedInput-root": {
+                            "&:hover fieldset": { borderColor: theme.palette.primary.main },
+                            "&.Mui-focused fieldset": { borderColor: theme.palette.primary.main }
+                          }
+                        }}
+                      >
+                        {rawGeothermalUsage.map((value, index) => (
+                          <MenuItem key={index} value={value.name}>
+                            <Checkbox checked={geothermalUsageFilter.indexOf(value.name) > -1} color="primary" />
                             <ListItemText primary={value.name} />
                           </MenuItem>
                         ))}
@@ -374,6 +419,41 @@ const FilterDrawer = ({
                         {windProvince.map((name) => (
                           <MenuItem key={name} value={name}>
                             <Checkbox checked={windProvFilter.indexOf(name) > -1} color="primary" />
+                            <ListItemText primary={name} />
+                          </MenuItem>
+                        ))}
+                      </Select> : type.contName === 'Geothermal Energy' ? <Select
+                        id="demo-multiple-checkbox"
+                        multiple
+                        value={geoProvFilter}
+                        onChange={onChangeGeothermalProv}
+                        input={<OutlinedInput 
+                          label="Select City/Municipality" 
+                          sx={{ 
+                            borderRadius: 2,
+                            "&:hover": { borderColor: theme.palette.primary.main }
+                          }}
+                        />}
+                        renderValue={(selected) => selected.join(', ')}
+                        MenuProps={{
+                          ...MenuProps,
+                          PaperProps: {
+                            style: {
+                              maxHeight: 300,
+                              width: 300,
+                            },
+                          },
+                        }}
+                        sx={{
+                          borderRadius: 2,
+                          "& .MuiOutlinedInput-root": {
+                            "&:hover fieldset": { borderColor: theme.palette.primary.main }
+                          }
+                        }}
+                      >
+                        {geothermalProvince.map((name) => (
+                          <MenuItem key={name} value={name}>
+                            <Checkbox checked={geoProvFilter.indexOf(name) > -1} color="primary" />
                             <ListItemText primary={name} />
                           </MenuItem>
                         ))}

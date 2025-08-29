@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useInventoryFilter } from './inventoryFilterContext';
 import { reCats } from '../../config/reCats';
-import { rawSolarUsage, rawBiomassPriUsage, rawWindUsage, Status, rawSolarSysTypes } from '../../config/techAssesment';
+import { rawSolarUsage, rawBiomassPriUsage, rawWindUsage, rawGeothermalUsage, Status, rawSolarSysTypes, rawHydroUsage } from '../../config/techAssesment';
 import {
   Drawer,
   Box,
@@ -50,17 +50,20 @@ const InventoryMapFilter = () => {
     statusFilter,
     biomassUsageFilter,
     windUsageFilter,
+    geothermalUsageFilter,
     netMeteredFilter,
     ownUseFilter,
     solarSystemTypeFilter,
     solarProvFilter,
     bioProvFilter,
     windProvFilter,
+    geoProvFilter,
     usersByAffiliation,
     availableAffiliations,
     commercialFilter,
     capacityFilter,
     installersGroup,
+    hydroUsageFilter,
     
     setQuery,
     setUploaderFilter,
@@ -68,14 +71,17 @@ const InventoryMapFilter = () => {
     setStatusFilter,
     setBiomassUsageFilter,
     setWindUsageFilter,
+    setGeothermalUsageFilter,
     setNetMeteredFilter,
     setOwnUseFilter,
     setSolarSystemTypeFilter,
     setSolarProvFilter,
     setBioProvFilter,
     setWindProvFilter,
+    setGeoProvFilter,
     setCommercialFilter,
     setCapacityFilter,
+    setHydroUsageFilter,
     
     clearAllFilters,
     handleCategoryChange,
@@ -137,6 +143,22 @@ const InventoryMapFilter = () => {
     // Filter out "all" value since we handle it in the onClick
     const filteredValue = newValue.filter(v => v !== "all");
     setWindUsageFilter(filteredValue);
+  };
+  
+  const onGeothermalChecked = (event) => {
+    const { target: { value } } = event;
+    const newValue = typeof value === 'string' ? value.split(',') : value;
+    
+    // Filter out "all" value since we handle it in the onClick
+    const filteredValue = newValue.filter(v => v !== "all");
+    setGeothermalUsageFilter(filteredValue);
+  };
+ 
+  const onHydroChecked = (event) => {
+    const { target: { value } } = event;
+    const newValue = typeof value === 'string' ? value.split(',') : value;
+    const filteredValue = newValue.filter(v => v !== 'all');
+    setHydroUsageFilter(filteredValue);
   };
   
   const onStatusFilterChanged = (event) => {
@@ -657,9 +679,9 @@ const InventoryMapFilter = () => {
                                 }}
                               />}
                               renderValue={selected => {
-                                if (selected.length === rawSolarUsage.length) {
+                                if (selected && rawSolarUsage && selected.length === rawSolarUsage.length) {
                                   return "All Usage Types";
-                                } else if (selected.length === 0) {
+                                } else if (!selected || selected.length === 0) {
                                   return "Select Usage Types";
                                 } else {
                                   return `${selected.length} types selected`;
@@ -685,15 +707,15 @@ const InventoryMapFilter = () => {
                               {/* All Usage Types Option */}
                               <MenuItem value="all">
                                 <Checkbox 
-                                  checked={solarUsageFilter.length === rawSolarUsage.length} 
-                                  indeterminate={solarUsageFilter.length > 0 && solarUsageFilter.length < rawSolarUsage.length}
+                                  checked={solarUsageFilter && rawSolarUsage && solarUsageFilter.length === rawSolarUsage.length} 
+                                  indeterminate={solarUsageFilter && rawSolarUsage && solarUsageFilter.length > 0 && solarUsageFilter.length < rawSolarUsage.length}
                                   color="primary"
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    if (solarUsageFilter.length === rawSolarUsage.length) {
+                                    if (solarUsageFilter && rawSolarUsage && solarUsageFilter.length === rawSolarUsage.length) {
                                       setSolarUsageFilter([]);
                                     } else {
-                                      setSolarUsageFilter(rawSolarUsage.map(item => item.name));
+                                      setSolarUsageFilter(rawSolarUsage ? rawSolarUsage.map(item => item.name) : []);
                                     }
                                   }}
                                 />
@@ -704,9 +726,9 @@ const InventoryMapFilter = () => {
                               <Divider sx={{ my: 1, borderColor: '#e0e0e0' }} />
                               
                               {/* Individual Usage Types */}
-                              {rawSolarUsage.map((value, idx) => (
+                              {rawSolarUsage && rawSolarUsage.map((value, idx) => (
                                 <MenuItem key={idx} value={value.name}>
-                                  <Checkbox checked={solarUsageFilter.indexOf(value.name) > -1} color="primary" />
+                                  <Checkbox checked={solarUsageFilter && solarUsageFilter.indexOf(value.name) > -1} color="primary" />
                                   <ListItemText primary={value.name} />
                                 </MenuItem>
                               ))}
@@ -1138,9 +1160,9 @@ const InventoryMapFilter = () => {
                                 }}
                               />}
                               renderValue={selected => {
-                                if (selected.length === rawBiomassPriUsage.length) {
+                                if (selected && rawBiomassPriUsage && selected.length === rawBiomassPriUsage.length) {
                                   return "All Usage Types";
-                                } else if (selected.length === 0) {
+                                } else if (!selected || selected.length === 0) {
                                   return "Select Usage Types";
                                 } else {
                                   return `${selected.length} types selected`;
@@ -1166,15 +1188,15 @@ const InventoryMapFilter = () => {
                               {/* All Usage Types Option */}
                               <MenuItem value="all">
                                 <Checkbox 
-                                  checked={biomassUsageFilter.length === rawBiomassPriUsage.length} 
-                                  indeterminate={biomassUsageFilter.length > 0 && biomassUsageFilter.length < rawBiomassPriUsage.length}
+                                  checked={biomassUsageFilter && rawBiomassPriUsage && biomassUsageFilter.length === rawBiomassPriUsage.length} 
+                                  indeterminate={biomassUsageFilter && rawBiomassPriUsage && biomassUsageFilter.length > 0 && biomassUsageFilter.length < rawBiomassPriUsage.length}
                                   color="primary"
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    if (biomassUsageFilter.length === rawBiomassPriUsage.length) {
+                                    if (biomassUsageFilter && rawBiomassPriUsage && biomassUsageFilter.length === rawBiomassPriUsage.length) {
                                       setBiomassUsageFilter([]);
                                     } else {
-                                      setBiomassUsageFilter(rawBiomassPriUsage.map(item => item.name));
+                                      setBiomassUsageFilter(rawBiomassPriUsage ? rawBiomassPriUsage.map(item => item.name) : []);
                                     }
                                   }}
                                 />
@@ -1185,9 +1207,9 @@ const InventoryMapFilter = () => {
                               <Divider sx={{ my: 1, borderColor: '#e0e0e0' }} />
                               
                               {/* Individual Usage Types */}
-                              {rawBiomassPriUsage.map((value, idx) => (
+                              {rawBiomassPriUsage && rawBiomassPriUsage.map((value, idx) => (
                                 <MenuItem key={idx} value={value.name}>
-                                  <Checkbox checked={biomassUsageFilter.indexOf(value.name) > -1} color="primary" />
+                                  <Checkbox checked={biomassUsageFilter && biomassUsageFilter.indexOf(value.name) > -1} color="primary" />
                                   <ListItemText primary={value.name} />
                                 </MenuItem>
                               ))}
@@ -1228,9 +1250,9 @@ const InventoryMapFilter = () => {
                                 }}
                               />}
                               renderValue={selected => {
-                                if (selected.length === rawWindUsage.length) {
+                                if (selected && rawWindUsage && selected.length === rawWindUsage.length) {
                                   return "All Usage Types";
-                                } else if (selected.length === 0) {
+                                } else if (!selected || selected.length === 0) {
                                   return "Select Usage Types";
                                 } else {
                                   return `${selected.length} types selected`;
@@ -1256,15 +1278,15 @@ const InventoryMapFilter = () => {
                               {/* All Usage Types Option */}
                               <MenuItem value="all">
                                 <Checkbox 
-                                  checked={windUsageFilter.length === rawWindUsage.length} 
-                                  indeterminate={windUsageFilter.length > 0 && windUsageFilter.length < rawWindUsage.length}
+                                  checked={windUsageFilter && rawWindUsage && windUsageFilter.length === rawWindUsage.length} 
+                                  indeterminate={windUsageFilter && rawWindUsage && windUsageFilter.length > 0 && windUsageFilter.length < rawWindUsage.length}
                                   color="primary"
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    if (windUsageFilter.length === rawWindUsage.length) {
+                                    if (windUsageFilter && rawWindUsage && windUsageFilter.length === rawWindUsage.length) {
                                       setWindUsageFilter([]);
                                     } else {
-                                      setWindUsageFilter(rawWindUsage.map(item => item.name));
+                                      setWindUsageFilter(rawWindUsage ? rawWindUsage.map(item => item.name) : []);
                                     }
                                   }}
                                 />
@@ -1275,9 +1297,9 @@ const InventoryMapFilter = () => {
                               <Divider sx={{ my: 1, borderColor: '#e0e0e0' }} />
                               
                               {/* Individual Usage Types */}
-                              {rawWindUsage.map((value, idx) => (
+                              {rawWindUsage && rawWindUsage.map((value, idx) => (
                                 <MenuItem key={idx} value={value.name}>
-                                  <Checkbox checked={windUsageFilter.indexOf(value.name) > -1} color="primary" />
+                                  <Checkbox checked={windUsageFilter && windUsageFilter.indexOf(value.name) > -1} color="primary" />
                                   <ListItemText primary={value.name} />
                                 </MenuItem>
                               ))}
@@ -1295,10 +1317,99 @@ const InventoryMapFilter = () => {
                               💨 Filter by wind energy usage type
                             </Typography>
                           </FormControl>
+                        ) : type.contName === 'Geothermal Energy' ? (
+                          <FormControl sx={{ marginTop: 2, width: 250 }}>
+                            <Tooltip 
+                              title="Filter by geothermal energy usage type" 
+                              placement="top" 
+                              arrow
+                            >
+                              <InputLabel id="geothermal-usage-label">🌋 Select Usage</InputLabel>
+                            </Tooltip>
+                            <Select
+                              size="small"
+                              id="geothermal-usage-checkbox"
+                              multiple
+                              value={geothermalUsageFilter || []}
+                              onChange={onGeothermalChecked}
+                              input={<OutlinedInput 
+                                label="🌋 Select Usage" 
+                                sx={{ 
+                                  borderRadius: 2,
+                                  "&:hover": { borderColor: theme.palette.primary.main }
+                                }}
+                              />}
+                              renderValue={selected => {
+                                if (selected && rawGeothermalUsage && selected.length === rawGeothermalUsage.length) {
+                                  return "All Usage Types";
+                                } else if (!selected || selected.length === 0) {
+                                  return "Select Usage Types";
+                                } else {
+                                  return `${selected.length} types selected`;
+                                }
+                              }}
+                              MenuProps={{
+                                ...MenuProps,
+                                PaperProps: {
+                                  style: {
+                                    maxHeight: 300,
+                                    width: 300,
+                                  },
+                                },
+                              }}
+                              sx={{
+                                borderRadius: 2,
+                                "& .MuiOutlinedInput-root": {
+                                  "&:hover fieldset": { borderColor: theme.palette.primary.main }
+                                }
+                              }}
+                            >
+                              {/* All Usage Types Option */}
+                              <MenuItem value="all">
+                                <Checkbox 
+                                  checked={geothermalUsageFilter && rawGeothermalUsage && geothermalUsageFilter.length === rawGeothermalUsage.length} 
+                                  indeterminate={geothermalUsageFilter && rawGeothermalUsage && geothermalUsageFilter.length > 0 && geothermalUsageFilter.length < rawGeothermalUsage.length}
+                                  color="primary"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (geothermalUsageFilter && rawGeothermalUsage && geothermalUsageFilter.length === rawGeothermalUsage.length) {
+                                      setGeothermalUsageFilter([]);
+                                    } else {
+                                      setGeothermalUsageFilter(rawGeothermalUsage ? rawGeothermalUsage.map(item => item.name) : []);
+                                    }
+                                  }}
+                                />
+                                <ListItemText primary="All Usage Types" />
+                              </MenuItem>
+                              
+                              {/* Divider */}
+                              <Divider sx={{ my: 1, borderColor: '#e0e0e0' }} />
+                              
+                              {/* Individual Usage Types */}
+                              {rawGeothermalUsage && rawGeothermalUsage.map((value, idx) => (
+                                <MenuItem key={idx} value={value.name}>
+                                  <Checkbox checked={geothermalUsageFilter && geothermalUsageFilter.indexOf(value.name) > -1} color="primary" />
+                                  <ListItemText primary={value.name} />
+                                </MenuItem>
+                              ))}
+                            </Select>
+                            <Typography 
+                              variant="caption" 
+                              color="text.secondary" 
+                              sx={{ 
+                                mt: 0.5, 
+                                display: 'block',
+                                fontSize: '0.7rem',
+                                fontStyle: 'italic'
+                              }}
+                            >
+                              🌋 Filter by geothermal energy usage type
+                            </Typography>
+                          </FormControl>
                         ) : type.contName === 'Hydropower' ? (
                           <FormControl sx={{ marginTop: 2, width: 250 }}>
                             <Tooltip 
-                              title="Hydropower usage options are not yet available" 
+                              title="Filter by hydropower usage type" 
                               placement="top" 
                               arrow
                             >
@@ -1308,8 +1419,8 @@ const InventoryMapFilter = () => {
                               size="small"
                               id="hydro-usage-checkbox"
                               multiple
-                              value={['not available']}
-                              onChange={onWindChecked}
+                              value={hydroUsageFilter || []}
+                              onChange={onHydroChecked}
                               input={<OutlinedInput 
                                 label="🌊 Select Usage" 
                                 sx={{ 
@@ -1317,7 +1428,15 @@ const InventoryMapFilter = () => {
                                   "&:hover": { borderColor: theme.palette.primary.main }
                                 }}
                               />}
-                              renderValue={selected => selected.join(', ')}
+                              renderValue={selected => {
+                                if (selected && rawHydroUsage && selected.length === rawHydroUsage.length) {
+                                  return "All Usage Types";
+                                } else if (!selected || selected.length === 0) {
+                                  return "Select Usage Types";
+                                } else {
+                                  return `${selected.length} types selected`;
+                                }
+                              }}
                               MenuProps={{
                                 ...MenuProps,
                                 PaperProps: {
@@ -1335,10 +1454,34 @@ const InventoryMapFilter = () => {
                                 }
                               }}
                             >
-                              <MenuItem key="hydro" value={['not available']}>
-                                <Checkbox checked={true} color="primary" />
-                                <ListItemText primary="Not yet available" />
+                              {/* All Usage Types Option */}
+                              <MenuItem value="all">
+                                <Checkbox 
+                                  checked={hydroUsageFilter && rawHydroUsage && hydroUsageFilter.length === rawHydroUsage.length} 
+                                  indeterminate={hydroUsageFilter && rawHydroUsage && hydroUsageFilter.length > 0 && hydroUsageFilter.length < rawHydroUsage.length}
+                                  color="primary"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (hydroUsageFilter && rawHydroUsage && hydroUsageFilter.length === rawHydroUsage.length) {
+                                      setHydroUsageFilter([]);
+                                    } else {
+                                      setHydroUsageFilter(rawHydroUsage ? rawHydroUsage.map(item => item.name) : []);
+                                    }
+                                  }}
+                                />
+                                <ListItemText primary="All Usage Types" />
                               </MenuItem>
+                              
+                              {/* Divider */}
+                              <Divider sx={{ my: 1, borderColor: '#e0e0e0' }} />
+                              
+                              {/* Individual Usage Types */}
+                              {rawHydroUsage && rawHydroUsage.map((value, idx) => (
+                                <MenuItem key={idx} value={value.name}>
+                                  <Checkbox checked={hydroUsageFilter && hydroUsageFilter.indexOf(value.name) > -1} color="primary" />
+                                  <ListItemText primary={value.name} />
+                                </MenuItem>
+                              ))}
                             </Select>
                             <Typography 
                               variant="caption" 
@@ -1350,7 +1493,7 @@ const InventoryMapFilter = () => {
                                 fontStyle: 'italic'
                               }}
                             >
-                              🌊 Hydropower usage options coming soon
+                              🌊 Filter by hydropower usage type
                             </Typography>
                           </FormControl>
                         ) : null}

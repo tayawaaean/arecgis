@@ -434,6 +434,12 @@ const MapFilterHelpModal = ({ open, onClose }) => {
                         secondary="Water-based energy generation"
                       />
                     </ListItem>
+                    <ListItem>
+                      <ListItemText 
+                        primary="Geothermal Energy 🌋" 
+                        secondary="Earth's heat energy systems"
+                      />
+                    </ListItem>
                   </List>
                 </CardContent>
               </Card>

@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { reCats } from '../../config/reCats';
-import { rawSolarUsage, rawBiomassPriUsage, rawWindUsage, Status, rawSolarPowerGenSubcategories } from '../../config/techAssesment';
+import { rawSolarUsage, rawBiomassPriUsage, rawWindUsage, rawGeothermalUsage, Status, rawSolarPowerGenSubcategories } from '../../config/techAssesment';
 import { useSelector } from 'react-redux';
 import { useGetInventoryListSummaryQuery } from './inventoryListApiSlice';
 import useAuth from '../../hooks/useAuth';
@@ -32,10 +32,12 @@ export const InventoryFilterProvider = ({ children }) => {
   const [solarProvFilter, setSolarProvFilter] = useState([]);
   const [bioProvFilter, setBioProvFilter] = useState([]);
   const [windProvFilter, setWindProvFilter] = useState([]);
+  const [geoProvFilter, setGeoProvFilter] = useState([]);
   const [solarUsageFilter, setSolarUsageFilter] = useState(rawSolarUsage.map(item => item.name));
   const [statusFilter, setStatusFilter] = useState(Status.map(item => item.name));
   const [biomassUsageFilter, setBiomassUsageFilter] = useState(rawBiomassPriUsage.map(item => item.name));
   const [windUsageFilter, setWindUsageFilter] = useState(rawWindUsage.map(item => item.name));
+  const [geothermalUsageFilter, setGeothermalUsageFilter] = useState(rawGeothermalUsage.map(item => item.name));
   const [netMeteredFilter, setNetMeteredFilter] = useState([]);
   const [ownUseFilter, setOwnUseFilter] = useState([]);
   const [solarSystemTypeFilter, setSolarSystemTypeFilter] = useState(["Hybrid", "Off-grid", "Grid-tied"]);
@@ -137,6 +139,7 @@ export const InventoryFilterProvider = ({ children }) => {
     setStatusFilter(Status.map(item => item.name));
     setBiomassUsageFilter(rawBiomassPriUsage.map(item => item.name));
     setWindUsageFilter(rawWindUsage.map(item => item.name));
+    setGeothermalUsageFilter(rawGeothermalUsage.map(item => item.name));
     setNetMeteredFilter([]);
     setOwnUseFilter([]);
     setSolarSystemTypeFilter(["Hybrid", "Off-grid", "Grid-tied"]);
@@ -232,6 +235,12 @@ export const InventoryFilterProvider = ({ children }) => {
           statusFilter.includes(inventory.assessment.status)
         );
       }
+      if (inventory.properties.reCat === 'Geothermal Energy') {
+        return (
+          (!inventory.assessment.geothermalUsage || geothermalUsageFilter.includes(inventory.assessment.geothermalUsage)) &&
+          statusFilter.includes(inventory.assessment.status)
+        );
+      }
       if (inventory.properties.reCat === 'Hydropower') {
         return (
           statusFilter.includes(inventory.assessment.status)
@@ -251,10 +260,12 @@ export const InventoryFilterProvider = ({ children }) => {
     solarProvFilter,
     bioProvFilter,
     windProvFilter,
+    geoProvFilter,
     solarUsageFilter,
     statusFilter,
     biomassUsageFilter,
     windUsageFilter,
+    geothermalUsageFilter,
     netMeteredFilter,
     ownUseFilter,
     solarSystemTypeFilter,
@@ -276,10 +287,12 @@ export const InventoryFilterProvider = ({ children }) => {
     setSolarProvFilter,
     setBioProvFilter,
     setWindProvFilter,
+    setGeoProvFilter,
     setSolarUsageFilter, 
     setStatusFilter,
     setBiomassUsageFilter,
     setWindUsageFilter,
+    setGeothermalUsageFilter,
     setNetMeteredFilter,
     setOwnUseFilter,
     setSolarSystemTypeFilter,
